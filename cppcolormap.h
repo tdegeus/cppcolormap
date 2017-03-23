@@ -112,6 +112,14 @@ inline std::vector<int> reverse ( std::vector<int> in )
   return out;
 };
 
+inline std::vector<int> Greys ( size_t N=256 )
+{
+  std::vector<int> data;
+  data.push_back(  0); data.push_back(  0); data.push_back(  0);
+  data.push_back(255); data.push_back(255); data.push_back(255);
+  return interp(data,N);
+};
+
 inline std::vector<int> RdOrYl ( size_t N=256 )
 {
   std::vector<int> data;
@@ -124,11 +132,11 @@ inline std::vector<int> RdOrYl ( size_t N=256 )
   data.push_back(254); data.push_back(217); data.push_back(118);
   data.push_back(255); data.push_back(237); data.push_back(160);
   data.push_back(255); data.push_back(255); data.push_back(204);
-
   return interp(data,N);
 };
 
 inline std::vector<int> RdOrYl_r ( size_t N=256 ) { return reverse(RdOrYl(N)); };
+inline std::vector<int> Greys_r  ( size_t N=256 ) { return reverse(Greys (N)); };
 
 }; // namespace cppcolormap
 
