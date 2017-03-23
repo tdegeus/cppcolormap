@@ -9,7 +9,7 @@
 namespace cppcolormap {
 
 template<typename T>
-std::vector<float> linspace(T start_in, T end_in, int num_in)
+std::vector<float> linspace(T start_in, T end_in, size_t num_in)
 {
   float start = static_cast<float>(start_in);
   float end   = static_cast<float>(end_in);
@@ -18,20 +18,20 @@ std::vector<float> linspace(T start_in, T end_in, int num_in)
 
   std::vector<float> out;
 
-  for( int i=0 ; i<num ; ++i )
+  for( size_t i=0 ; i<num ; ++i )
     out.push_back(start+delta*i);
 
   out.push_back(end);
 
   return out;
-}
+};
 
-int findNearestNeighbourIndex( float value, std::vector<float> &x )
+size_t findNearestNeighbourIndex( float value, std::vector<float> &x )
 {
-  float dist = FLT_MAX;
-  int   idx  = -1;
+  float  dist = FLT_MAX;
+  size_t idx  = 0;
 
-  for ( int i=0; i<x.size(); ++i ) {
+  for ( size_t i=0 ; i<x.size() ; ++i ) {
     float newDist = value-x[i];
     if ( newDist>0 && newDist<dist ) {
       dist = newDist;
@@ -40,7 +40,7 @@ int findNearestNeighbourIndex( float value, std::vector<float> &x )
   }
 
   return idx;
-}
+};
 
 std::vector<float> interp1( std::vector<float> &x, std::vector<float> &y, std::vector<float> &x_new )
 {
@@ -66,7 +66,7 @@ std::vector<float> interp1( std::vector<float> &x, std::vector<float> &y, std::v
 
   for ( size_t i = 0; i < x_new.size(); ++i )
   {
-    int idx = findNearestNeighbourIndex(x_new[i],x);
+    size_t idx = findNearestNeighbourIndex(x_new[i],x);
     y_new.push_back( slope[idx]*x_new[i]+intercept[idx] );
   }
 
@@ -74,7 +74,7 @@ std::vector<float> interp1( std::vector<float> &x, std::vector<float> &y, std::v
   y_new[x_new.size()-1] = y[y.size()-1];
 
   return y_new;
-}
+};
 
 std::vector<int> interp ( std::vector<int> data , size_t N )
 {
@@ -98,7 +98,7 @@ std::vector<int> interp ( std::vector<int> data , size_t N )
   }
 
   return out;
-}
+};
 
 std::vector<int> reverse ( std::vector<int> in )
 {
