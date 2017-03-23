@@ -9,7 +9,7 @@
 namespace cppcolormap {
 
 template<typename T>
-std::vector<float> linspace(T start_in, T end_in, size_t num_in)
+inline std::vector<float> linspace(T start_in, T end_in, size_t num_in)
 {
   float start = static_cast<float>(start_in);
   float end   = static_cast<float>(end_in);
@@ -26,7 +26,7 @@ std::vector<float> linspace(T start_in, T end_in, size_t num_in)
   return out;
 };
 
-size_t findNearestNeighbourIndex( float value, std::vector<float> &x )
+inline size_t findNearestNeighbourIndex( float value, std::vector<float> &x )
 {
   float  dist = FLT_MAX;
   size_t idx  = 0;
@@ -42,7 +42,7 @@ size_t findNearestNeighbourIndex( float value, std::vector<float> &x )
   return idx;
 };
 
-std::vector<float> interp1( std::vector<float> &x, std::vector<float> &y, std::vector<float> &x_new )
+inline std::vector<float> interp1( std::vector<float> &x, std::vector<float> &y, std::vector<float> &x_new )
 {
   std::vector<float> y_new,dx,dy,slope,intercept;
 
@@ -76,7 +76,7 @@ std::vector<float> interp1( std::vector<float> &x, std::vector<float> &y, std::v
   return y_new;
 };
 
-std::vector<int> interp ( std::vector<int> data , size_t N )
+inline std::vector<int> interp ( std::vector<int> data , size_t N )
 {
   size_t n = data.size()/3;
 
@@ -100,7 +100,7 @@ std::vector<int> interp ( std::vector<int> data , size_t N )
   return out;
 };
 
-std::vector<int> reverse ( std::vector<int> in )
+inline std::vector<int> reverse ( std::vector<int> in )
 {
   std::vector<int> out(in.size());
   size_t N = in.size()/3;
@@ -112,7 +112,7 @@ std::vector<int> reverse ( std::vector<int> in )
   return out;
 };
 
-std::vector<int> RdOrYl ( size_t N=256 )
+inline std::vector<int> RdOrYl ( size_t N=256 )
 {
   std::vector<int> data;
   data.push_back(128); data.push_back(0  ); data.push_back(38 );
@@ -128,7 +128,7 @@ std::vector<int> RdOrYl ( size_t N=256 )
   return interp(data,N);
 };
 
-std::vector<int> RdOrYl_r ( size_t N=256 ) { return reverse(RdOrYl(N)); };
+inline std::vector<int> RdOrYl_r ( size_t N=256 ) { return reverse(RdOrYl(N)); };
 
 }; // namespace cppcolormap
 
