@@ -3,6 +3,7 @@
 #define CPPCOLORMAP_H
 
 #include <vector>
+#include <string>
 #include <cfloat>
 #include <math.h>
 
@@ -760,6 +761,8 @@ inline std::vector<int> colormap ( std::string cmap, size_t N=256 )
   else if ( cmap=="RdYlGn_r"    ) { return RdYlGn_r   (N); }
   else if ( cmap=="PiYG_r"      ) { return PiYG_r     (N); }
   else if ( cmap=="PRGn_r"      ) { return PRGn_r     (N); }
+
+  throw std::runtime_error("Colormap not recognized");
 };
 
 }; // namespace cppcolormap
