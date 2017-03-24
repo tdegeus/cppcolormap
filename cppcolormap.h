@@ -686,6 +686,82 @@ inline std::vector<int> RdYlGn_r   ( size_t N=256 ) { return reverse(RdYlGn  (N)
 inline std::vector<int> PiYG_r     ( size_t N=256 ) { return reverse(PiYG    (N)); };
 inline std::vector<int> PRGn_r     ( size_t N=256 ) { return reverse(PRGn    (N)); };
 
+// =============================================================================
+// read from string
+// =============================================================================
+
+inline std::vector<int> colormap ( std::string cmap, size_t N=256 )
+{
+  if      ( cmap=="Accent"      ) { return Accent     (N); }
+  else if ( cmap=="Dark2"       ) { return Dark2      (N); }
+  else if ( cmap=="Paired"      ) { return Paired     (N); }
+  else if ( cmap=="Spectral"    ) { return Spectral   (N); }
+  else if ( cmap=="Pastel1"     ) { return Pastel1    (N); }
+  else if ( cmap=="Pastel2"     ) { return Pastel2    (N); }
+  else if ( cmap=="Set1"        ) { return Set1       (N); }
+  else if ( cmap=="Set2"        ) { return Set2       (N); }
+  else if ( cmap=="Set3"        ) { return Set3       (N); }
+  else if ( cmap=="Blues"       ) { return Blues      (N); }
+  else if ( cmap=="Greens"      ) { return Greens     (N); }
+  else if ( cmap=="Greys"       ) { return Greys      (N); }
+  else if ( cmap=="Oranges"     ) { return Oranges    (N); }
+  else if ( cmap=="Purples"     ) { return Purples    (N); }
+  else if ( cmap=="Reds"        ) { return Reds       (N); }
+  else if ( cmap=="BuPu"        ) { return BuPu       (N); }
+  else if ( cmap=="GnBu"        ) { return GnBu       (N); }
+  else if ( cmap=="PuBu"        ) { return PuBu       (N); }
+  else if ( cmap=="PuBuGn"      ) { return PuBuGn     (N); }
+  else if ( cmap=="PuRd"        ) { return PuRd       (N); }
+  else if ( cmap=="RdPu"        ) { return RdPu       (N); }
+  else if ( cmap=="OrRd"        ) { return OrRd       (N); }
+  else if ( cmap=="RdOrYl"      ) { return RdOrYl     (N); }
+  else if ( cmap=="YlGn"        ) { return YlGn       (N); }
+  else if ( cmap=="YlGnBu"      ) { return YlGnBu     (N); }
+  else if ( cmap=="YlOrRd"      ) { return YlOrRd     (N); }
+  else if ( cmap=="BrBG"        ) { return BrBG       (N); }
+  else if ( cmap=="PuOr"        ) { return PuOr       (N); }
+  else if ( cmap=="RdBu"        ) { return RdBu       (N); }
+  else if ( cmap=="RdGy"        ) { return RdGy       (N); }
+  else if ( cmap=="RdYlBu"      ) { return RdYlBu     (N); }
+  else if ( cmap=="RdYlGn"      ) { return RdYlGn     (N); }
+  else if ( cmap=="PiYG"        ) { return PiYG       (N); }
+  else if ( cmap=="PRGn"        ) { return PRGn       (N); }
+  else if ( cmap=="Accent_r"    ) { return Accent_r   (N); }
+  else if ( cmap=="Dark2_r"     ) { return Dark2_r    (N); }
+  else if ( cmap=="Paired_r"    ) { return Paired_r   (N); }
+  else if ( cmap=="Spectral_r"  ) { return Spectral_r (N); }
+  else if ( cmap=="Pastel1_r"   ) { return Pastel1_r  (N); }
+  else if ( cmap=="Pastel2_r"   ) { return Pastel2_r  (N); }
+  else if ( cmap=="Set1_r"      ) { return Set1_r     (N); }
+  else if ( cmap=="Set2_r"      ) { return Set2_r     (N); }
+  else if ( cmap=="Set3_r"      ) { return Set3_r     (N); }
+  else if ( cmap=="Blues_r"     ) { return Blues_r    (N); }
+  else if ( cmap=="Greens_r"    ) { return Greens_r   (N); }
+  else if ( cmap=="Greys_r"     ) { return Greys_r    (N); }
+  else if ( cmap=="Oranges_r"   ) { return Oranges_r  (N); }
+  else if ( cmap=="Purples_r"   ) { return Purples_r  (N); }
+  else if ( cmap=="Reds_r"      ) { return Reds_r     (N); }
+  else if ( cmap=="BuPu_r"      ) { return BuPu_r     (N); }
+  else if ( cmap=="GnBu_r"      ) { return GnBu_r     (N); }
+  else if ( cmap=="PuBu_r"      ) { return PuBu_r     (N); }
+  else if ( cmap=="PuBuGn_r"    ) { return PuBuGn_r   (N); }
+  else if ( cmap=="PuRd_r"      ) { return PuRd_r     (N); }
+  else if ( cmap=="RdPu_r"      ) { return RdPu_r     (N); }
+  else if ( cmap=="OrRd_r"      ) { return OrRd_r     (N); }
+  else if ( cmap=="RdOrYl_r"    ) { return RdOrYl_r   (N); }
+  else if ( cmap=="YlGn_r"      ) { return YlGn_r     (N); }
+  else if ( cmap=="YlGnBu_r"    ) { return YlGnBu_r   (N); }
+  else if ( cmap=="YlOrRd_r"    ) { return YlOrRd_r   (N); }
+  else if ( cmap=="BrBG_r"      ) { return BrBG_r     (N); }
+  else if ( cmap=="PuOr_r"      ) { return PuOr_r     (N); }
+  else if ( cmap=="RdBu_r"      ) { return RdBu_r     (N); }
+  else if ( cmap=="RdGy_r"      ) { return RdGy_r     (N); }
+  else if ( cmap=="RdYlBu_r"    ) { return RdYlBu_r   (N); }
+  else if ( cmap=="RdYlGn_r"    ) { return RdYlGn_r   (N); }
+  else if ( cmap=="PiYG_r"      ) { return PiYG_r     (N); }
+  else if ( cmap=="PRGn_r"      ) { return PRGn_r     (N); }
+};
+
 }; // namespace cppcolormap
 
 #endif
