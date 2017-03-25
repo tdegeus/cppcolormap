@@ -649,6 +649,45 @@ inline std::vector<int> PRGn ( size_t N=256 )
 };
 
 // =============================================================================
+// monochromatic colormaps
+// =============================================================================
+
+inline std::vector<int> White ( size_t N=1 )
+{
+  std::vector<int> data;
+  data.push_back(255); data.push_back(255); data.push_back(255);
+  return interp(data,N);
+};
+
+inline std::vector<int> Grey ( size_t N=1 )
+{
+  std::vector<int> data;
+  data.push_back(127); data.push_back(127); data.push_back(127);
+  return interp(data,N);
+};
+
+inline std::vector<int> Black ( size_t N=1 )
+{
+  std::vector<int> data;
+  data.push_back(  0); data.push_back(  0); data.push_back(  0);
+  return interp(data,N);
+};
+
+inline std::vector<int> Red ( size_t N=1 )
+{
+  std::vector<int> data;
+  data.push_back(255); data.push_back(  0); data.push_back(  0);
+  return interp(data,N);
+};
+
+inline std::vector<int> Blue ( size_t N=1 )
+{
+  std::vector<int> data;
+  data.push_back(  0); data.push_back(  0); data.push_back(255);
+  return interp(data,N);
+};
+
+// =============================================================================
 // inverse colormaps
 // =============================================================================
 
@@ -761,6 +800,11 @@ inline std::vector<int> colormap ( std::string cmap, size_t N=256 )
   else if ( cmap=="RdYlGn_r"    ) { return RdYlGn_r   (N); }
   else if ( cmap=="PiYG_r"      ) { return PiYG_r     (N); }
   else if ( cmap=="PRGn_r"      ) { return PRGn_r     (N); }
+  else if ( cmap=="White"       ) { return White      (N); }
+  else if ( cmap=="Grey"        ) { return Grey       (N); }
+  else if ( cmap=="Black"       ) { return Black      (N); }
+  else if ( cmap=="Red"         ) { return Red        (N); }
+  else if ( cmap=="Blue"        ) { return Blue       (N); }
 
   throw std::runtime_error("Colormap not recognized");
 };
