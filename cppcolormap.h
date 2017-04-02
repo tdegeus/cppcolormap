@@ -9,6 +9,8 @@
 
 namespace cppcolormap {
 
+// =============================================================================
+
 template<typename T>
 inline std::vector<float> linspace(T start_in, T end_in, size_t num_in)
 {
@@ -27,6 +29,8 @@ inline std::vector<float> linspace(T start_in, T end_in, size_t num_in)
   return out;
 };
 
+// =============================================================================
+
 inline size_t findNearestNeighbourIndex( float value, std::vector<float> &x )
 {
   float  dist = FLT_MAX;
@@ -43,7 +47,10 @@ inline size_t findNearestNeighbourIndex( float value, std::vector<float> &x )
   return idx;
 };
 
-inline std::vector<float> interp1( std::vector<float> &x, std::vector<float> &y, std::vector<float> &x_new )
+// =============================================================================
+
+inline std::vector<float> interp1( std::vector<float> &x, std::vector<float> &y,
+  std::vector<float> &x_new )
 {
   std::vector<float> y_new,dx,dy,slope,intercept;
 
@@ -77,6 +84,8 @@ inline std::vector<float> interp1( std::vector<float> &x, std::vector<float> &y,
   return y_new;
 };
 
+// =============================================================================
+
 inline std::vector<int> interp ( std::vector<int> data , size_t N )
 {
   size_t n = data.size()/3;
@@ -101,6 +110,8 @@ inline std::vector<int> interp ( std::vector<int> data , size_t N )
   return out;
 };
 
+// =============================================================================
+
 inline std::vector<int> reverse ( std::vector<int> in )
 {
   std::vector<int> out(in.size());
@@ -117,7 +128,7 @@ inline std::vector<int> reverse ( std::vector<int> in )
 // qualitative colormaps
 // =============================================================================
 
-inline std::vector<int> Accent ( size_t N=256 )
+inline std::vector<int> Accent ( size_t N=8 )
 {
   std::vector<int> data;
   data.push_back(127); data.push_back(201); data.push_back(127);
@@ -131,7 +142,7 @@ inline std::vector<int> Accent ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> Dark2 ( size_t N=256 )
+inline std::vector<int> Dark2 ( size_t N=8 )
 {
   std::vector<int> data;
   data.push_back( 27); data.push_back(158); data.push_back(119);
@@ -145,7 +156,7 @@ inline std::vector<int> Dark2 ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> Paired ( size_t N=256 )
+inline std::vector<int> Paired ( size_t N=12 )
 {
   std::vector<int> data;
   data.push_back(166); data.push_back(206); data.push_back(227);
@@ -163,7 +174,7 @@ inline std::vector<int> Paired ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> Spectral ( size_t N=256 )
+inline std::vector<int> Spectral ( size_t N=11 )
 {
   std::vector<int> data;
   data.push_back(158); data.push_back(  1); data.push_back( 66);
@@ -180,7 +191,7 @@ inline std::vector<int> Spectral ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> Pastel1 ( size_t N=256 )
+inline std::vector<int> Pastel1 ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(251); data.push_back(180); data.push_back(174);
@@ -195,7 +206,7 @@ inline std::vector<int> Pastel1 ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> Pastel2 ( size_t N=256 )
+inline std::vector<int> Pastel2 ( size_t N=8 )
 {
   std::vector<int> data;
   data.push_back(179); data.push_back(226); data.push_back(205);
@@ -209,7 +220,7 @@ inline std::vector<int> Pastel2 ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> Set1 ( size_t N=256 )
+inline std::vector<int> Set1 ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(228); data.push_back( 26); data.push_back( 28);
@@ -224,7 +235,7 @@ inline std::vector<int> Set1 ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> Set2 ( size_t N=256 )
+inline std::vector<int> Set2 ( size_t N=8 )
 {
   std::vector<int> data;
   data.push_back(102); data.push_back(194); data.push_back(165);
@@ -238,7 +249,7 @@ inline std::vector<int> Set2 ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> Set3 ( size_t N=256 )
+inline std::vector<int> Set3 ( size_t N=12 )
 {
   std::vector<int> data;
   data.push_back(141); data.push_back(211); data.push_back(199);
@@ -260,7 +271,7 @@ inline std::vector<int> Set3 ( size_t N=256 )
 // sequential colormaps
 // =============================================================================
 
-inline std::vector<int> Blues ( size_t N=256 )
+inline std::vector<int> Blues ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(247); data.push_back(251); data.push_back(255);
@@ -275,7 +286,7 @@ inline std::vector<int> Blues ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> Greens ( size_t N=256 )
+inline std::vector<int> Greens ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(247); data.push_back(252); data.push_back(245);
@@ -290,7 +301,7 @@ inline std::vector<int> Greens ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> Greys ( size_t N=256 )
+inline std::vector<int> Greys ( size_t N=2 )
 {
   std::vector<int> data;
   data.push_back(  0); data.push_back(  0); data.push_back(  0);
@@ -298,7 +309,7 @@ inline std::vector<int> Greys ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> Oranges ( size_t N=256 )
+inline std::vector<int> Oranges ( size_t N=0 )
 {
   std::vector<int> data;
   data.push_back(255); data.push_back(245); data.push_back(235);
@@ -313,7 +324,7 @@ inline std::vector<int> Oranges ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> Purples ( size_t N=256 )
+inline std::vector<int> Purples ( size_t N=0 )
 {
   std::vector<int> data;
   data.push_back(252); data.push_back(251); data.push_back(253);
@@ -328,7 +339,7 @@ inline std::vector<int> Purples ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> Reds ( size_t N=256 )
+inline std::vector<int> Reds ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(255); data.push_back(245); data.push_back(240);
@@ -343,7 +354,7 @@ inline std::vector<int> Reds ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> BuPu ( size_t N=256 )
+inline std::vector<int> BuPu ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(247); data.push_back(252); data.push_back(253);
@@ -358,7 +369,7 @@ inline std::vector<int> BuPu ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> GnBu ( size_t N=256 )
+inline std::vector<int> GnBu ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(247); data.push_back(252); data.push_back(240);
@@ -373,7 +384,7 @@ inline std::vector<int> GnBu ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> PuBu ( size_t N=256 )
+inline std::vector<int> PuBu ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(255); data.push_back(247); data.push_back(251);
@@ -388,7 +399,7 @@ inline std::vector<int> PuBu ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> PuBuGn ( size_t N=256 )
+inline std::vector<int> PuBuGn ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(255); data.push_back(247); data.push_back(251);
@@ -403,7 +414,7 @@ inline std::vector<int> PuBuGn ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> PuRd ( size_t N=256 )
+inline std::vector<int> PuRd ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(247); data.push_back(244); data.push_back(249);
@@ -418,7 +429,7 @@ inline std::vector<int> PuRd ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> RdPu ( size_t N=256 )
+inline std::vector<int> RdPu ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(255); data.push_back(247); data.push_back(243);
@@ -433,7 +444,7 @@ inline std::vector<int> RdPu ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> OrRd ( size_t N=256 )
+inline std::vector<int> OrRd ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(255); data.push_back(247); data.push_back(236);
@@ -448,7 +459,7 @@ inline std::vector<int> OrRd ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> RdOrYl ( size_t N=256 )
+inline std::vector<int> RdOrYl ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(128); data.push_back(0  ); data.push_back(38 );
@@ -463,7 +474,7 @@ inline std::vector<int> RdOrYl ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> YlGn ( size_t N=256 )
+inline std::vector<int> YlGn ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(255); data.push_back(255); data.push_back(229);
@@ -478,7 +489,7 @@ inline std::vector<int> YlGn ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> YlGnBu ( size_t N=256 )
+inline std::vector<int> YlGnBu ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(255); data.push_back(255); data.push_back(217);
@@ -493,7 +504,7 @@ inline std::vector<int> YlGnBu ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> YlOrRd ( size_t N=256 )
+inline std::vector<int> YlOrRd ( size_t N=9 )
 {
   std::vector<int> data;
   data.push_back(255); data.push_back(255); data.push_back(204);
@@ -512,7 +523,7 @@ inline std::vector<int> YlOrRd ( size_t N=256 )
 // diverging colormaps
 // =============================================================================
 
-inline std::vector<int> BrBG ( size_t N=256 )
+inline std::vector<int> BrBG ( size_t N=11 )
 {
   std::vector<int> data;
   data.push_back( 84); data.push_back( 48); data.push_back(  5);
@@ -529,7 +540,7 @@ inline std::vector<int> BrBG ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> PuOr ( size_t N=256 )
+inline std::vector<int> PuOr ( size_t N=11 )
 {
   std::vector<int> data;
   data.push_back(127); data.push_back( 59); data.push_back(  8);
@@ -546,7 +557,7 @@ inline std::vector<int> PuOr ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> RdBu ( size_t N=256 )
+inline std::vector<int> RdBu ( size_t N=11 )
 {
   std::vector<int> data;
   data.push_back(103); data.push_back(  0); data.push_back( 31);
@@ -563,7 +574,7 @@ inline std::vector<int> RdBu ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> RdGy ( size_t N=256 )
+inline std::vector<int> RdGy ( size_t N=11 )
 {
   std::vector<int> data;
   data.push_back(103); data.push_back(  0); data.push_back( 31);
@@ -580,7 +591,7 @@ inline std::vector<int> RdGy ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> RdYlBu ( size_t N=256 )
+inline std::vector<int> RdYlBu ( size_t N=11 )
 {
   std::vector<int> data;
   data.push_back(165); data.push_back(  0); data.push_back( 38);
@@ -597,7 +608,7 @@ inline std::vector<int> RdYlBu ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> RdYlGn ( size_t N=256 )
+inline std::vector<int> RdYlGn ( size_t N=11 )
 {
   std::vector<int> data;
   data.push_back(165); data.push_back(  0); data.push_back( 38);
@@ -614,7 +625,7 @@ inline std::vector<int> RdYlGn ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> PiYG ( size_t N=256 )
+inline std::vector<int> PiYG ( size_t N=11 )
 {
   std::vector<int> data;
   data.push_back(142); data.push_back(  1); data.push_back( 82);
@@ -631,7 +642,7 @@ inline std::vector<int> PiYG ( size_t N=256 )
   return interp(data,N);
 };
 
-inline std::vector<int> PRGn ( size_t N=256 )
+inline std::vector<int> PRGn ( size_t N=11 )
 {
   std::vector<int> data;
   data.push_back( 64); data.push_back(  0); data.push_back( 75);
@@ -808,6 +819,68 @@ inline std::vector<int> colormap ( std::string cmap, size_t N=256 )
 
   throw std::runtime_error("Colormap not recognized");
 };
+
+// =============================================================================
+// color cycles
+// =============================================================================
+
+inline std::vector<int> tue ( void )
+{
+  std::vector<int> data;
+  data.push_back(247); data.push_back( 49); data.push_back( 49); //  0: warm red
+  data.push_back(214); data.push_back(  0); data.push_back( 74); //  1: red
+  data.push_back(214); data.push_back(  0); data.push_back(123); //  2: pink
+  data.push_back(173); data.push_back( 32); data.push_back(173); //  3: dark pink
+  data.push_back( 16); data.push_back( 16); data.push_back(115); //  4: dark blue
+  data.push_back(  0); data.push_back(102); data.push_back(204); //  5: blue
+  data.push_back(  0); data.push_back(162); data.push_back(222); //  6: light blue
+  data.push_back(255); data.push_back(154); data.push_back(  0); //  7: orange
+  data.push_back(255); data.push_back(221); data.push_back(  0); //  8: yellow
+  data.push_back(206); data.push_back(223); data.push_back(  0); //  9: lemon
+  data.push_back(132); data.push_back(210); data.push_back(  0); // 10: lime
+  data.push_back(  0); data.push_back(172); data.push_back(130); // 11: green
+  data.push_back(  0); data.push_back(146); data.push_back(181); // 12: cornflower blue
+  return data;
+};
+
+inline std::vector<int> tuewarmred ( void )
+{
+  std::vector<int> data;
+  data.push_back(247); data.push_back( 49); data.push_back( 49);
+  return data;
+};
+
+inline std::vector<int> tuedarkblue ( void )
+{
+  std::vector<int> data;
+  data.push_back( 16); data.push_back( 16); data.push_back(115);
+  return data;
+};
+
+inline std::vector<int> tueblue ( void )
+{
+  std::vector<int> data;
+  data.push_back(  0); data.push_back(102); data.push_back(204);
+  return data;
+};
+
+inline std::vector<int> tuelightblue ( void )
+{
+  std::vector<int> data;
+  data.push_back(  0); data.push_back(162); data.push_back(222);
+  return data;
+};
+
+inline std::vector<int> colorcycle ( std::string cmap )
+{
+  if      ( cmap=="tue"          ) { return tue         (); }
+  else if ( cmap=="tuewarmred"   ) { return tuewarmred  (); }
+  else if ( cmap=="tuedarkblue"  ) { return tuedarkblue (); }
+  else if ( cmap=="tueblue"      ) { return tueblue     (); }
+  else if ( cmap=="tuelightblue" ) { return tuelightblue(); }
+
+  throw std::runtime_error("Colormap not recognized");
+}
 
 }; // namespace cppcolormap
 
