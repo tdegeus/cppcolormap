@@ -6,6 +6,7 @@ Library with colormaps for C++. Quick-start: `#include "cppcolormap.h"`, that's 
 
 - [Usage](#usage)
     - [From C++](#from-c)
+    - [From Python](#from-python)
 - [Available colormaps](#available-colormaps)
     - [ColorBrewer](#colorbrewer)
 - [Available color-cycles](#available-color-cycles)
@@ -17,9 +18,26 @@ Library with colormaps for C++. Quick-start: `#include "cppcolormap.h"`, that's 
 
 ## From C++
 
+### Installation
+
 The library is header-only. This means that one has to only include the header-file `cppcolormap.h`. Really, that's it! 
 
-### Storage format
+### Usage
+
+The main interface is with two functions:
+
+```cpp
+#include "cppcolormap.h"
+
+std::vector<int> cmap;
+
+cmap = cppcolormap::colormap("Reds");
+cmap = cppcolormap::colorcycle("tue");
+```
+
+(see lists of colormaps and color-cycles below).
+
+The colormaps are stored as a sequential list of (R,G,B) colors, whereby each color has a range `[0..255]`. To understand this format consider the following example:
 
 ```cpp
 #include "cppcolormap.h"
@@ -27,7 +45,7 @@ The library is header-only. This means that one has to only include the header-f
 int main ( void )
 {
 
-  std::vector<int> cmap = cppcolormap::Reds();
+  std::vector<int> cmap = cppcolormap::colormap("Reds");
   size_t           N    = cmap.size()/3;
 
   for ( size_t i=0 ; i<N ; ++i )
@@ -37,25 +55,50 @@ int main ( void )
 }
 ```
 
-From the example we directly observe that the colormaps are stored are a sequential list of (R,G,B) colors, whereby each color has a range `[0..255]`. Take note of the following:
+Take note of the following:
 
 *   The colormaps are returns as ``std::vector<int>`. 
 *   The number of colors (i.e. rows) can be backed-out from the length of the vector as: `size_t N = cmap.size()/3;`
 *   To get the colors (R,G,B) from row `i`, use: `cmap[i*3+0]` for Red, `cmap[i*3+1]` for Blue, and `cmap[i*3+2]` for Green.
 
-### String based selection
+## From Python
 
-One can also select the colormap using a string:
+### Installation
 
-```cpp
-std::vector<int> cmap = cppcolormap::colormap("Reds",256);
+Install using PyPI:
+
+```bash
+# if you are using Python 2.X
+pip install ccpcolormap
+
+# if you are using Python 3.X
+pip3 install cppcolormap
 ```
 
-To select one of the color-cycles:
+Otherwise, clone the repository and then run:
 
-```cpp
-std::vector<int> cmap = cppcolormap::colorcycle("tue");
+```bash
+# if you are using Python 2.X
+python setup.py build
+python setup.py install
+
+# if you are using Python 3.X
+python3 setup.py build
+python3 setup.py install
 ```
+
+### Usage
+
+There are two functions, each returns a 2-d NumPy array:
+
+```python
+import cppcolormap as cmap
+
+cols = cmap.colormap("Reds")
+cols = cmap.colorcycle("tue")
+```
+
+(see lists of colormaps and color-cycles below).
 
 # Available colormaps
 
