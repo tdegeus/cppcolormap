@@ -1,6 +1,6 @@
 # cppcolormap
 
-Library with colormaps for C++. 
+Library with colormaps for C++. Quick-start: `#include "cppcolormap.h"`, that's about it.
 
 <!-- MarkdownTOC -->
 

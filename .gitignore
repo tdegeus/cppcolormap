@@ -6,6 +6,21 @@ cppmat
 # Test functions
 test*
 
+# cmake files
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+
+# Python build
+dist/
+cppcolormap.egg-info/
+
 # Compiled Object files
 *.slo
 *.lo
