@@ -1,3 +1,9 @@
+
+# Sub-modules
+pybind11
+cppmat
+
+# Test functions
 test*
 
 # Compiled Object files
