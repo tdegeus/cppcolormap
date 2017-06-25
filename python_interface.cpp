@@ -1,6 +1,6 @@
 
-#include "cppmat/cppmat.h"
-#include "cppmat/py_cppmat.h"
+#include <cppmat/matrix.h>
+#include <cppmat/pybind11_matrix.h>
 #include "cppcolormap.h"
 
 
