@@ -4,18 +4,18 @@
 #include "cppcolormap.h"
 
 
-mat::matrix<int> colormap ( std::string cmap, size_t N=256 )
+cppmat::matrix<int> colormap ( std::string cmap, size_t N=256 )
 {
   std::vector<int> data = cppcolormap::colormap(cmap,N);
-  mat::matrix<int> ret({N,3},data.data());
+  cppmat::matrix<int> ret({N,3},data.data());
   return ret;
 }
 
-mat::matrix<int> colorcycle ( std::string cmap )
+cppmat::matrix<int> colorcycle ( std::string cmap )
 {
   std::vector<int> data = cppcolormap::colorcycle(cmap);
   size_t           N    = data.size()/3;
-  mat::matrix<int> ret({N,3},data.data());
+  cppmat::matrix<int> ret({N,3},data.data());
   return ret;
 }
 
