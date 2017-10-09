@@ -1,6 +1,16 @@
 # cppcolormap
 
-Library with colormaps for C++. Quick-start: `#include "cppcolormap.h"`, that's about it.
+Library with colormaps for C++. Quick-start: `#include <cppcolormap.h>`, that's about it. Note that the library depends on [cppmat](http://cppmat.geus.me). Its installation and use is equally straightforward.
+
+>   **Disclaimer**
+>   
+>   This library is free to use under the [GPLv3 license](https://github.com/tdegeus/cppcolormap/blob/master/LICENSE). Any additions are very much appreciated, in terms of suggested functionality, code, documentation, testimonials, word of mouth advertisement, .... Bug reports or feature requests can be filed on [GitHub](https://github.com/tdegeus/cppcolormap). As always, the code comes with no guarantee. None of the developers can be held responsible for possible mistakes.
+>   
+>   Download: [.zip file](https://github.com/tdegeus/cppcolormap/zipball/master) | [.tar.gz file](https://github.com/tdegeus/cppcolormap/tarball/master).
+>   
+>   (c - [GPLv3](https://github.com/tdegeus/cppcolormap/blob/master/LICENSE)) T.W.J. de Geus (Tom) | tom@geus.me | www.geus.me | [github.com/tdegeus/cppcolormap](https://github.com/tdegeus/cppcolormap)
+
+# Contents
 
 <!-- MarkdownTOC -->
 
@@ -22,44 +32,45 @@ Library with colormaps for C++. Quick-start: `#include "cppcolormap.h"`, that's 
 
 The library is header-only. This means that one has to only include the header-file `cppcolormap.h`. Really, that's it! 
 
+To be able to set the include path semi-automatic, one can choose to 'install' cppcolormap. To do this using CMake:
+
+1.  Proceed to a (temporary) build directory. For example
+
+    ```bash
+    $ cd /path/to/cppcolormap/src/build
+    ```
+
+2.  'Build' cppcolormap
+
+    ```bash
+    $ cmake ..
+    $ make install
+    ```
+
+    (If you've used another build directory, change the first command to `$ cmake /path/to/cppcolormap/src`)
+
 ### Usage
 
 The main interface is with two functions:
 
 ```cpp
-#include "cppcolormap.h"
-
-std::vector<int> cmap;
-
-cmap = cppcolormap::colormap("Reds");
-cmap = cppcolormap::colorcycle("tue");
-```
-
-(see lists of colormaps and color-cycles below).
-
-The colormaps are stored as a sequential list of (R,G,B) colors, whereby each color has a range `[0..255]`. To understand this format consider the following example:
-
-```cpp
-#include "cppcolormap.h"
+#include <cppmat/matrix.h>
+#include <cppcolormap.h>
 
 int main ( void )
 {
+    cppmat::matrix<int> cmap;
 
-  std::vector<int> cmap = cppcolormap::colormap("Reds");
-  size_t           N    = cmap.size()/3;
+    cmap = cppcolormap::colormap("Reds");
+    cmap = cppcolormap::colorcycle("tue");
 
-  for ( size_t i=0 ; i<N ; ++i )
-    printf("%3d , %3d , %3d\n",cmap[i*3+0],cmap[i*3+1],cmap[i*3+2]);
-
-  return 0;
+    cmap.printf("%4d");
 }
 ```
 
-Take note of the following:
+(see lists of [colormaps](#available-colormaps) and [color-cycles](#available-color-cycles) below).
 
-*   The colormaps are returns as ``std::vector<int>`. 
-*   The number of colors (i.e. rows) can be backed-out from the length of the vector as: `size_t N = cmap.size()/3;`
-*   To get the colors (R,G,B) from row `i`, use: `cmap[i*3+0]` for Red, `cmap[i*3+1]` for Blue, and `cmap[i*3+2]` for Green.
+The colormaps are stored as a matrix whereby each row contains the (R,G,B) colors. Each color value has a range `[0..255]`.
 
 ## From Python
 
@@ -94,11 +105,19 @@ There are two functions, each returns a 2-d NumPy array:
 ```python
 import cppcolormap as cmap
 
-cols = cmap.colormap("Reds")
-cols = cmap.colorcycle("tue")
+# number of colors in the colormap (optional, may be omitted)
+N = 256
+
+# specify the colormap as string
+cols = cmap.colormap("Reds",N)
+cols = cmap.colorcycle("tue",N)
+
+# or call the functions directly
+cols = cmap.Reds(N)
+cols = cmap.tue(N)
 ```
 
-(see lists of colormaps and color-cycles below).
+(see lists of [colormaps](#available-colormaps) and [color-cycles](#available-color-cycles) below).
 
 # Available colormaps
 
