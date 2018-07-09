@@ -1,6 +1,25 @@
+/* =================================================================================================
+
+(c - GPLv3) T.W.J. de Geus (Tom) | tom@geus.me | www.geus.me | github.com/tdegeus/cppcolormap
+
+================================================================================================= */
 
 #ifndef CPPCOLORMAP_H
 #define CPPCOLORMAP_H
+
+#define CPPCOLORMAP_WORLD_VERSION 0
+#define CPPCOLORMAP_MAJOR_VERSION 1
+#define CPPCOLORMAP_MINOR_VERSION 5
+
+#define CPPCOLORMAP_VERSION_AT_LEAST(x,y,z) \
+  (CPPCOLORMAP_WORLD_VERSION>x || (CPPCOLORMAP_WORLD_VERSION>=x && \
+  (CPPCOLORMAP_MAJOR_VERSION>y || (CPPCOLORMAP_MAJOR_VERSION>=y && \
+                                   CPPCOLORMAP_MINOR_VERSION>=z))))
+
+#define CPPCOLORMAP_VERSION(x,y,z) \
+  (CPPCOLORMAP_WORLD_VERSION==x && \
+   CPPCOLORMAP_MAJOR_VERSION==y && \
+   CPPCOLORMAP_MINOR_VERSION==z)
 
 #include <vector>
 #include <string>

@@ -1,10 +1,18 @@
+# required to specify the c++ standard
+cmake_minimum_required(VERSION 3.0)
 
 # define project information
 project(cppcolormap)
-set(CPPCOLORMAP_VERSION_NUMBER 0.1.5)
 
-# required to specify the c++ standard
-cmake_minimum_required(VERSION 3.0)
+# automatically parse the version number
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/cppcolormap.h" _cppcolormap_version_header)
+string(REGEX MATCH "define[ \t]+CPPCOLORMAP_WORLD_VERSION[ \t]+([0-9]+)" _cppcolormap_world_version_match "${_cppcolormap_version_header}")
+set(CPPCOLORMAP_WORLD_VERSION "${CMAKE_MATCH_1}")
+string(REGEX MATCH "define[ \t]+CPPCOLORMAP_MAJOR_VERSION[ \t]+([0-9]+)" _cppcolormap_major_version_match "${_cppcolormap_version_header}")
+set(CPPCOLORMAP_MAJOR_VERSION "${CMAKE_MATCH_1}")
+string(REGEX MATCH "define[ \t]+CPPCOLORMAP_MINOR_VERSION[ \t]+([0-9]+)" _cppcolormap_minor_version_match "${_cppcolormap_version_header}")
+set(CPPCOLORMAP_MINOR_VERSION "${CMAKE_MATCH_1}")
+set(CPPCOLORMAP_VERSION_NUMBER ${CPPCOLORMAP_WORLD_VERSION}.${CPPCOLORMAP_MAJOR_VERSION}.${CPPCOLORMAP_MINOR_VERSION})
 
 # required for install
 include(CMakePackageConfigHelpers)

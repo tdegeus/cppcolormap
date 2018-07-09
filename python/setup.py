@@ -7,12 +7,17 @@ cppcolormap is a library that contains many colormaps from different sources:
 
 from setuptools import setup, Extension
 
-import sys
+import sys,re
 import setuptools
 import pybind11
 import cppmat
 
-__version__ = '0.1.5'
+header = open('../src/cppcolormap.h','r').read()
+world  = re.split('(.*)(\#define CPPCOLORMAP_WORLD_VERSION\ )([0-9]+)(.*)',header)[3]
+major  = re.split('(.*)(\#define CPPCOLORMAP_MAJOR_VERSION\ )([0-9]+)(.*)',header)[3]
+minor  = re.split('(.*)(\#define CPPCOLORMAP_MINOR_VERSION\ )([0-9]+)(.*)',header)[3]
+
+__version__ = '.'.join([world,major,minor])
 
 ext_modules = [
   Extension(

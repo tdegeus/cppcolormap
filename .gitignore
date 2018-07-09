@@ -50,3 +50,4 @@ cppcolormap.egg-info/
 *.exe
 *.out
 *.app
+.DS_Store
