@@ -8,8 +8,8 @@
 #define CPPCOLORMAP_H
 
 #define CPPCOLORMAP_WORLD_VERSION 0
-#define CPPCOLORMAP_MAJOR_VERSION 1
-#define CPPCOLORMAP_MINOR_VERSION 5
+#define CPPCOLORMAP_MAJOR_VERSION 2
+#define CPPCOLORMAP_MINOR_VERSION 0
 
 #define CPPCOLORMAP_VERSION_AT_LEAST(x,y,z) \
   (CPPCOLORMAP_WORLD_VERSION>x || (CPPCOLORMAP_WORLD_VERSION>=x && \
@@ -25,126 +25,40 @@
 #include <string>
 #include <cfloat>
 #include <math.h>
-#include <cppmat/matrix.h>
+#include <xtensor/xtensor.hpp>
+#include <xtensor/xview.hpp>
+#include <xtensor/xmath.hpp>
+#include <xtensor/xio.hpp>
 
 namespace cppcolormap {
 
 // =================================================================================================
-
-template<typename T>
-inline std::vector<float> linspace(T start_in, T end_in, size_t num_in)
-{
-  float start = static_cast<float>(start_in);
-  float end   = static_cast<float>(end_in);
-  float num   = static_cast<float>(num_in);
-  float delta = (end-start)/(num-1);
-
-  std::vector<float> out;
-
-  for( size_t i = 0 ; i < num ; ++i )
-    out.push_back(start+delta*i);
-
-  out.push_back(end);
-
-  return out;
-}
-
+// support function: interpolate the individual colours
 // =================================================================================================
 
-inline size_t findNearestNeighbourIndex(float value, const std::vector<float> &x)
+inline xt::xtensor<int,2> interp(const xt::xtensor<int,2> &data , size_t N)
 {
-  float  dist = FLT_MAX;
-  size_t idx  = 0;
+  // no interpolation needed
+  if ( N == data.shape()[0] ) return data;
 
-  for ( size_t i = 0 ; i<x.size() ; ++i )
+  // allocate output
+  xt::xtensor<int,2> out = xt::empty<int>({N,data.shape()[1]});
+
+  // set interpolation axes
+  xt::xtensor<double,1> x  = xt::linspace(0.0, 1.0, data.shape()[0]);
+  xt::xtensor<double,1> xi = xt::linspace(0.0, 1.0, N);
+
+  // loop over colours
+  for ( size_t j = 0 ; j < data.shape()[1] ; j++ )
   {
-    float newDist = value-x[i];
-    if ( newDist > 0 and newDist < dist )
-    {
-      dist = newDist;
-      idx  = i;
-    }
+    // - 'view' of data
+    auto c  = xt::view(data, xt::all(), j);
+    auto ci = xt::view(out , xt::all(), j);
+    // - interpolate
+    ci = xt::interp(xi, x, c);
   }
 
-  return idx;
-}
-
-// =================================================================================================
-
-inline std::vector<float> interp1(const std::vector<float> &x, const std::vector<float> &y,
-  const std::vector<float> &x_new)
-{
-  std::vector<float> y_new,dx,dy,slope,intercept;
-
-  y_new    .reserve( x_new.size() );
-  dx       .reserve( x    .size() );
-  dy       .reserve( x    .size() );
-  slope    .reserve( x    .size() );
-  intercept.reserve( x    .size() );
-
-  for ( size_t i = 0 ; i < x.size()-1 ; ++i )
-  {
-    dx       .push_back( x[i+1]-x[i]        );
-    dy       .push_back( y[i+1]-y[i]        );
-    slope    .push_back( dy[i]/dx[i]        );
-    intercept.push_back( y[i]-x[i]*slope[i] );
-  }
-
-  dx       .push_back( dx[x.size()-2]        );
-  dy       .push_back( dy[x.size()-2]        );
-  slope    .push_back( slope[x.size()-2]     );
-  intercept.push_back( intercept[x.size()-2] );
-
-  for ( size_t i = 0 ; i < x_new.size() ; ++i )
-  {
-    size_t idx = findNearestNeighbourIndex(x_new[i],x);
-    y_new.push_back( slope[idx]*x_new[i]+intercept[idx] );
-  }
-
-  y_new[0]              = y[0];
-  y_new[x_new.size()-1] = y[y.size()-1];
-
-  return y_new;
-}
-
-// =================================================================================================
-
-inline cppmat::matrix<int> interp(const cppmat::matrix<int> &data , size_t N)
-{
-  size_t n = data.size()/3;
-
-  cppmat::matrix<int> out({N,data.shape(1)});
-  std::vector<float> x,xi,c(n),ci;
-
-  x  = linspace(0.0,1.0,n);
-  xi = linspace(0.0,1.0,N);
-
-  for ( size_t j = 0 ; j < data.shape(1) ; j++ )
-  {
-
-    for ( size_t i = 0 ; i < n ; i++ ) c[i] = static_cast<float>(data(i,j));
-
-    ci = interp1(x,c,xi);
-
-    for ( size_t i = 0 ; i < N ; i++ ) out(i,j) = static_cast<int>(ci[i]);
-  }
-
-  return out;
-}
-
-// =================================================================================================
-
-inline cppmat::matrix<int> reverse(const cppmat::matrix<int> &in)
-{
-  cppmat::matrix<int> out(in.shape());
-
-  size_t n = in.shape(0);
-  size_t m = in.shape(1);
-
-  for ( size_t i = 0 ; i < n ; ++i )
-    for ( size_t j = 0 ; j < m ; ++j )
-      out(i,j) = in(n-1-i,j);
-
+  // return output
   return out;
 }
 
@@ -152,9 +66,9 @@ inline cppmat::matrix<int> reverse(const cppmat::matrix<int> &in)
 // qualitative colormaps
 // =================================================================================================
 
-inline cppmat::matrix<int> Accent ( size_t N=8 )
+inline xt::xtensor<int,2> Accent(size_t N=8)
 {
-  cppmat::matrix<int> data({8,3});
+  xt::xtensor<int,2> data = xt::empty<int>({8,3});
 
   data( 0,0) = 127;   data( 0,1) = 201;   data( 0,2) = 127;
   data( 1,0) = 190;   data( 1,1) = 174;   data( 1,2) = 212;
@@ -168,9 +82,11 @@ inline cppmat::matrix<int> Accent ( size_t N=8 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Dark2 ( size_t N=8 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Dark2(size_t N=8)
 {
-  cppmat::matrix<int> data({8,3});
+  xt::xtensor<int,2> data = xt::empty<int>({8,3});
 
   data( 0,0) =  27;   data( 0,1) = 158;   data( 0,2) = 119;
   data( 1,0) = 217;   data( 1,1) =  95;   data( 1,2) =   2;
@@ -184,9 +100,11 @@ inline cppmat::matrix<int> Dark2 ( size_t N=8 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Paired ( size_t N=12 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Paired(size_t N=12)
 {
-  cppmat::matrix<int> data({12,3});
+  xt::xtensor<int,2> data = xt::empty<int>({12,3});
 
   data( 0,0) = 166;   data( 0,1) = 206;   data( 0,2) = 227;
   data( 1,0) =  31;   data( 1,1) = 120;   data( 1,2) = 180;
@@ -204,9 +122,11 @@ inline cppmat::matrix<int> Paired ( size_t N=12 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Spectral ( size_t N=11 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Spectral(size_t N=11)
 {
-  cppmat::matrix<int> data({11,3});
+  xt::xtensor<int,2> data = xt::empty<int>({11,3});
 
   data( 0,0) = 158;   data( 0,1) =   1;   data( 0,2) =  66;
   data( 1,0) = 213;   data( 1,1) =  62;   data( 1,2) =  79;
@@ -223,9 +143,11 @@ inline cppmat::matrix<int> Spectral ( size_t N=11 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Pastel1 ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Pastel1(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 251;   data( 0,1) = 180;   data( 0,2) = 174;
   data( 1,0) = 179;   data( 1,1) = 205;   data( 1,2) = 227;
@@ -240,9 +162,11 @@ inline cppmat::matrix<int> Pastel1 ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Pastel2 ( size_t N=8 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Pastel2(size_t N=8)
 {
-  cppmat::matrix<int> data({8,3});
+  xt::xtensor<int,2> data = xt::empty<int>({8,3});
 
   data( 0,0) = 179;   data( 0,1) = 226;   data( 0,2) = 205;
   data( 1,0) = 253;   data( 1,1) = 205;   data( 1,2) = 172;
@@ -256,9 +180,11 @@ inline cppmat::matrix<int> Pastel2 ( size_t N=8 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Set1 ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Set1(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 228;   data( 0,1) =  26;   data( 0,2) =  28;
   data( 1,0) =  55;   data( 1,1) = 126;   data( 1,2) = 184;
@@ -273,9 +199,11 @@ inline cppmat::matrix<int> Set1 ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Set2 ( size_t N=8 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Set2(size_t N=8)
 {
-  cppmat::matrix<int> data({8,3});
+  xt::xtensor<int,2> data = xt::empty<int>({8,3});
 
   data( 0,0) = 102;   data( 0,1) = 194;   data( 0,2) = 165;
   data( 1,0) = 252;   data( 1,1) = 141;   data( 1,2) =  98;
@@ -289,9 +217,11 @@ inline cppmat::matrix<int> Set2 ( size_t N=8 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Set3 ( size_t N=12 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Set3(size_t N=12)
 {
-  cppmat::matrix<int> data({12,3});
+  xt::xtensor<int,2> data = xt::empty<int>({12,3});
 
   data( 0,0) = 141;   data( 0,1) = 211;   data( 0,2) = 199;
   data( 1,0) = 255;   data( 1,1) = 255;   data( 1,2) = 179;
@@ -313,9 +243,9 @@ inline cppmat::matrix<int> Set3 ( size_t N=12 )
 // sequential colormaps
 // =================================================================================================
 
-inline cppmat::matrix<int> Blues ( size_t N=9 )
+inline xt::xtensor<int,2> Blues(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 247;   data( 0,1) = 251;   data( 0,2) = 255;
   data( 1,0) = 222;   data( 1,1) = 235;   data( 1,2) = 247;
@@ -330,9 +260,11 @@ inline cppmat::matrix<int> Blues ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Greens ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Greens(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 247;   data( 0,1) = 252;   data( 0,2) = 245;
   data( 1,0) = 229;   data( 1,1) = 245;   data( 1,2) = 224;
@@ -347,9 +279,11 @@ inline cppmat::matrix<int> Greens ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Greys ( size_t N=2 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Greys(size_t N=2)
 {
-  cppmat::matrix<int> data({2,3});
+  xt::xtensor<int,2> data = xt::empty<int>({2,3});
 
   data( 0,0) =   0;   data( 0,1) =   0;   data( 0,2) =   0;
   data( 1,0) = 255;   data( 1,1) = 255;   data( 1,2) = 255;
@@ -357,9 +291,11 @@ inline cppmat::matrix<int> Greys ( size_t N=2 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Oranges ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Oranges(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 255;   data( 0,1) = 245;   data( 0,2) = 235;
   data( 1,0) = 254;   data( 1,1) = 230;   data( 1,2) = 206;
@@ -374,9 +310,11 @@ inline cppmat::matrix<int> Oranges ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Purples ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Purples(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 252;   data( 0,1) = 251;   data( 0,2) = 253;
   data( 1,0) = 239;   data( 1,1) = 237;   data( 1,2) = 245;
@@ -391,9 +329,11 @@ inline cppmat::matrix<int> Purples ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Reds ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Reds(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 255;   data( 0,1) = 245;   data( 0,2) = 240;
   data( 1,0) = 254;   data( 1,1) = 224;   data( 1,2) = 210;
@@ -408,9 +348,11 @@ inline cppmat::matrix<int> Reds ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> BuPu ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> BuPu(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 247;   data( 0,1) = 252;   data( 0,2) = 253;
   data( 1,0) = 224;   data( 1,1) = 236;   data( 1,2) = 244;
@@ -425,9 +367,11 @@ inline cppmat::matrix<int> BuPu ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> GnBu ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> GnBu(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 247;   data( 0,1) = 252;   data( 0,2) = 240;
   data( 1,0) = 224;   data( 1,1) = 243;   data( 1,2) = 219;
@@ -442,9 +386,11 @@ inline cppmat::matrix<int> GnBu ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> PuBu ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> PuBu(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 255;   data( 0,1) = 247;   data( 0,2) = 251;
   data( 1,0) = 236;   data( 1,1) = 231;   data( 1,2) = 242;
@@ -459,9 +405,11 @@ inline cppmat::matrix<int> PuBu ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> PuBuGn ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> PuBuGn(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 255;   data( 0,1) = 247;   data( 0,2) = 251;
   data( 1,0) = 236;   data( 1,1) = 226;   data( 1,2) = 240;
@@ -476,9 +424,11 @@ inline cppmat::matrix<int> PuBuGn ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> PuRd ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> PuRd(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 247;   data( 0,1) = 244;   data( 0,2) = 249;
   data( 1,0) = 231;   data( 1,1) = 225;   data( 1,2) = 239;
@@ -493,9 +443,11 @@ inline cppmat::matrix<int> PuRd ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> RdPu ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> RdPu(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 255;   data( 0,1) = 247;   data( 0,2) = 243;
   data( 1,0) = 253;   data( 1,1) = 224;   data( 1,2) = 221;
@@ -510,9 +462,11 @@ inline cppmat::matrix<int> RdPu ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> OrRd ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> OrRd(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 255;   data( 0,1) = 247;   data( 0,2) = 236;
   data( 1,0) = 254;   data( 1,1) = 232;   data( 1,2) = 200;
@@ -527,9 +481,11 @@ inline cppmat::matrix<int> OrRd ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> RdOrYl ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> RdOrYl(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 128;   data( 0,1) = 0  ;   data( 0,2) = 38 ;
   data( 1,0) = 189;   data( 1,1) = 0  ;   data( 1,2) = 38 ;
@@ -544,9 +500,11 @@ inline cppmat::matrix<int> RdOrYl ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> YlGn ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> YlGn(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 255;   data( 0,1) = 255;   data( 0,2) = 229;
   data( 1,0) = 247;   data( 1,1) = 252;   data( 1,2) = 185;
@@ -561,9 +519,11 @@ inline cppmat::matrix<int> YlGn ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> YlGnBu ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> YlGnBu(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 255;   data( 0,1) = 255;   data( 0,2) = 217;
   data( 1,0) = 237;   data( 1,1) = 248;   data( 1,2) = 177;
@@ -578,9 +538,11 @@ inline cppmat::matrix<int> YlGnBu ( size_t N=9 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> YlOrRd ( size_t N=9 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> YlOrRd(size_t N=9)
 {
-  cppmat::matrix<int> data({9,3});
+  xt::xtensor<int,2> data = xt::empty<int>({9,3});
 
   data( 0,0) = 255;   data( 0,1) = 255;   data( 0,2) = 204;
   data( 1,0) = 255;   data( 1,1) = 237;   data( 1,2) = 160;
@@ -599,9 +561,9 @@ inline cppmat::matrix<int> YlOrRd ( size_t N=9 )
 // diverging colormaps
 // =================================================================================================
 
-inline cppmat::matrix<int> BrBG ( size_t N=11 )
+inline xt::xtensor<int,2> BrBG(size_t N=11)
 {
-  cppmat::matrix<int> data({11,3});
+  xt::xtensor<int,2> data = xt::empty<int>({11,3});
 
   data( 0,0) =  84;   data( 0,1) =  48;   data( 0,2) =   5;
   data( 1,0) = 140;   data( 1,1) =  81;   data( 1,2) =  10;
@@ -618,9 +580,11 @@ inline cppmat::matrix<int> BrBG ( size_t N=11 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> PuOr ( size_t N=11 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> PuOr(size_t N=11)
 {
-  cppmat::matrix<int> data({11,3});
+  xt::xtensor<int,2> data = xt::empty<int>({11,3});
 
   data( 0,0) = 127;   data( 0,1) =  59;   data( 0,2) =   8;
   data( 1,0) = 179;   data( 1,1) =  88;   data( 1,2) =   6;
@@ -637,9 +601,11 @@ inline cppmat::matrix<int> PuOr ( size_t N=11 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> RdBu ( size_t N=11 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> RdBu(size_t N=11)
 {
-  cppmat::matrix<int> data({11,3});
+  xt::xtensor<int,2> data = xt::empty<int>({11,3});
 
   data( 0,0) = 103;   data( 0,1) =   0;   data( 0,2) =  31;
   data( 1,0) = 178;   data( 1,1) =  24;   data( 1,2) =  43;
@@ -656,9 +622,11 @@ inline cppmat::matrix<int> RdBu ( size_t N=11 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> RdGy ( size_t N=11 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> RdGy(size_t N=11)
 {
-  cppmat::matrix<int> data({11,3});
+  xt::xtensor<int,2> data = xt::empty<int>({11,3});
 
   data( 0,0) = 103;   data( 0,1) =   0;   data( 0,2) =  31;
   data( 1,0) = 178;   data( 1,1) =  24;   data( 1,2) =  43;
@@ -675,9 +643,11 @@ inline cppmat::matrix<int> RdGy ( size_t N=11 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> RdYlBu ( size_t N=11 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> RdYlBu(size_t N=11)
 {
-  cppmat::matrix<int> data({11,3});
+  xt::xtensor<int,2> data = xt::empty<int>({11,3});
 
   data( 0,0) = 165;   data( 0,1) =   0;   data( 0,2) =  38;
   data( 1,0) = 215;   data( 1,1) =  48;   data( 1,2) =  39;
@@ -694,9 +664,11 @@ inline cppmat::matrix<int> RdYlBu ( size_t N=11 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> RdYlGn ( size_t N=11 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> RdYlGn(size_t N=11)
 {
-  cppmat::matrix<int> data({11,3});
+  xt::xtensor<int,2> data = xt::empty<int>({11,3});
 
   data( 0,0) = 165;   data( 0,1) =   0;   data( 0,2) =  38;
   data( 1,0) = 215;   data( 1,1) =  48;   data( 1,2) =  39;
@@ -713,9 +685,11 @@ inline cppmat::matrix<int> RdYlGn ( size_t N=11 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> PiYG ( size_t N=11 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> PiYG(size_t N=11)
 {
-  cppmat::matrix<int> data({11,3});
+  xt::xtensor<int,2> data = xt::empty<int>({11,3});
 
   data( 0,0) = 142;   data( 0,1) =   1;   data( 0,2) =  82;
   data( 1,0) = 197;   data( 1,1) =  27;   data( 1,2) = 125;
@@ -732,9 +706,11 @@ inline cppmat::matrix<int> PiYG ( size_t N=11 )
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> PRGn ( size_t N=11 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> PRGn(size_t N=11)
 {
-  cppmat::matrix<int> data({11,3});
+  xt::xtensor<int,2> data = xt::empty<int>({11,3});
 
   data( 0,0) =  64;   data( 0,1) =   0;   data( 0,2) =  75;
   data( 1,0) = 118;   data( 1,1) =  42;   data( 1,2) = 131;
@@ -755,45 +731,55 @@ inline cppmat::matrix<int> PRGn ( size_t N=11 )
 // monochromatic colormaps
 // =================================================================================================
 
-inline cppmat::matrix<int> White ( size_t N=1 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> White(size_t N=1)
 {
-  cppmat::matrix<int> data({1,3});
+  xt::xtensor<int,2> data = xt::empty<int>({1,3});
 
   data( 0,0) = 255;   data( 0,1) = 255;   data( 0,2) = 255;
 
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Grey ( size_t N=1 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Grey(size_t N=1)
 {
-  cppmat::matrix<int> data({1,3});
+  xt::xtensor<int,2> data = xt::empty<int>({1,3});
 
   data( 0,0) = 127;   data( 0,1) = 127;   data( 0,2) = 127;
 
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Black ( size_t N=1 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Black(size_t N=1)
 {
-  cppmat::matrix<int> data({1,3});
+  xt::xtensor<int,2> data = xt::empty<int>({1,3});
 
   data( 0,0) =   0;   data( 0,1) =   0;   data( 0,2) =   0;
 
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Red ( size_t N=1 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Red(size_t N=1)
 {
-  cppmat::matrix<int> data({1,3});
+  xt::xtensor<int,2> data = xt::empty<int>({1,3});
 
   data( 0,0) = 255;   data( 0,1) =   0;   data( 0,2) =   0;
 
   return interp(data,N);
 }
 
-inline cppmat::matrix<int> Blue ( size_t N=1 )
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> Blue(size_t N=1)
 {
-  cppmat::matrix<int> data({1,3});
+  xt::xtensor<int,2> data = xt::empty<int>({1,3});
 
   data( 0,0) =   0;   data( 0,1) =   0;   data( 0,2) = 255;
 
@@ -804,120 +790,120 @@ inline cppmat::matrix<int> Blue ( size_t N=1 )
 // inverse colormaps
 // =================================================================================================
 
-inline cppmat::matrix<int> Accent_r   ( size_t N= 8 ) { return reverse(Accent  (N)); }
-inline cppmat::matrix<int> Dark2_r    ( size_t N= 8 ) { return reverse(Dark2   (N)); }
-inline cppmat::matrix<int> Paired_r   ( size_t N=12 ) { return reverse(Paired  (N)); }
-inline cppmat::matrix<int> Spectral_r ( size_t N=11 ) { return reverse(Spectral(N)); }
-inline cppmat::matrix<int> Pastel1_r  ( size_t N= 9 ) { return reverse(Pastel1 (N)); }
-inline cppmat::matrix<int> Pastel2_r  ( size_t N= 8 ) { return reverse(Pastel2 (N)); }
-inline cppmat::matrix<int> Set1_r     ( size_t N= 9 ) { return reverse(Set1    (N)); }
-inline cppmat::matrix<int> Set2_r     ( size_t N= 8 ) { return reverse(Set2    (N)); }
-inline cppmat::matrix<int> Set3_r     ( size_t N=12 ) { return reverse(Set3    (N)); }
-inline cppmat::matrix<int> Blues_r    ( size_t N= 9 ) { return reverse(Blues   (N)); }
-inline cppmat::matrix<int> Greens_r   ( size_t N= 9 ) { return reverse(Greens  (N)); }
-inline cppmat::matrix<int> Greys_r    ( size_t N= 2 ) { return reverse(Greys   (N)); }
-inline cppmat::matrix<int> Oranges_r  ( size_t N= 9 ) { return reverse(Oranges (N)); }
-inline cppmat::matrix<int> Purples_r  ( size_t N= 9 ) { return reverse(Purples (N)); }
-inline cppmat::matrix<int> Reds_r     ( size_t N= 9 ) { return reverse(Reds    (N)); }
-inline cppmat::matrix<int> BuPu_r     ( size_t N= 9 ) { return reverse(BuPu    (N)); }
-inline cppmat::matrix<int> GnBu_r     ( size_t N= 9 ) { return reverse(GnBu    (N)); }
-inline cppmat::matrix<int> PuBu_r     ( size_t N= 9 ) { return reverse(PuBu    (N)); }
-inline cppmat::matrix<int> PuBuGn_r   ( size_t N= 9 ) { return reverse(PuBuGn  (N)); }
-inline cppmat::matrix<int> PuRd_r     ( size_t N= 9 ) { return reverse(PuRd    (N)); }
-inline cppmat::matrix<int> RdPu_r     ( size_t N= 9 ) { return reverse(RdPu    (N)); }
-inline cppmat::matrix<int> OrRd_r     ( size_t N= 9 ) { return reverse(OrRd    (N)); }
-inline cppmat::matrix<int> RdOrYl_r   ( size_t N= 9 ) { return reverse(RdOrYl  (N)); }
-inline cppmat::matrix<int> YlGn_r     ( size_t N= 9 ) { return reverse(YlGn    (N)); }
-inline cppmat::matrix<int> YlGnBu_r   ( size_t N= 9 ) { return reverse(YlGnBu  (N)); }
-inline cppmat::matrix<int> YlOrRd_r   ( size_t N= 9 ) { return reverse(YlOrRd  (N)); }
-inline cppmat::matrix<int> BrBG_r     ( size_t N=11 ) { return reverse(BrBG    (N)); }
-inline cppmat::matrix<int> PuOr_r     ( size_t N=11 ) { return reverse(PuOr    (N)); }
-inline cppmat::matrix<int> RdBu_r     ( size_t N=11 ) { return reverse(RdBu    (N)); }
-inline cppmat::matrix<int> RdGy_r     ( size_t N=11 ) { return reverse(RdGy    (N)); }
-inline cppmat::matrix<int> RdYlBu_r   ( size_t N=11 ) { return reverse(RdYlBu  (N)); }
-inline cppmat::matrix<int> RdYlGn_r   ( size_t N=11 ) { return reverse(RdYlGn  (N)); }
-inline cppmat::matrix<int> PiYG_r     ( size_t N=11 ) { return reverse(PiYG    (N)); }
-inline cppmat::matrix<int> PRGn_r     ( size_t N=11 ) { return reverse(PRGn    (N)); }
+inline xt::xtensor<int,2> Accent_r   (size_t N= 8) { return xt::flip(Accent  (N), 0); }
+inline xt::xtensor<int,2> Dark2_r    (size_t N= 8) { return xt::flip(Dark2   (N), 0); }
+inline xt::xtensor<int,2> Paired_r   (size_t N=12) { return xt::flip(Paired  (N), 0); }
+inline xt::xtensor<int,2> Spectral_r (size_t N=11) { return xt::flip(Spectral(N), 0); }
+inline xt::xtensor<int,2> Pastel1_r  (size_t N= 9) { return xt::flip(Pastel1 (N), 0); }
+inline xt::xtensor<int,2> Pastel2_r  (size_t N= 8) { return xt::flip(Pastel2 (N), 0); }
+inline xt::xtensor<int,2> Set1_r     (size_t N= 9) { return xt::flip(Set1    (N), 0); }
+inline xt::xtensor<int,2> Set2_r     (size_t N= 8) { return xt::flip(Set2    (N), 0); }
+inline xt::xtensor<int,2> Set3_r     (size_t N=12) { return xt::flip(Set3    (N), 0); }
+inline xt::xtensor<int,2> Blues_r    (size_t N= 9) { return xt::flip(Blues   (N), 0); }
+inline xt::xtensor<int,2> Greens_r   (size_t N= 9) { return xt::flip(Greens  (N), 0); }
+inline xt::xtensor<int,2> Greys_r    (size_t N= 2) { return xt::flip(Greys   (N), 0); }
+inline xt::xtensor<int,2> Oranges_r  (size_t N= 9) { return xt::flip(Oranges (N), 0); }
+inline xt::xtensor<int,2> Purples_r  (size_t N= 9) { return xt::flip(Purples (N), 0); }
+inline xt::xtensor<int,2> Reds_r     (size_t N= 9) { return xt::flip(Reds    (N), 0); }
+inline xt::xtensor<int,2> BuPu_r     (size_t N= 9) { return xt::flip(BuPu    (N), 0); }
+inline xt::xtensor<int,2> GnBu_r     (size_t N= 9) { return xt::flip(GnBu    (N), 0); }
+inline xt::xtensor<int,2> PuBu_r     (size_t N= 9) { return xt::flip(PuBu    (N), 0); }
+inline xt::xtensor<int,2> PuBuGn_r   (size_t N= 9) { return xt::flip(PuBuGn  (N), 0); }
+inline xt::xtensor<int,2> PuRd_r     (size_t N= 9) { return xt::flip(PuRd    (N), 0); }
+inline xt::xtensor<int,2> RdPu_r     (size_t N= 9) { return xt::flip(RdPu    (N), 0); }
+inline xt::xtensor<int,2> OrRd_r     (size_t N= 9) { return xt::flip(OrRd    (N), 0); }
+inline xt::xtensor<int,2> RdOrYl_r   (size_t N= 9) { return xt::flip(RdOrYl  (N), 0); }
+inline xt::xtensor<int,2> YlGn_r     (size_t N= 9) { return xt::flip(YlGn    (N), 0); }
+inline xt::xtensor<int,2> YlGnBu_r   (size_t N= 9) { return xt::flip(YlGnBu  (N), 0); }
+inline xt::xtensor<int,2> YlOrRd_r   (size_t N= 9) { return xt::flip(YlOrRd  (N), 0); }
+inline xt::xtensor<int,2> BrBG_r     (size_t N=11) { return xt::flip(BrBG    (N), 0); }
+inline xt::xtensor<int,2> PuOr_r     (size_t N=11) { return xt::flip(PuOr    (N), 0); }
+inline xt::xtensor<int,2> RdBu_r     (size_t N=11) { return xt::flip(RdBu    (N), 0); }
+inline xt::xtensor<int,2> RdGy_r     (size_t N=11) { return xt::flip(RdGy    (N), 0); }
+inline xt::xtensor<int,2> RdYlBu_r   (size_t N=11) { return xt::flip(RdYlBu  (N), 0); }
+inline xt::xtensor<int,2> RdYlGn_r   (size_t N=11) { return xt::flip(RdYlGn  (N), 0); }
+inline xt::xtensor<int,2> PiYG_r     (size_t N=11) { return xt::flip(PiYG    (N), 0); }
+inline xt::xtensor<int,2> PRGn_r     (size_t N=11) { return xt::flip(PRGn    (N), 0); }
 
 // =================================================================================================
 // read from string
 // =================================================================================================
 
-inline cppmat::matrix<int> colormap ( std::string cmap, size_t N=256 )
+inline xt::xtensor<int,2> colormap(const std::string &cmap, size_t N=256)
 {
-  if      ( cmap=="Accent"      ) { return Accent     (N); }
-  else if ( cmap=="Dark2"       ) { return Dark2      (N); }
-  else if ( cmap=="Paired"      ) { return Paired     (N); }
-  else if ( cmap=="Spectral"    ) { return Spectral   (N); }
-  else if ( cmap=="Pastel1"     ) { return Pastel1    (N); }
-  else if ( cmap=="Pastel2"     ) { return Pastel2    (N); }
-  else if ( cmap=="Set1"        ) { return Set1       (N); }
-  else if ( cmap=="Set2"        ) { return Set2       (N); }
-  else if ( cmap=="Set3"        ) { return Set3       (N); }
-  else if ( cmap=="Blues"       ) { return Blues      (N); }
-  else if ( cmap=="Greens"      ) { return Greens     (N); }
-  else if ( cmap=="Greys"       ) { return Greys      (N); }
-  else if ( cmap=="Oranges"     ) { return Oranges    (N); }
-  else if ( cmap=="Purples"     ) { return Purples    (N); }
-  else if ( cmap=="Reds"        ) { return Reds       (N); }
-  else if ( cmap=="BuPu"        ) { return BuPu       (N); }
-  else if ( cmap=="GnBu"        ) { return GnBu       (N); }
-  else if ( cmap=="PuBu"        ) { return PuBu       (N); }
-  else if ( cmap=="PuBuGn"      ) { return PuBuGn     (N); }
-  else if ( cmap=="PuRd"        ) { return PuRd       (N); }
-  else if ( cmap=="RdPu"        ) { return RdPu       (N); }
-  else if ( cmap=="OrRd"        ) { return OrRd       (N); }
-  else if ( cmap=="RdOrYl"      ) { return RdOrYl     (N); }
-  else if ( cmap=="YlGn"        ) { return YlGn       (N); }
-  else if ( cmap=="YlGnBu"      ) { return YlGnBu     (N); }
-  else if ( cmap=="YlOrRd"      ) { return YlOrRd     (N); }
-  else if ( cmap=="BrBG"        ) { return BrBG       (N); }
-  else if ( cmap=="PuOr"        ) { return PuOr       (N); }
-  else if ( cmap=="RdBu"        ) { return RdBu       (N); }
-  else if ( cmap=="RdGy"        ) { return RdGy       (N); }
-  else if ( cmap=="RdYlBu"      ) { return RdYlBu     (N); }
-  else if ( cmap=="RdYlGn"      ) { return RdYlGn     (N); }
-  else if ( cmap=="PiYG"        ) { return PiYG       (N); }
-  else if ( cmap=="PRGn"        ) { return PRGn       (N); }
-  else if ( cmap=="Accent_r"    ) { return Accent_r   (N); }
-  else if ( cmap=="Dark2_r"     ) { return Dark2_r    (N); }
-  else if ( cmap=="Paired_r"    ) { return Paired_r   (N); }
-  else if ( cmap=="Spectral_r"  ) { return Spectral_r (N); }
-  else if ( cmap=="Pastel1_r"   ) { return Pastel1_r  (N); }
-  else if ( cmap=="Pastel2_r"   ) { return Pastel2_r  (N); }
-  else if ( cmap=="Set1_r"      ) { return Set1_r     (N); }
-  else if ( cmap=="Set2_r"      ) { return Set2_r     (N); }
-  else if ( cmap=="Set3_r"      ) { return Set3_r     (N); }
-  else if ( cmap=="Blues_r"     ) { return Blues_r    (N); }
-  else if ( cmap=="Greens_r"    ) { return Greens_r   (N); }
-  else if ( cmap=="Greys_r"     ) { return Greys_r    (N); }
-  else if ( cmap=="Oranges_r"   ) { return Oranges_r  (N); }
-  else if ( cmap=="Purples_r"   ) { return Purples_r  (N); }
-  else if ( cmap=="Reds_r"      ) { return Reds_r     (N); }
-  else if ( cmap=="BuPu_r"      ) { return BuPu_r     (N); }
-  else if ( cmap=="GnBu_r"      ) { return GnBu_r     (N); }
-  else if ( cmap=="PuBu_r"      ) { return PuBu_r     (N); }
-  else if ( cmap=="PuBuGn_r"    ) { return PuBuGn_r   (N); }
-  else if ( cmap=="PuRd_r"      ) { return PuRd_r     (N); }
-  else if ( cmap=="RdPu_r"      ) { return RdPu_r     (N); }
-  else if ( cmap=="OrRd_r"      ) { return OrRd_r     (N); }
-  else if ( cmap=="RdOrYl_r"    ) { return RdOrYl_r   (N); }
-  else if ( cmap=="YlGn_r"      ) { return YlGn_r     (N); }
-  else if ( cmap=="YlGnBu_r"    ) { return YlGnBu_r   (N); }
-  else if ( cmap=="YlOrRd_r"    ) { return YlOrRd_r   (N); }
-  else if ( cmap=="BrBG_r"      ) { return BrBG_r     (N); }
-  else if ( cmap=="PuOr_r"      ) { return PuOr_r     (N); }
-  else if ( cmap=="RdBu_r"      ) { return RdBu_r     (N); }
-  else if ( cmap=="RdGy_r"      ) { return RdGy_r     (N); }
-  else if ( cmap=="RdYlBu_r"    ) { return RdYlBu_r   (N); }
-  else if ( cmap=="RdYlGn_r"    ) { return RdYlGn_r   (N); }
-  else if ( cmap=="PiYG_r"      ) { return PiYG_r     (N); }
-  else if ( cmap=="PRGn_r"      ) { return PRGn_r     (N); }
-  else if ( cmap=="White"       ) { return White      (N); }
-  else if ( cmap=="Grey"        ) { return Grey       (N); }
-  else if ( cmap=="Black"       ) { return Black      (N); }
-  else if ( cmap=="Red"         ) { return Red        (N); }
-  else if ( cmap=="Blue"        ) { return Blue       (N); }
+  if ( cmap == "Accent"      ) { return Accent     (N); }
+  if ( cmap == "Dark2"       ) { return Dark2      (N); }
+  if ( cmap == "Paired"      ) { return Paired     (N); }
+  if ( cmap == "Spectral"    ) { return Spectral   (N); }
+  if ( cmap == "Pastel1"     ) { return Pastel1    (N); }
+  if ( cmap == "Pastel2"     ) { return Pastel2    (N); }
+  if ( cmap == "Set1"        ) { return Set1       (N); }
+  if ( cmap == "Set2"        ) { return Set2       (N); }
+  if ( cmap == "Set3"        ) { return Set3       (N); }
+  if ( cmap == "Blues"       ) { return Blues      (N); }
+  if ( cmap == "Greens"      ) { return Greens     (N); }
+  if ( cmap == "Greys"       ) { return Greys      (N); }
+  if ( cmap == "Oranges"     ) { return Oranges    (N); }
+  if ( cmap == "Purples"     ) { return Purples    (N); }
+  if ( cmap == "Reds"        ) { return Reds       (N); }
+  if ( cmap == "BuPu"        ) { return BuPu       (N); }
+  if ( cmap == "GnBu"        ) { return GnBu       (N); }
+  if ( cmap == "PuBu"        ) { return PuBu       (N); }
+  if ( cmap == "PuBuGn"      ) { return PuBuGn     (N); }
+  if ( cmap == "PuRd"        ) { return PuRd       (N); }
+  if ( cmap == "RdPu"        ) { return RdPu       (N); }
+  if ( cmap == "OrRd"        ) { return OrRd       (N); }
+  if ( cmap == "RdOrYl"      ) { return RdOrYl     (N); }
+  if ( cmap == "YlGn"        ) { return YlGn       (N); }
+  if ( cmap == "YlGnBu"      ) { return YlGnBu     (N); }
+  if ( cmap == "YlOrRd"      ) { return YlOrRd     (N); }
+  if ( cmap == "BrBG"        ) { return BrBG       (N); }
+  if ( cmap == "PuOr"        ) { return PuOr       (N); }
+  if ( cmap == "RdBu"        ) { return RdBu       (N); }
+  if ( cmap == "RdGy"        ) { return RdGy       (N); }
+  if ( cmap == "RdYlBu"      ) { return RdYlBu     (N); }
+  if ( cmap == "RdYlGn"      ) { return RdYlGn     (N); }
+  if ( cmap == "PiYG"        ) { return PiYG       (N); }
+  if ( cmap == "PRGn"        ) { return PRGn       (N); }
+  if ( cmap == "Accent_r"    ) { return Accent_r   (N); }
+  if ( cmap == "Dark2_r"     ) { return Dark2_r    (N); }
+  if ( cmap == "Paired_r"    ) { return Paired_r   (N); }
+  if ( cmap == "Spectral_r"  ) { return Spectral_r (N); }
+  if ( cmap == "Pastel1_r"   ) { return Pastel1_r  (N); }
+  if ( cmap == "Pastel2_r"   ) { return Pastel2_r  (N); }
+  if ( cmap == "Set1_r"      ) { return Set1_r     (N); }
+  if ( cmap == "Set2_r"      ) { return Set2_r     (N); }
+  if ( cmap == "Set3_r"      ) { return Set3_r     (N); }
+  if ( cmap == "Blues_r"     ) { return Blues_r    (N); }
+  if ( cmap == "Greens_r"    ) { return Greens_r   (N); }
+  if ( cmap == "Greys_r"     ) { return Greys_r    (N); }
+  if ( cmap == "Oranges_r"   ) { return Oranges_r  (N); }
+  if ( cmap == "Purples_r"   ) { return Purples_r  (N); }
+  if ( cmap == "Reds_r"      ) { return Reds_r     (N); }
+  if ( cmap == "BuPu_r"      ) { return BuPu_r     (N); }
+  if ( cmap == "GnBu_r"      ) { return GnBu_r     (N); }
+  if ( cmap == "PuBu_r"      ) { return PuBu_r     (N); }
+  if ( cmap == "PuBuGn_r"    ) { return PuBuGn_r   (N); }
+  if ( cmap == "PuRd_r"      ) { return PuRd_r     (N); }
+  if ( cmap == "RdPu_r"      ) { return RdPu_r     (N); }
+  if ( cmap == "OrRd_r"      ) { return OrRd_r     (N); }
+  if ( cmap == "RdOrYl_r"    ) { return RdOrYl_r   (N); }
+  if ( cmap == "YlGn_r"      ) { return YlGn_r     (N); }
+  if ( cmap == "YlGnBu_r"    ) { return YlGnBu_r   (N); }
+  if ( cmap == "YlOrRd_r"    ) { return YlOrRd_r   (N); }
+  if ( cmap == "BrBG_r"      ) { return BrBG_r     (N); }
+  if ( cmap == "PuOr_r"      ) { return PuOr_r     (N); }
+  if ( cmap == "RdBu_r"      ) { return RdBu_r     (N); }
+  if ( cmap == "RdGy_r"      ) { return RdGy_r     (N); }
+  if ( cmap == "RdYlBu_r"    ) { return RdYlBu_r   (N); }
+  if ( cmap == "RdYlGn_r"    ) { return RdYlGn_r   (N); }
+  if ( cmap == "PiYG_r"      ) { return PiYG_r     (N); }
+  if ( cmap == "PRGn_r"      ) { return PRGn_r     (N); }
+  if ( cmap == "White"       ) { return White      (N); }
+  if ( cmap == "Grey"        ) { return Grey       (N); }
+  if ( cmap == "Black"       ) { return Black      (N); }
+  if ( cmap == "Red"         ) { return Red        (N); }
+  if ( cmap == "Blue"        ) { return Blue       (N); }
 
   throw std::runtime_error("Colormap not recognized");
 }
@@ -926,9 +912,9 @@ inline cppmat::matrix<int> colormap ( std::string cmap, size_t N=256 )
 // color cycles
 // =================================================================================================
 
-inline cppmat::matrix<int> tue(void)
+inline xt::xtensor<int,2> tue()
 {
-  cppmat::matrix<int> data({13,3});
+  xt::xtensor<int,2> data = xt::empty<int>({13,3});
 
   data( 0,0) = 247;   data( 0,1) =  49;   data( 0,2) =  49; //  0: warm red
   data( 1,0) = 214;   data( 1,1) =   0;   data( 1,2) =  74; //  1: red
@@ -947,52 +933,64 @@ inline cppmat::matrix<int> tue(void)
   return data;
 }
 
-inline cppmat::matrix<int> tuewarmred(void)
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> tuewarmred()
 {
-  cppmat::matrix<int> data({1,3});
+  xt::xtensor<int,2> data = xt::empty<int>({1,3});
 
   data( 0,0) = 247;   data( 0,1) =  49;   data( 0,2) =  49;
 
   return data;
 }
 
-inline cppmat::matrix<int> tuedarkblue(void)
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> tuedarkblue()
 {
-  cppmat::matrix<int> data({1,3});
+  xt::xtensor<int,2> data = xt::empty<int>({1,3});
 
   data( 0,0) =  16;   data( 0,1) =  16;   data( 0,2) = 115;
 
   return data;
 }
 
-inline cppmat::matrix<int> tueblue(void)
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> tueblue()
 {
-  cppmat::matrix<int> data({1,3});
+  xt::xtensor<int,2> data = xt::empty<int>({1,3});
 
   data( 0,0) =   0;   data( 0,1) = 102;   data( 0,2) = 204;
 
   return data;
 }
 
-inline cppmat::matrix<int> tuelightblue(void)
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> tuelightblue()
 {
-  cppmat::matrix<int> data({1,3});
+  xt::xtensor<int,2> data = xt::empty<int>({1,3});
 
   data( 0,0) =   0;   data( 0,1) = 162;   data( 0,2) = 222;
 
   return data;
 }
 
-inline cppmat::matrix<int> colorcycle(std::string cmap)
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<int,2> colorcycle(const std::string &cmap)
 {
-  if      ( cmap=="tue"          ) { return tue         (); }
-  else if ( cmap=="tuewarmred"   ) { return tuewarmred  (); }
-  else if ( cmap=="tuedarkblue"  ) { return tuedarkblue (); }
-  else if ( cmap=="tueblue"      ) { return tueblue     (); }
-  else if ( cmap=="tuelightblue" ) { return tuelightblue(); }
+  if ( cmap == "tue"          ) { return tue         (); }
+  if ( cmap == "tuewarmred"   ) { return tuewarmred  (); }
+  if ( cmap == "tuedarkblue"  ) { return tuedarkblue (); }
+  if ( cmap == "tueblue"      ) { return tueblue     (); }
+  if ( cmap == "tuelightblue" ) { return tuelightblue(); }
 
   throw std::runtime_error("Color-cycle not recognized");
 }
+
+// =================================================================================================
 
 } // namespace cppcolormap
 

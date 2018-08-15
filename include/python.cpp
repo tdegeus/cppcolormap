@@ -1,7 +1,9 @@
 
-#include <cppmat/matrix.h>
-#include <cppmat/pybind11_matrix.h>
-#include "../src/cppcolormap.h"
+#include <pyxtensor/pyxtensor.hpp>
+
+#include "cppcolormap.h"
+
+// -------------------------------------------------------------------------------------------------
 
 PYBIND11_MODULE(cppcolormap, m)
 {
