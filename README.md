@@ -1,6 +1,6 @@
 # cppcolormap
 
-Library with colormaps for C++. Quick-start: `#include <cppcolormap.h>`, that's about it. Note that the library depends on [cppmat](http://cppmat.geus.me). Its installation and use is equally straightforward.
+Library with colormaps for C++. Quick start: `#include <cppcolormap.h>`, that's about it. Note that the library depends on [xtensor](http://xtensor.readthedocs.io). Its installation and use are equally straightforward.
 
 >   **Disclaimer**
 >   
@@ -14,9 +14,12 @@ Library with colormaps for C++. Quick-start: `#include <cppcolormap.h>`, that's 
 
 <!-- MarkdownTOC -->
 
-- [Usage](#usage)
-    - [From C++](#from-c)
-    - [From Python](#from-python)
+- [Usage from C++](#usage-from-c)
+    - [Installation](#installation)
+    - [Usage](#usage)
+- [Usage from Python](#usage-from-python)
+    - [Installation](#installation-1)
+    - [Usage](#usage-1)
 - [Available colormaps](#available-colormaps)
     - [ColorBrewer](#colorbrewer)
 - [Available color-cycles](#available-color-cycles)
@@ -24,20 +27,18 @@ Library with colormaps for C++. Quick-start: `#include <cppcolormap.h>`, that's 
 
 <!-- /MarkdownTOC -->
 
-# Usage
+# Usage from C++
 
-## From C++
+## Installation
 
-### Installation
-
-The library is header-only. This means that one has to only include the header-file `cppcolormap.h`. Really, that's it! 
+The library is header only. This means that one has to only include the header-file `cppcolormap.h`. Really, that's it! 
 
 To be able to set the include path semi-automatic, one can choose to 'install' cppcolormap. To do this using CMake:
 
 1.  Proceed to a (temporary) build directory. For example
 
     ```bash
-    $ cd /path/to/cppcolormap/src/build
+    $ cd /path/to/cppcolormap/build
     ```
 
 2.  'Build' cppcolormap
@@ -47,58 +48,68 @@ To be able to set the include path semi-automatic, one can choose to 'install' c
     $ make install
     ```
 
-    (If you've used another build directory, change the first command to `$ cmake /path/to/cppcolormap/src`)
-
-### Usage
+## Usage
 
 The main interface is with two functions:
 
 ```cpp
-#include <cppmat/matrix.h>
 #include <cppcolormap.h>
 
-int main ( void )
+int main ()
 {
-    cppmat::matrix<int> cmap;
+    std::cout << cppcolormap::colormap("Reds")  << std::endl;
+    std::cout << cppcolormap::colorcycle("tue") << std::endl;
 
-    cmap = cppcolormap::colormap("Reds");
-    cmap = cppcolormap::colorcycle("tue");
-
-    cmap.printf("%4d");
+    return 0;
 }
 ```
 
-(see lists of [colormaps](#available-colormaps) and [color-cycles](#available-color-cycles) below).
+Lists of [colormaps](#available-colormaps) and [color-cycles](#available-color-cycles) can be found below.
 
-The colormaps are stored as a matrix whereby each row contains the (R,G,B) colors. Each color value has a range `[0..255]`.
+The colormaps are stored as a matrix whereby each row contains the (R,G,B) colors. Each color value has a range `[0..255]`. The number of colors varies from map to map, but can be interpolated by specifying the number of colors you want:
 
-## From Python
+```cpp
+#include <cppcolormap.h>
 
-### Installation
+int main ()
+{
+    std::cout << cppcolormap::colormap("Reds", 256)  << std::endl;
 
-Install using PyPI:
-
-```bash
-# if you are using Python 2.X
-pip install ccpcolormap
-
-# if you are using Python 3.X
-pip3 install cppcolormap
+    return 0;
+}
 ```
 
-Otherwise, clone the repository and then run:
+Note that the colorcycles are not interpolatable. Consequently the functions do have a size option. Note also that the colormaps can also be called directly, e.g.
+
+```cpp
+#include <cppcolormap.h>
+
+int main ()
+{
+    std::cout << cppcolormap::Reds() << std::endl;
+    std::cout << cppcolormap::tue()  << std::endl;
+
+    return 0;
+}
+```
+
+# Usage from Python
+
+## Installation
+
+Clone the repository and then run:
 
 ```bash
-# if you are using Python 2.X
+# if you are using Python 2.x
 python setup.py build
 python setup.py install
 
-# if you are using Python 3.X
+# if you are using Python 3.x
 python3 setup.py build
 python3 setup.py install
 ```
 
-### Usage
+## Usage
 
 There are two functions, each returns a 2-d NumPy array:
 
