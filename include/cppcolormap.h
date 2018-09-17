@@ -28,6 +28,7 @@
 #include <xtensor/xtensor.hpp>
 #include <xtensor/xview.hpp>
 #include <xtensor/xmath.hpp>
+#include <xtensor/xmanipulation.hpp>
 #include <xtensor/xio.hpp>
 
 namespace cppcolormap {
