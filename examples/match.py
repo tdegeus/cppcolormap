@@ -18,6 +18,5 @@ z   = (x-50)**2. + (y-50)**2.
 im = axes[0].imshow(z, cmap=m_cmap , clim=(0,5000))
 im = axes[1].imshow(z, cmap=m_xterm, clim=(0,5000))
 
-plt.savefig('match.png')
 plt.show()
 
