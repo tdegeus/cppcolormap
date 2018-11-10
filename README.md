@@ -20,9 +20,13 @@ Library with colormaps for C++. Quick start: `#include <cppcolormap.h>`, that's 
 - [Usage from Python](#usage-from-python)
     - [Installation](#installation-1)
     - [Usage](#usage-1)
+    - [Find match](#find-match)
 - [Available colormaps](#available-colormaps)
     - [ColorBrewer](#colorbrewer)
+- [Matplotlib](#matplotlib)
+- [Monochromatic colormaps](#monochromatic-colormaps)
 - [Available color-cycles](#available-color-cycles)
+    - [Xterm](#xterm)
     - [Eindhoven University of Technology](#eindhoven-university-of-technology)
 
 <!-- /MarkdownTOC -->
@@ -66,7 +70,7 @@ int main ()
 
 Lists of [colormaps](#available-colormaps) and [color-cycles](#available-color-cycles) can be found below.
 
-The colormaps are stored as a matrix whereby each row contains the (R,G,B) colors. Each color value has a range `[0..255]`. The number of colors varies from map to map, but can be interpolated by specifying the number of colors you want:
+The colormaps are stored as a matrix whereby each row contains the (R,G,B) colors. Each color value has a range `[0..1]`. The number of colors varies from map to map, but can be interpolated by specifying the number of colors you want:
 
 ```cpp
 #include <cppcolormap.h>
@@ -130,11 +134,23 @@ cols = cmap.tue(N)
 
 (see lists of [colormaps](#available-colormaps) and [color-cycles](#available-color-cycles) below).
 
+## Find match
+
+To find the closest match of each color of a colormap in another colormap you can use:
+
+```cpp
+xt::xtensor<size_t,1> idx = cppcolormap::match(cmap1, cmap2);
+
+// use weight factors for a better visual match
+xt::xtensor<size_t,1> idx = cppcolormap:match_visual(cmap1, cmap2);
+```
+
+
 # Available colormaps
 
-## ColorBrewer
+> Note that each colormap can be flipped by appending the name by "_r"
 
-The following colormaps are taken from "[ColorBrewer](http://colorbrewer2.org)":
+## ColorBrewer
 
 *   Accent
 *   Dark2
@@ -171,13 +187,41 @@ The following colormaps are taken from "[ColorBrewer](http://colorbrewer2.org)":
 *   PiYG
 *   PRGn
 
->   Copyright (c) 2002 Cynthia Brewer, Mark Harrower, and The Pennsylvania State University.                                                            
+>   Copyright (c) 2002 Cynthia Brewer, Mark Harrower, and The Pennsylvania State University.
 >   
 >   Licensed under the Apache License, Version 2.0
 >   
 >   [colorbrewer2.org](http://colorbrewer2.org)
 
+# Matplotlib
+
+*   magma
+*   inferno
+*   plasma
+*   viridis
+
+>   Copyright (c)  New matplotlib colormaps by Nathaniel J. Smith, Stefan van der Walt, and 
+>   in the case of viridis) Eric Firing.
+>   
+>   Licensed under the under the CC0 license / public domain dedication.
+>   
+>   [GitHub](https://github.com/BIDS/colormap)
+
+# Monochromatic colormaps
+
+*   White
+*   Grey
+*   Black
+*   Red
+*   Blue
+
 # Available color-cycles
+
+## Xterm
+
+See [this site](https://jonasjacek.github.io/colors/)
+
+*   xterm
 
 ## Eindhoven University of Technology
 
