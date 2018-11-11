@@ -21,10 +21,11 @@ Library with colormaps for C++. Quick start: `#include <cppcolormap.h>`, that's 
 - [Usage from C++](#usage-from-c)
     - [Installation](#installation)
     - [Usage](#usage)
+    - [Find match](#find-match)
 - [Usage from Python](#usage-from-python)
     - [Installation](#installation-1)
     - [Usage](#usage-1)
-    - [Find match](#find-match)
+    - [Find match](#find-match-1)
 - [Available colormaps](#available-colormaps)
     - [ColorBrewer](#colorbrewer)
 - [Matplotlib](#matplotlib)
@@ -101,6 +102,21 @@ int main ()
 }
 ```
 
+## Find match
+
+To find the closest match of each color of a colormap in another colormap you can use:
+
+```cpp
+xt::xtensor<size_t,1> idx = cppcolormap::match(cmap1, cmap2);
+xt::xtensor<size_t,1> idx = cppcolormap::match(cmap1, cmap2, cppcolormap::metric::euclidean);
+```
+
+The following metrics can be used:
+
+*   euclidean (default)
+*   fast_perceptual
+*   perceptual
+
 # Usage from Python
 
 ## Installation
@@ -122,18 +138,18 @@ python3 setup.py install
 There are two functions, each returns a 2-d NumPy array:
 
 ```python
-import cppcolormap as cmap
+import cppcolormap as cm
 
 # number of colors in the colormap (optional, may be omitted)
 N = 256
 
 # specify the colormap as string
-cols = cmap.colormap("Reds",N)
-cols = cmap.colorcycle("tue",N)
+cols = cm.colormap("Reds",N)
+cols = cm.colorcycle("tue",N)
 
 # or call the functions directly
-cols = cmap.Reds(N)
-cols = cmap.tue(N)
+cols = cm.Reds(N)
+cols = cm.tue(N)
 ```
 
 (see lists of [colormaps](#available-colormaps) and [color-cycles](#available-color-cycles) below).
@@ -143,13 +159,13 @@ cols = cmap.tue(N)
 To find the closest match of each color of a colormap in another colormap you can use:
 
 ```cpp
-xt::xtensor<size_t,1> idx = cppcolormap::match(cmap1, cmap2);
-xt::xtensor<size_t,1> idx = cppcolormap::match(cmap1, cmap2, cppcolormap::metric::euclidean);
+idx = cm.match(cmap1, cmap2)
+idx = cm.match(cmap1, cmap2, cm.DistanceMetric.perceptual)
 ```
 
-As option the following metrics can be used:
+The following metrics can be used:
 
-*   euclidean
+*   euclidean (default) 
 *   fast_perceptual
 *   perceptual
 
