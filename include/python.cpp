@@ -122,8 +122,13 @@ m.def("colormap"  ,&cppcolormap::colormap  ,"Colormap by name"   ,py::arg("cmap"
 
 // -------------------------------------------------------------------------------------------------
 
+py::enum_<cppcolormap::metric>(m, "DistanceMetric", "Distance metric for color matching")
+    .value("euclidean",	      cppcolormap::metric::euclidean)
+    .value("fast_perceptual", cppcolormap::metric::fast_perceptual)
+    .value("perceptual",      cppcolormap::metric::perceptual)
+    .export_values();
+
 m.def("match"       , &cppcolormap::match       );
-m.def("match_visual", &cppcolormap::match_visual);
 
 // -------------------------------------------------------------------------------------------------
 

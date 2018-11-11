@@ -2338,38 +2338,48 @@ inline xt::xtensor<double,2> colorcycle(const std::string &cmap)
 // Find closest color-match
 // =================================================================================================
 
-inline xt::xtensor<size_t,1> match(
-  const xt::xtensor<double,2> &A, const xt::xtensor<double,2> &B)
+enum metric
 {
-  xt::xtensor<size_t,1> idx = xt::empty<size_t>({A.shape()[0]});
-  xt::xtensor<double,1> d   = xt::empty<double>({B.shape()[0]});
+  euclidean, fast_perceptual, perceptual
+};
 
-  for ( size_t i = 0 ; i < A.shape()[0] ; ++i )
-  {
-    for ( size_t j = 0 ; j < B.shape()[0] ; ++j )
-    {
-      d(j) = std::pow(A(i,0)-B(j,0),2.) + std::pow(A(i,1)-B(j,1),2.) + std::pow(A(i,2)-B(j,2),2.);
-    }
-    idx(i) = xt::argmin(d)[0];
-  }
-
-  return idx;
+double euclidean_metric(double R1, double G1, double B1, double R2, double G2, double B2)
+{
+  return std::pow(R1-R2,2.) + std::pow(G1-G2,2.) + std::pow(B1-B2,2.);
 }
 
-// -------------------------------------------------------------------------------------------------
-
 // https://stackoverflow.com/a/1847112/2646505
-inline xt::xtensor<size_t,1> match_visual(
-  const xt::xtensor<double,2> &A, const xt::xtensor<double,2> &B)
+double fast_perceptual_metric(double R1, double G1, double B1, double R2, double G2, double B2)
+{
+  return 0.3 * std::pow(R1-R2, 2.) + 0.59 * std::pow(G1-G2, 2.) + 0.11 * std::pow(B1-B2, 2.);
+}
+
+// https://en.wikipedia.org/wiki/Color_difference
+double perceptual_metric(double R1, double G1, double B1, double R2, double G2, double B2)
+{
+  double r_ = (R1 + R2) / 2;
+  double DR = (R1 - R2);
+  double DG = (G1 - G2);
+  double DB = (B1 - B2);
+
+  return 2 * DR * DR + 4 * DG * DG + 3 * DB * DB + ((r_ * (DR * DR - DB * DB)));
+}
+
+inline xt::xtensor<size_t,1> match(
+  const xt::xtensor<double,2> &A, const xt::xtensor<double,2> &B, metric distance_metric = euclidean)
 {
   xt::xtensor<size_t,1> idx = xt::empty<size_t>({A.shape()[0]});
   xt::xtensor<double,1> d   = xt::empty<double>({B.shape()[0]});
+
+  auto fmetric = euclidean_metric;
+  if (distance_metric == metric::fast_perceptual) { fmetric = fast_perceptual_metric; }
+  if (distance_metric == metric::perceptual) { fmetric = perceptual_metric; }
 
   for ( size_t i = 0 ; i < A.shape()[0] ; ++i )
   {
     for ( size_t j = 0 ; j < B.shape()[0] ; ++j )
     {
-      d(j) = 0.3*std::pow(A(i,0)-B(j,0),2.) + 0.59*std::pow(A(i,1)-B(j,1),2.) + 0.11*std::pow(A(i,2)-B(j,2),2.);
+      d(j) = fmetric(A(i, 0), A(i, 1), A(i, 2), B(j, 0), B(j, 1), B(j, 2));
     }
     idx(i) = xt::argmin(d)[0];
   }

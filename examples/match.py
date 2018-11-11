@@ -4,10 +4,11 @@ import matplotlib.pyplot as plt
 import numpy             as np
 
 cmap    = cm.Reds()
+
 m_cmap  = mpl.colors.ListedColormap(cmap, name='Reds', N=cmap.shape[0])
 
 xterm   = cm.xterm()
-idx     = cm.match_visual(cmap, xterm)
+idx     = cm.match(cmap, xterm, cm.DistanceMetric.perceptual)
 m_xterm = mpl.colors.ListedColormap(xterm[idx,:], name='xterm', N=cmap.shape[0])
 
 fig, axes = plt.subplots(figsize=(16,8), ncols=2)
