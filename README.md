@@ -9,6 +9,10 @@ Library with colormaps for C++. Quick start: `#include <cppcolormap.h>`, that's 
 >   Download: [.zip file](https://github.com/tdegeus/cppcolormap/zipball/master) | [.tar.gz file](https://github.com/tdegeus/cppcolormap/tarball/master).
 >   
 >   (c - [GPLv3](https://github.com/tdegeus/cppcolormap/blob/master/LICENSE)) T.W.J. de Geus (Tom) | tom@geus.me | www.geus.me | [github.com/tdegeus/cppcolormap](https://github.com/tdegeus/cppcolormap)
+>   
+>   Acknowledgement:
+>   
+>   *   Wolf Vollprecht
 
 # Contents
 
@@ -140,11 +144,14 @@ To find the closest match of each color of a colormap in another colormap you ca
 
 ```cpp
 xt::xtensor<size_t,1> idx = cppcolormap::match(cmap1, cmap2);
-
-// use weight factors for a better visual match
-xt::xtensor<size_t,1> idx = cppcolormap:match_visual(cmap1, cmap2);
+xt::xtensor<size_t,1> idx = cppcolormap::match(cmap1, cmap2, cppcolormap::metric::euclidean);
 ```
 
+As option the following metrics can be used:
+
+*   euclidean
+*   fast_perceptual
+*   perceptual
 
 # Available colormaps
 
@@ -199,6 +206,7 @@ xt::xtensor<size_t,1> idx = cppcolormap:match_visual(cmap1, cmap2);
 *   inferno
 *   plasma
 *   viridis
+*   jet
 
 >   Copyright (c)  New matplotlib colormaps by Nathaniel J. Smith, Stefan van der Walt, and 
 >   in the case of viridis) Eric Firing.

@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy             as np
 
 cmap    = cm.Reds()
-
 m_cmap  = mpl.colors.ListedColormap(cmap, name='Reds', N=cmap.shape[0])
 
 xterm   = cm.xterm()

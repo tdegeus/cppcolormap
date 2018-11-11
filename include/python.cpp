@@ -90,6 +90,7 @@ m.def("magma"  , &cppcolormap::magma  , "magma   - matplotlib", py::arg("N")=256
 m.def("inferno", &cppcolormap::inferno, "inferno - matplotlib", py::arg("N")=256);
 m.def("plasma" , &cppcolormap::plasma , "plasma  - matplotlib", py::arg("N")=256);
 m.def("viridis", &cppcolormap::viridis, "viridis - matplotlib", py::arg("N")=256);
+m.def("jet"    , &cppcolormap::jet    , "jet     - matplotlib", py::arg("N")=256);
 
 // -------------------------------------------------------------------------------------------------
 
@@ -97,6 +98,7 @@ m.def("magma_r"  , &cppcolormap::magma_r  , "magma_r   - matplotlib", py::arg("N
 m.def("inferno_r", &cppcolormap::inferno_r, "inferno_r - matplotlib", py::arg("N")=256);
 m.def("plasma_r" , &cppcolormap::plasma_r , "plasma_r  - matplotlib", py::arg("N")=256);
 m.def("viridis_r", &cppcolormap::viridis_r, "viridis_r - matplotlib", py::arg("N")=256);
+m.def("jet_r"    , &cppcolormap::jet_r    , "jet_r     - matplotlib", py::arg("N")=256);
 
 // -------------------------------------------------------------------------------------------------
 
@@ -108,12 +110,12 @@ m.def("Blue" , &cppcolormap::Blue , "Blue" , py::arg("N")=1);
 
 // -------------------------------------------------------------------------------------------------
 
-m.def("xterm"        ,&cppcolormap::xterm        ,"xterm"                );
-m.def("tue"          ,&cppcolormap::tue          ,"tue          - tue.nl");
-m.def("tuewarmred"   ,&cppcolormap::tuewarmred   ,"tuewarmred   - tue.nl");
-m.def("tuedarkblue"  ,&cppcolormap::tuedarkblue  ,"tuedarkblue  - tue.nl");
-m.def("tueblue"      ,&cppcolormap::tueblue      ,"tueblue      - tue.nl");
-m.def("tuelightblue" ,&cppcolormap::tuelightblue ,"tuelightblue - tue.nl");
+m.def("xterm"       , &cppcolormap::xterm        ,"xterm"                );
+m.def("tue"         , &cppcolormap::tue          ,"tue          - tue.nl");
+m.def("tuewarmred"  , &cppcolormap::tuewarmred   ,"tuewarmred   - tue.nl");
+m.def("tuedarkblue" , &cppcolormap::tuedarkblue  ,"tuedarkblue  - tue.nl");
+m.def("tueblue"     , &cppcolormap::tueblue      ,"tueblue      - tue.nl");
+m.def("tuelightblue", &cppcolormap::tuelightblue ,"tuelightblue - tue.nl");
 
 // -------------------------------------------------------------------------------------------------
 
@@ -123,12 +125,12 @@ m.def("colormap"  ,&cppcolormap::colormap  ,"Colormap by name"   ,py::arg("cmap"
 // -------------------------------------------------------------------------------------------------
 
 py::enum_<cppcolormap::metric>(m, "DistanceMetric", "Distance metric for color matching")
-    .value("euclidean",	      cppcolormap::metric::euclidean)
+    .value("euclidean"      , cppcolormap::metric::euclidean      )
     .value("fast_perceptual", cppcolormap::metric::fast_perceptual)
-    .value("perceptual",      cppcolormap::metric::perceptual)
+    .value("perceptual"     , cppcolormap::metric::perceptual     )
     .export_values();
 
-m.def("match"       , &cppcolormap::match       );
+m.def("match", &cppcolormap::match);
 
 // -------------------------------------------------------------------------------------------------
 
