@@ -2592,13 +2592,21 @@ inline xt::xtensor<double,2> tuelightblue()
 
 // -------------------------------------------------------------------------------------------------
 
+inline xt::xtensor<double,2> xterm_r() { return xt::flip(xterm(), 0); }
+inline xt::xtensor<double,2> tue_r()   { return xt::flip(tue()  , 0); }
+
+// -------------------------------------------------------------------------------------------------
+
 inline xt::xtensor<double,2> colorcycle(const std::string &cmap)
 {
+  if ( cmap == "xterm"        ) { return xterm       (); }
   if ( cmap == "tue"          ) { return tue         (); }
   if ( cmap == "tuewarmred"   ) { return tuewarmred  (); }
   if ( cmap == "tuedarkblue"  ) { return tuedarkblue (); }
   if ( cmap == "tueblue"      ) { return tueblue     (); }
   if ( cmap == "tuelightblue" ) { return tuelightblue(); }
+  if ( cmap == "xterm_r"      ) { return xterm_r     (); }
+  if ( cmap == "tue_r"        ) { return tue_r       (); }
 
   throw std::runtime_error("Color-cycle not recognized");
 }

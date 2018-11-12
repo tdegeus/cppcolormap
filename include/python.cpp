@@ -110,12 +110,17 @@ m.def("Blue" , &cppcolormap::Blue , "Blue" , py::arg("N")=1);
 
 // -------------------------------------------------------------------------------------------------
 
-m.def("xterm"       , &cppcolormap::xterm        ,"xterm"                );
-m.def("tue"         , &cppcolormap::tue          ,"tue          - tue.nl");
-m.def("tuewarmred"  , &cppcolormap::tuewarmred   ,"tuewarmred   - tue.nl");
-m.def("tuedarkblue" , &cppcolormap::tuedarkblue  ,"tuedarkblue  - tue.nl");
-m.def("tueblue"     , &cppcolormap::tueblue      ,"tueblue      - tue.nl");
-m.def("tuelightblue", &cppcolormap::tuelightblue ,"tuelightblue - tue.nl");
+m.def("xterm"       , &cppcolormap::xterm       , "xterm"                );
+m.def("tue"         , &cppcolormap::tue         , "tue          - tue.nl");
+m.def("tuewarmred"  , &cppcolormap::tuewarmred  , "tuewarmred   - tue.nl");
+m.def("tuedarkblue" , &cppcolormap::tuedarkblue , "tuedarkblue  - tue.nl");
+m.def("tueblue"     , &cppcolormap::tueblue     , "tueblue      - tue.nl");
+m.def("tuelightblue", &cppcolormap::tuelightblue, "tuelightblue - tue.nl");
+
+// -------------------------------------------------------------------------------------------------
+
+m.def("xterm_r", &cppcolormap::xterm_r, "xterm_r"       );
+m.def("tue_r"  , &cppcolormap::tue_r  , "tue_r - tue.nl");
 
 // -------------------------------------------------------------------------------------------------
 

@@ -10,7 +10,7 @@ Library with colormaps for C++. Quick start: `#include <cppcolormap.h>`, that's 
 >   
 >   (c - [GPLv3](https://github.com/tdegeus/cppcolormap/blob/master/LICENSE)) T.W.J. de Geus (Tom) | tom@geus.me | www.geus.me | [github.com/tdegeus/cppcolormap](https://github.com/tdegeus/cppcolormap)
 >   
->   Acknowledgement:
+>   **Acknowledgement**
 >   
 >   *   Wolf Vollprecht
 
@@ -64,7 +64,7 @@ The main interface is with two functions:
 ```cpp
 #include <cppcolormap.h>
 
-int main ()
+int main()
 {
     std::cout << cppcolormap::colormap("Reds")  << std::endl;
     std::cout << cppcolormap::colorcycle("tue") << std::endl;
@@ -80,7 +80,7 @@ The colormaps are stored as a matrix whereby each row contains the (R,G,B) color
 ```cpp
 #include <cppcolormap.h>
 
-int main ()
+int main()
 {
     std::cout << cppcolormap::colormap("Reds", 256)  << std::endl;
 
@@ -93,10 +93,11 @@ Note that the colorcycles are not interpolatable. Consequently the functions do 
 ```cpp
 #include <cppcolormap.h>
 
-int main ()
+int main()
 {
-    std::cout << cppcolormap::Reds() << std::endl;
-    std::cout << cppcolormap::tue()  << std::endl;
+    std::cout << cppcolormap::Reds()    << std::endl;
+    std::cout << cppcolormap::Reds(256) << std::endl;
+    std::cout << cppcolormap::tue()     << std::endl;
 
     return 0;
 }
@@ -163,52 +164,48 @@ idx = cm.match(cmap1, cmap2)
 idx = cm.match(cmap1, cmap2, cm.DistanceMetric.perceptual)
 ```
 
-The following metrics can be used:
-
-*   euclidean (default) 
-*   fast_perceptual
-*   perceptual
+(See metrics above.)
 
 # Available colormaps
 
-> Note that each colormap can be flipped by appending the name by "_r"
-
 ## ColorBrewer
 
-*   Accent
-*   Dark2
-*   Paired
-*   Spectral
-*   Pastel1
-*   Pastel2
-*   Set1
-*   Set2
-*   Set3
-*   Blues
-*   Greens
-*   Greys
-*   Oranges
-*   Purples
-*   Reds
-*   BuPu
-*   GnBu
-*   PuBu
-*   PuBuGn
-*   PuRd
-*   RdPu
-*   OrRd
-*   RdOrYl
-*   YlGn
-*   YlGnBu
-*   YlOrRd
-*   BrBG
-*   PuOr
-*   RdBu
-*   RdGy
-*   RdYlBu
-*   RdYlGn
-*   PiYG
-*   PRGn
+| Name     | Inverse colormap |
+|----------|------------------|
+| Accent   | Accent_r         |
+| Dark2    | Dark2_r          |
+| Paired   | Paired_r         |
+| Spectral | Spectral_r       |
+| Pastel1  | Pastel1_r        |
+| Pastel2  | Pastel2_r        |
+| Set1     | Set1_r           |
+| Set2     | Set2_r           |
+| Set3     | Set3_r           |
+| Blues    | Blues_r          |
+| Greens   | Greens_r         |
+| Greys    | Greys_r          |
+| Oranges  | Oranges_r        |
+| Purples  | Purples_r        |
+| Reds     | Reds_r           |
+| BuPu     | BuPu_r           |
+| GnBu     | GnBu_r           |
+| PuBu     | PuBu_r           |
+| PuBuGn   | PuBuGn_r         |
+| PuRd     | PuRd_r           |
+| RdPu     | RdPu_r           |
+| OrRd     | OrRd_r           |
+| RdOrYl   | RdOrYl_r         |
+| YlGn     | YlGn_r           |
+| YlGnBu   | YlGnBu_r         |
+| YlOrRd   | YlOrRd_r         |
+| BrBG     | BrBG_r           |
+| PuOr     | PuOr_r           |
+| RdBu     | RdBu_r           |
+| RdGy     | RdGy_r           |
+| RdYlBu   | RdYlBu_r         |
+| RdYlGn   | RdYlGn_r         |
+| PiYG     | PiYG_r           |
+| PRGn     | PRGn_r           |
 
 >   Copyright (c) 2002 Cynthia Brewer, Mark Harrower, and The Pennsylvania State University.
 >   
@@ -218,11 +215,13 @@ The following metrics can be used:
 
 # Matplotlib
 
-*   magma
-*   inferno
-*   plasma
-*   viridis
-*   jet
+| Name     | Inverse colormap |
+|----------|------------------|
+| magma    | magma_r          |
+| inferno  | inferno_r        |
+| plasma   | plasma_r         |
+| viridis  | viridis_r        |
+| jet      | jet_r            |
 
 >   Copyright (c)  New matplotlib colormaps by Nathaniel J. Smith, Stefan van der Walt, and 
 >   in the case of viridis) Eric Firing.
@@ -233,26 +232,33 @@ The following metrics can be used:
 
 # Monochromatic colormaps
 
-*   White
-*   Grey
-*   Black
-*   Red
-*   Blue
+| Name     | Inverse colormap |
+|----------|------------------|
+| White    | -                |    
+| Grey     | -                |   
+| Black    | -                |    
+| Red      | -                |  
+| Blue     | -                |   
 
 # Available color-cycles
 
 ## Xterm
 
-See [this site](https://jonasjacek.github.io/colors/)
+| Name     | Inverse colormap |
+|----------|------------------|
+| xterm    | xterm_r          |
 
-*   xterm
+>   See [this site](https://jonasjacek.github.io/colors/)
 
 ## Eindhoven University of Technology
 
-The following colors and color-cycles are based on the corporate color scheme of the [Eindhoven University of Technology](http://www.tue.nl).
+| Name         | Inverse colormap |
+|--------------|------------------|
+| tue          | tue_r            |
+| tuedarkblue  | -                |           
+| tueblue      | -                |       
+| tuelightblue | -                |            
+| tuewarmred   | -                |          
 
-*   tue
-*   tuedarkblue
-*   tueblue
-*   tuelightblue
-*   tuewarmred
+>   Based on the corporate color scheme of the 
+>   [Eindhoven University of Technology](http://www.tue.nl).
