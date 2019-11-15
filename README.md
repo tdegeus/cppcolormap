@@ -26,6 +26,7 @@ Library with colormaps for C++. Quick start: `#include <cppcolormap.h>`, that's 
     - [Installation](#installation-1)
     - [Usage](#usage-1)
     - [Find match](#find-match-1)
+    - [Example](#example)
 - [Available colormaps](#available-colormaps)
     - [ColorBrewer](#colorbrewer)
 - [Matplotlib](#matplotlib)
@@ -165,6 +166,32 @@ idx = cm.match(cmap1, cmap2, cm.DistanceMetric.perceptual)
 ```
 
 (See metrics above.)
+
+## Example
+
+```python
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import cppcolormap as cm
+
+x, y = np.meshgrid(
+  np.linspace(0, 1, 100), 
+  np.linspace(0, 1, 100))
+
+d = np.sqrt(x**2 + y**2)
+
+C = cm.Reds(256)
+C = np.c_[C, np.ones(C.shape[0])]
+
+cmap = matplotlib.colors.LinearSegmentedColormap.from_list('my_colormap', C)
+
+fig, ax = plt.subplots()
+
+cax = ax.imshow(d, cmap=cmap)
+
+plt.show()
+```
 
 # Available colormaps
 
