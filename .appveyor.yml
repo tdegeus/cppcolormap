@@ -47,9 +47,10 @@ install:
   - python setup.py install
 
 build_script:
-  # Compile and run C++ example
-  - cmake -G "NMake Makefiles" examples\cpp
-  - nmake
-  - .\match
   # Run Python example
   - python examples\python\match.py
+  # Compile and run C++ example
+  - cd examples\cpp
+  - cmake -G "NMake Makefiles" .
+  - nmake
+  - .\match

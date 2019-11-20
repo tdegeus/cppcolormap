@@ -92,10 +92,11 @@ install:
     - python setup.py build
     - python setup.py install
 script:
-    # Compile and run C++ example
-    - cmake examples/cpp
-    - make
-    - ./match
     # Run Python example
     - python examples/python/match.py
+    # Compile and run C++ example
+    - cd examples/cpp
+    - cmake .
+    - make
+    - ./match
 
