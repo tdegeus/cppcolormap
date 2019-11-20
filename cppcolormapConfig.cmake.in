@@ -1,4 +1,13 @@
-set(CPPCOLORMAP_FOUND 1)
+# cppcolormap cmake module
+# This module sets the following variables:
+#
+#   cppcolormap_FOUND - true if cppcolormap found
+#   cppcolormap_INCLUDE_DIRS - the directory containing cppcolormap headers
+#   cppcolormap_LIBRARY - empty
 
-set(CPPCOLORMAP_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(CPPCOLORMAP_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
+@PACKAGE_INIT@
+
+if(NOT TARGET @PROJECT_NAME@)
+  include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+  get_target_property(@PROJECT_NAME@_INCLUDE_DIRS @PROJECT_NAME@ INTERFACE_INCLUDE_DIRECTORIES)
+endif()

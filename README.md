@@ -1,10 +1,11 @@
 # cppcolormap
 
-Library with colormaps for C++. Quick start: `#include <cppcolormap.h>`, that's about it. Note that the library depends on [xtensor](http://xtensor.readthedocs.io). Its installation and use are equally straightforward.
+[![Travis](https://travis-ci.org/tdegeus/cppcolormap.svg?branch=master)](https://travis-ci.org/tdegeus/cppcolormap)
+[![Appveyor](https://ci.appveyor.com/api/projects/status/lmrkifr8q9vledv5?svg=true)](https://ci.appveyor.com/project/tdegeus/cppcolormap)
 
 >   **Disclaimer**
 >   
->   This library is free to use under the [GPLv3 license](https://github.com/tdegeus/cppcolormap/blob/master/LICENSE). Any additions are very much appreciated, in terms of suggested functionality, code, documentation, testimonials, word of mouth advertisement, .... Bug reports or feature requests can be filed on [GitHub](https://github.com/tdegeus/cppcolormap). As always, the code comes with no guarantee. None of the developers can be held responsible for possible mistakes.
+>   This library is free to use under the [GPLv3 license](https://github.com/tdegeus/cppcolormap/blob/master/LICENSE). Any additions are very much appreciated, in terms of suggested functionality, code, documentation, testimonials, word-of-mouth advertisement, etc. Bug reports or feature requests can be filed on [GitHub](https://github.com/tdegeus/cppcolormap). As always, the code comes with no guarantee. None of the developers can be held responsible for possible mistakes.
 >   
 >   Download: [.zip file](https://github.com/tdegeus/cppcolormap/zipball/master) | [.tar.gz file](https://github.com/tdegeus/cppcolormap/tarball/master).
 >   
@@ -18,12 +19,19 @@ Library with colormaps for C++. Quick start: `#include <cppcolormap.h>`, that's 
 
 <!-- MarkdownTOC -->
 
+- [Introduction](#introduction)
 - [Usage from C++](#usage-from-c)
-    - [Installation](#installation)
+    - [Getting cppcolormap](#getting-cppcolormap)
+        - [Using conda](#using-conda)
+        - [From source](#from-source)
     - [Usage](#usage)
     - [Find match](#find-match)
+    - [Compiling](#compiling)
+        - [Using `CMakeLists.txt`](#using-cmakeliststxt)
 - [Usage from Python](#usage-from-python)
-    - [Installation](#installation-1)
+    - [Getting cppcolormap](#getting-cppcolormap-1)
+        - [Using conda](#using-conda-1)
+        - [From source](#from-source-1)
     - [Usage](#usage-1)
     - [Find match](#find-match-1)
     - [Example](#example)
@@ -37,37 +45,42 @@ Library with colormaps for C++. Quick start: `#include <cppcolormap.h>`, that's 
 
 <!-- /MarkdownTOC -->
 
+# Introduction
+
+Library with colormaps for C++/Python. 
+
 # Usage from C++
 
-## Installation
+## Getting cppcolormap
 
-The library is header only. This means that one has to only include the header-file `cppcolormap.h`. Really, that's it! 
+### Using conda
 
-To be able to set the include path semi-automatic, one can choose to 'install' cppcolormap. To do this using CMake:
+```bash
+conda install -c conda-forge cppcolormap
+```
 
-1.  Proceed to a (temporary) build directory. For example
+### From source
 
-    ```bash
-    $ cd /path/to/cppcolormap/build
-    ```
+```bash
+# Download cppcolormap
+git checkout https://github.com/tdegeus/cppcolormap.git
+cd cppcolormap
 
-2.  'Build' cppcolormap
-
-    ```bash
-    $ cmake ..
-    $ make install
-    ```
+# For CMake or pkg-config use
+cmake .
+make install
+```
 
 ## Usage
 
-The main interface is with two functions:
+The principle interface is with these two functions:
 
 ```cpp
 #include <cppcolormap.h>
 
 int main()
 {
-    std::cout << cppcolormap::colormap("Reds")  << std::endl;
+    std::cout << cppcolormap::colormap("Reds") << std::endl;
     std::cout << cppcolormap::colorcycle("tue") << std::endl;
 
     return 0;
@@ -83,7 +96,7 @@ The colormaps are stored as a matrix whereby each row contains the (R,G,B) color
 
 int main()
 {
-    std::cout << cppcolormap::colormap("Reds", 256)  << std::endl;
+    std::cout << cppcolormap::colormap("Reds", 256) << std::endl;
 
     return 0;
 }
@@ -96,9 +109,9 @@ Note that the colorcycles are not interpolatable. Consequently the functions do 
 
 int main()
 {
-    std::cout << cppcolormap::Reds()    << std::endl;
+    std::cout << cppcolormap::Reds() << std::endl;
     std::cout << cppcolormap::Reds(256) << std::endl;
-    std::cout << cppcolormap::tue()     << std::endl;
+    std::cout << cppcolormap::tue() << std::endl;
 
     return 0;
 }
@@ -119,25 +132,63 @@ The following metrics can be used:
 *   fast_perceptual
 *   perceptual
 
-# Usage from Python
+## Compiling
 
-## Installation
+### Using `CMakeLists.txt`
 
-Clone the repository and then run:
+Using *cppcolormap* the `CMakeLists.txt` can be as follows
+
+```cmake
+cmake_minimum_required(VERSION 3.1)
+
+project(example)
+
+find_package(xtl REQUIRED)
+find_package(xtensor REQUIRED)
+find_package(cppcolormap REQUIRED)
+
+add_executable(example example.cpp)
+
+target_link_libraries(example
+    PRIVATE
+    xtensor
+    cppcolormap)
+```
+
+[download "CMakeLists.txt"](./example/CMakeLists.txt)
+
+Compilation can then proceed using 
 
 ```bash
-# if you are using Python 2.x
+cmake .
+make
+```
+
+# Usage from Python
+
+## Getting cppcolormap
+
+### Using conda
+
+```bash
+conda install -c conda-forge cppcolormap
+```
+
+### From source
+
+```bash
+# Download cppcolormap
+git checkout https://github.com/tdegeus/cppcolormap.git
+cd cppcolormap
+
+# Compile & build
 python setup.py build
 python setup.py install
-
-# if you are using Python 3.x
-python3 setup.py build
-python3 setup.py install
 ```
 
 ## Usage
 
-There are two functions, each returns a 2-d NumPy array:
+There are two principle functions, each returns a 2-d NumPy array:
 
 ```python
 import cppcolormap as cm
@@ -146,8 +197,8 @@ import cppcolormap as cm
 N = 256
 
 # specify the colormap as string
-cols = cm.colormap("Reds",N)
-cols = cm.colorcycle("tue",N)
+cols = cm.colormap("Reds", N)
+cols = cm.colorcycle("tue", N)
 
 # or call the functions directly
 cols = cm.Reds(N)
@@ -162,7 +213,7 @@ To find the closest match of each color of a colormap in another colormap you ca
 
 ```cpp
 idx = cm.match(cmap1, cmap2)
-idx = cm.match(cmap1, cmap2, cm.DistanceMetric.perceptual)
+idx = cm.match(cmap1, cmap2, cm.metric.perceptual)
 ```
 
 (See metrics above.)
