@@ -65,7 +65,7 @@ set(CPPCOLORMAP_CMAKECONFIG_INSTALL_DIR
     STRING "install path for ${PROJECT_NAME}Config.cmake")
 
 configure_package_config_file(
-    "CPPCOLORMAPConfig.cmake.in"
+    "cppcolormapConfig.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
     INSTALL_DESTINATION ${CPPCOLORMAP_CMAKECONFIG_INSTALL_DIR})
 
