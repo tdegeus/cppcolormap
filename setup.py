@@ -2,6 +2,7 @@
 from setuptools import setup, Extension
 
 import re
+import os
 import pybind11
 import pyxtensor
 
@@ -17,6 +18,7 @@ ext_modules = [
     'cppcolormap',
     ['python/main.cpp'],
     include_dirs=[
+      os.path.abspath('include/'),
       pybind11.get_include(False),
       pybind11.get_include(True),
       pyxtensor.get_include(False),
