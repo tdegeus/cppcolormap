@@ -1,7 +1,6 @@
 
 #include <pyxtensor/pyxtensor.hpp>
-
-#include "cppcolormap.h"
+#include <cppcolormap.h>
 
 // -------------------------------------------------------------------------------------------------
 
