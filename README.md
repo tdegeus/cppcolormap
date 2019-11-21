@@ -17,28 +17,23 @@
 
 # Contents
 
-<!-- MarkdownTOC -->
+<!-- MarkdownTOC levels="1,2" -->
 
 - [Introduction](#introduction)
 - [Usage from C++](#usage-from-c)
     - [Getting cppcolormap](#getting-cppcolormap)
-        - [Using conda](#using-conda)
-        - [From source](#from-source)
     - [Usage](#usage)
     - [Find match](#find-match)
     - [Compiling](#compiling)
-        - [Using `CMakeLists.txt`](#using-cmakeliststxt)
 - [Usage from Python](#usage-from-python)
     - [Getting cppcolormap](#getting-cppcolormap-1)
-        - [Using conda](#using-conda-1)
-        - [From source](#from-source-1)
     - [Usage](#usage-1)
     - [Find match](#find-match-1)
     - [Example](#example)
 - [Available colormaps](#available-colormaps)
     - [ColorBrewer](#colorbrewer)
-- [Matplotlib](#matplotlib)
-- [Monochromatic colormaps](#monochromatic-colormaps)
+    - [Matplotlib](#matplotlib)
+    - [Monochromatic colormaps](#monochromatic-colormaps)
 - [Available color-cycles](#available-color-cycles)
     - [Xterm](#xterm)
     - [Eindhoven University of Technology](#eindhoven-university-of-technology)
@@ -292,7 +287,7 @@ plt.show()
 >   
 >   [colorbrewer2.org](http://colorbrewer2.org)
 
-# Matplotlib
+## Matplotlib
 
 | Name     | Inverse colormap |
 |----------|------------------|
@@ -309,7 +304,7 @@ plt.show()
 >   
 >   [GitHub](https://github.com/BIDS/colormap)
 
-# Monochromatic colormaps
+## Monochromatic colormaps
 
 | Name     | Inverse colormap |
 |----------|------------------|
