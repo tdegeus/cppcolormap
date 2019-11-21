@@ -85,7 +85,6 @@ install:
     - conda install cmake -c conda-forge
     - conda install xtensor -c conda-forge
     - conda install pyxtensor -c conda-forge
-    - conda install pybind11 -c conda-forge
     # Install library
     - cmake .
     - sudo make install
