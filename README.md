@@ -42,6 +42,7 @@
 - [Available color-cycles](#available-color-cycles)
     - [Xterm](#xterm)
     - [Eindhoven University of Technology](#eindhoven-university-of-technology)
+- [Create a new release](#create-a-new-release)
 
 <!-- /MarkdownTOC -->
 
@@ -340,3 +341,12 @@ plt.show()
 
 >   Based on the corporate color scheme of the 
 >   [Eindhoven University of Technology](http://www.tue.nl).
+
+# Create a new release
+
+1.  Update the version number in `include/cppcolormap.h`. 
+
+2.  Upload the changes to GitHub and create a new release there (with the correct version number).
+
+3.  Update the package at [conda-forge](https://github.com/conda-forge/pyxtensor-feedstock).
+
