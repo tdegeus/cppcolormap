@@ -348,5 +348,5 @@ plt.show()
 
 2.  Upload the changes to GitHub and create a new release there (with the correct version number).
 
-3.  Update the package at [conda-forge](https://github.com/conda-forge/pyxtensor-feedstock).
+3.  Update the package at [conda-forge](https://github.com/conda-forge/pdfcombine-feedstock).
 
