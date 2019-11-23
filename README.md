@@ -315,7 +315,7 @@ plt.show()
 >   Copyright (c)  New matplotlib colormaps by Nathaniel J. Smith, Stefan van der Walt, and 
 >   in the case of viridis) Eric Firing.
 >   
->   Licensed under the under the CC0 license / public domain dedication.
+>   Licensed under the CC0 license / public domain dedication.
 >   
 >   [GitHub](https://github.com/BIDS/colormap)
 
