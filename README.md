@@ -130,6 +130,22 @@ The following metrics can be used:
 
 ## Compiling
 
+### By hand
+
+Presuming that the compiler is `c++`, compile using:
+
+```
+c++ -I/path/to/cppcolormap/include ...
+```
+
+### Using pkg-config
+
+Presuming that the compiler is `c++`, compile using:
+
+```
+c++ `pkg-config --cflags cppcolormap` ...
+```
+
 ### Using `CMakeLists.txt`
 
 Using *cppcolormap* the `CMakeLists.txt` can be as follows
@@ -139,7 +155,6 @@ cmake_minimum_required(VERSION 3.1)
 
 project(example)
 
-find_package(xtl REQUIRED)
 find_package(xtensor REQUIRED)
 find_package(cppcolormap REQUIRED)
 

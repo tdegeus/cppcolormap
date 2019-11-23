@@ -13,7 +13,7 @@ image:
 
 environment:
   matrix:
-    - MINICONDA: C:\pyxtensor-conda
+    - MINICONDA: C:\myname-conda
 
 init:
   - "ECHO %MINICONDA%"
@@ -24,7 +24,7 @@ init:
   - "%VCVARPATH% %VCARGUMENT%"
   - ps: if($env:Platform -eq "x64"){Start-FileDownload 'http://repo.continuum.io/miniconda/Miniconda3-latest-Windows-x86_64.exe' C:\Miniconda.exe; echo "Done"}
   - ps: if($env:Platform -eq "x86"){Start-FileDownload 'http://repo.continuum.io/miniconda/Miniconda3-latest-Windows-x86.exe' C:\Miniconda.exe; echo "Done"}
-  - cmd: C:\Miniconda.exe /S /D=C:\pyxtensor-conda
+  - cmd: C:\Miniconda.exe /S /D=C:\myname-conda
   - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%MINICONDA%\\Library\\bin;%PATH%"
 
 install:
