@@ -2,6 +2,7 @@
 
 [![Travis](https://travis-ci.org/tdegeus/cppcolormap.svg?branch=master)](https://travis-ci.org/tdegeus/cppcolormap)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/lmrkifr8q9vledv5?svg=true)](https://ci.appveyor.com/project/tdegeus/cppcolormap)
+![Conda Version](https://img.shields.io/conda/vn/conda-forge/cppcolormap.svg)
 
 >   **Disclaimer**
 >   
@@ -17,31 +18,27 @@
 
 # Contents
 
-<!-- MarkdownTOC -->
+<!-- MarkdownTOC levels="1,2" -->
 
 - [Introduction](#introduction)
 - [Usage from C++](#usage-from-c)
     - [Getting cppcolormap](#getting-cppcolormap)
-        - [Using conda](#using-conda)
-        - [From source](#from-source)
     - [Usage](#usage)
     - [Find match](#find-match)
     - [Compiling](#compiling)
-        - [Using `CMakeLists.txt`](#using-cmakeliststxt)
 - [Usage from Python](#usage-from-python)
     - [Getting cppcolormap](#getting-cppcolormap-1)
-        - [Using conda](#using-conda-1)
-        - [From source](#from-source-1)
     - [Usage](#usage-1)
     - [Find match](#find-match-1)
     - [Example](#example)
 - [Available colormaps](#available-colormaps)
     - [ColorBrewer](#colorbrewer)
-- [Matplotlib](#matplotlib)
-- [Monochromatic colormaps](#monochromatic-colormaps)
+    - [Matplotlib](#matplotlib)
+    - [Monochromatic colormaps](#monochromatic-colormaps)
 - [Available color-cycles](#available-color-cycles)
     - [Xterm](#xterm)
     - [Eindhoven University of Technology](#eindhoven-university-of-technology)
+- [Create a new release](#create-a-new-release)
 
 <!-- /MarkdownTOC -->
 
@@ -134,6 +131,22 @@ The following metrics can be used:
 
 ## Compiling
 
+### By hand
+
+Presuming that the compiler is `c++`, compile using:
+
+```
+c++ -I/path/to/cppcolormap/include ...
+```
+
+### Using pkg-config
+
+Presuming that the compiler is `c++`, compile using:
+
+```
+c++ `pkg-config --cflags cppcolormap` ...
+```
+
 ### Using `CMakeLists.txt`
 
 Using *cppcolormap* the `CMakeLists.txt` can be as follows
@@ -143,7 +156,6 @@ cmake_minimum_required(VERSION 3.1)
 
 project(example)
 
-find_package(xtl REQUIRED)
 find_package(xtensor REQUIRED)
 find_package(cppcolormap REQUIRED)
 
@@ -291,7 +303,7 @@ plt.show()
 >   
 >   [colorbrewer2.org](http://colorbrewer2.org)
 
-# Matplotlib
+## Matplotlib
 
 | Name     | Inverse colormap |
 |----------|------------------|
@@ -304,11 +316,11 @@ plt.show()
 >   Copyright (c)  New matplotlib colormaps by Nathaniel J. Smith, Stefan van der Walt, and 
 >   in the case of viridis) Eric Firing.
 >   
->   Licensed under the under the CC0 license / public domain dedication.
+>   Licensed under the CC0 license / public domain dedication.
 >   
 >   [GitHub](https://github.com/BIDS/colormap)
 
-# Monochromatic colormaps
+## Monochromatic colormaps
 
 | Name     | Inverse colormap |
 |----------|------------------|
@@ -340,3 +352,12 @@ plt.show()
 
 >   Based on the corporate color scheme of the 
 >   [Eindhoven University of Technology](http://www.tue.nl).
+
+# Create a new release
+
+1.  Update the version number in `include/cppcolormap.h`. 
+
+2.  Upload the changes to GitHub and create a new release there (with the correct version number).
+
+3.  Update the package at [conda-forge](https://github.com/conda-forge/pdfcombine-feedstock).
+
