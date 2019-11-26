@@ -2,7 +2,8 @@
 
 [![Travis](https://travis-ci.org/tdegeus/cppcolormap.svg?branch=master)](https://travis-ci.org/tdegeus/cppcolormap)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/lmrkifr8q9vledv5?svg=true)](https://ci.appveyor.com/project/tdegeus/cppcolormap)
-![Conda Version](https://img.shields.io/conda/vn/conda-forge/cppcolormap.svg)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/cppcolormap.svg)](https://anaconda.org/conda-forge/cppcolormap)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/python-cppcolormap.svg)](https://anaconda.org/conda-forge/python-cppcolormap)
 
 >   **Disclaimer**
 >   
@@ -183,7 +184,7 @@ make
 ### Using conda
 
 ```bash
-conda install -c conda-forge cppcolormap
+conda install -c conda-forge python-cppcolormap
 ```
 
 ### From source
