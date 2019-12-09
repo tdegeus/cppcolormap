@@ -2,6 +2,6 @@ prefix=@CMAKE_INSTALL_PREFIX@
 includedir=${prefix}/include
 
 Name: @PROJECT_NAME@
-Description: colormaps for C++
-Version: @PCPPCOLORMAP_VERSION@
+Description: Colormaps for C++.
+Version: @CPPCOLORMAP_VERSION@
 Cflags: -I${includedir}

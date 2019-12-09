@@ -1,22 +1,20 @@
 
 cmake_minimum_required(VERSION 3.0)
 
-# Options
-# =======
+# Basic settings
+# ==============
 
 project(cppcolormap)
-
-# Internals
-# =========
-
-set(CPPCOLORMAP_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Version
 # =======
 
 file(
-    STRINGS "${CPPCOLORMAP_INCLUDE_DIR}/cppcolormap.h" cppcolormap_version_defines
-    REGEX "#define CPPCOLORMAP_VERSION_(MAJOR|MINOR|PATCH)")
+    STRINGS
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/cppcolormap.h"
+        cppcolormap_version_defines
+    REGEX
+        "#define CPPCOLORMAP_VERSION_(MAJOR|MINOR|PATCH)")
 
 foreach(ver ${cppcolormap_version_defines})
     if(ver MATCHES "#define CPPCOLORMAP_VERSION_(MAJOR|MINOR|PATCH) +([^ ]+)$")
@@ -29,18 +27,18 @@ set(CPPCOLORMAP_VERSION
 
 message(STATUS "Building cppcolormap v${CPPCOLORMAP_VERSION}")
 
-# Build
-# =====
+# Set target
+# ==========
 
-set(CPPCOLORMAP_HEADERS
-    ${CPPCOLORMAP_INCLUDE_DIR}/cppcolormap.h)
+find_package(xtensor REQUIRED)
 
-add_library(${PROJECT_NAME} INTERFACE)
+add_library(cppcolormap INTERFACE)
 
-target_include_directories(
-    ${PROJECT_NAME} INTERFACE
-    $<BUILD_INTERFACE:${CPPCOLORMAP_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include>)
+target_include_directories(cppcolormap INTERFACE
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+
+target_link_libraries(cppcolormap INTERFACE xtensor)
 
 # Installation
 # ============
@@ -49,53 +47,51 @@ include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
 install(
-    TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}-targets)
-
-export(
-    EXPORT ${PROJECT_NAME}-targets
-    FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
+    FILES
+        "include/cppcolormap.h"
+    DESTINATION
+        include)
 
 install(
-    FILES ${CPPCOLORMAP_HEADERS}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    TARGETS
+        cppcolormap
+    EXPORT
+        cppcolormap-targets)
 
-set(CPPCOLORMAP_CMAKECONFIG_INSTALL_DIR
-    "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE
-    STRING "install path for ${PROJECT_NAME}Config.cmake")
+install(
+    EXPORT
+        cppcolormap-targets
+    FILE
+        cppcolormapTargets.cmake
+    DESTINATION
+        "${CMAKE_INSTALL_LIBDIR}/cmake/cppcolormap")
 
-configure_package_config_file(
-    "cppcolormapConfig.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-    INSTALL_DESTINATION ${CPPCOLORMAP_CMAKECONFIG_INSTALL_DIR})
-
-set(_CPPCOLORMAP_CMAKE_SIZEOF_VOID_P ${CMAKE_SIZEOF_VOID_P})
-
+set(_CPPCOLORMAP ${CMAKE_SIZEOF_VOID_P})
 unset(CMAKE_SIZEOF_VOID_P)
 
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-    VERSION ${CPPCOLORMAP_VERSION}
-    COMPATIBILITY AnyNewerVersion)
+        "${CMAKE_CURRENT_BINARY_DIR}/cppcolormapConfigVersion.cmake"
+    VERSION
+        ${CPPCOLORMAP_VERSION}
+    COMPATIBILITY
+        AnyNewerVersion)
 
-set(CMAKE_SIZEOF_VOID_P ${_CPPCOLORMAP_CMAKE_SIZEOF_VOID_P})
+set(CMAKE_SIZEOF_VOID_P ${_CPPCOLORMAP})
 
 install(
     FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-    DESTINATION ${CPPCOLORMAP_CMAKECONFIG_INSTALL_DIR})
-
-install(
-    EXPORT ${PROJECT_NAME}-targets
-    FILE "${PROJECT_NAME}Targets.cmake"
-    DESTINATION ${CPPCOLORMAP_CMAKECONFIG_INSTALL_DIR})
+        cppcolormapConfig.cmake
+        "${CMAKE_CURRENT_BINARY_DIR}/cppcolormapConfigVersion.cmake"
+    DESTINATION
+        "${CMAKE_INSTALL_LIBDIR}/cmake/cppcolormap")
 
 configure_file(
     "cppcolormap.pc.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
+    "${CMAKE_CURRENT_BINARY_DIR}/cppcolormap.pc"
      @ONLY)
 
 install(
-    FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig/")
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/cppcolormap.pc"
+    DESTINATION
+        "${CMAKE_INSTALL_LIBDIR}/pkgconfig/")

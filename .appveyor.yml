@@ -42,8 +42,7 @@ install:
   - cmake -G "NMake Makefiles" -DCMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -DCMAKE_BUILD_TYPE=RELEASE .
   - nmake
   - nmake install
-  - python setup.py build
-  - python setup.py install
+  - python -m pip install .
 
 build_script:
   # Run Python example

@@ -13,8 +13,8 @@ m_xterm = mpl.colors.ListedColormap(xterm[idx,:], name='xterm', N=cmap.shape[0])
 fig, axes = plt.subplots(figsize=(16,8), ncols=2)
 
 x, y = np.meshgrid(
-  np.linspace(0, 99, 100),
-  np.linspace(0, 99, 100))
+    np.linspace(0, 99, 100),
+    np.linspace(0, 99, 100))
 
 z = (x - 50)**2.0 + (y - 50)**2.0
 
