@@ -7,7 +7,7 @@
 # In addition, it sets the following variables:
 #
 #   cppcolormap_FOUND - true if cppcolormap found
-#   cppcolormap_VERSION - the package's version
+#   cppcolormap_VERSION - cppcolormap's version
 #   cppcolormap_INCLUDE_DIRS - the directory containing cppcolormap headers
 
 include(CMakeFindDependencyMacro)
