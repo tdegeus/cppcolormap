@@ -66,12 +66,17 @@ install(
     DESTINATION
         "${CMAKE_INSTALL_LIBDIR}/cmake/cppcolormap")
 
+set(_CPPCOLORMAP ${CMAKE_SIZEOF_VOID_P})
+unset(CMAKE_SIZEOF_VOID_P)
+
 write_basic_package_version_file(
         "${CMAKE_CURRENT_BINARY_DIR}/cppcolormapConfigVersion.cmake"
     VERSION
         ${CPPCOLORMAP_VERSION}
     COMPATIBILITY
         AnyNewerVersion)
+
+set(CMAKE_SIZEOF_VOID_P ${_CPPCOLORMAP})
 
 install(
     FILES
