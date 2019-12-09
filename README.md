@@ -1,27 +1,18 @@
-# cppcolormap
 
 [![Travis](https://travis-ci.org/tdegeus/cppcolormap.svg?branch=master)](https://travis-ci.org/tdegeus/cppcolormap)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/lmrkifr8q9vledv5?svg=true)](https://ci.appveyor.com/project/tdegeus/cppcolormap)
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/cppcolormap.svg)](https://anaconda.org/conda-forge/cppcolormap)
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/python-cppcolormap.svg)](https://anaconda.org/conda-forge/python-cppcolormap)
 
->   **Disclaimer**
->   
->   This library is free to use under the [GPLv3 license](https://github.com/tdegeus/cppcolormap/blob/master/LICENSE). Any additions are very much appreciated, in terms of suggested functionality, code, documentation, testimonials, word-of-mouth advertisement, etc. Bug reports or feature requests can be filed on [GitHub](https://github.com/tdegeus/cppcolormap). As always, the code comes with no guarantee. None of the developers can be held responsible for possible mistakes.
->   
->   Download: [.zip file](https://github.com/tdegeus/cppcolormap/zipball/master) | [.tar.gz file](https://github.com/tdegeus/cppcolormap/tarball/master).
->   
->   (c - [GPLv3](https://github.com/tdegeus/cppcolormap/blob/master/LICENSE)) T.W.J. de Geus (Tom) | tom@geus.me | www.geus.me | [github.com/tdegeus/cppcolormap](https://github.com/tdegeus/cppcolormap)
->   
->   **Acknowledgement**
->   
->   *   Wolf Vollprecht
+# cppcolormap
+
+C++ and Python library specifying colormaps. 
 
 # Contents
 
 <!-- MarkdownTOC levels="1,2" -->
 
-- [Introduction](#introduction)
+- [Disclaimer](#disclaimer)
 - [Usage from C++](#usage-from-c)
     - [Getting cppcolormap](#getting-cppcolormap)
     - [Usage](#usage)
@@ -39,13 +30,20 @@
 - [Available color-cycles](#available-color-cycles)
     - [Xterm](#xterm)
     - [Eindhoven University of Technology](#eindhoven-university-of-technology)
-- [Create a new release](#create-a-new-release)
 
 <!-- /MarkdownTOC -->
 
-# Introduction
+# Disclaimer
 
-Library with colormaps for C++/Python. 
+This library is free to use under the [GPLv3 license](https://github.com/tdegeus/cppcolormap/blob/master/LICENSE). Any additions are very much appreciated, in terms of suggested functionality, code, documentation, testimonials, word-of-mouth advertisement, etc. Bug reports or feature requests can be filed on [GitHub](https://github.com/tdegeus/cppcolormap). As always, the code comes with no guarantee. None of the developers can be held responsible for possible mistakes.
+
+Download: [.zip file](https://github.com/tdegeus/cppcolormap/zipball/master) | [.tar.gz file](https://github.com/tdegeus/cppcolormap/tarball/master).
+
+(c - [GPLv3](https://github.com/tdegeus/cppcolormap/blob/master/LICENSE)) T.W.J. de Geus (Tom) | tom@geus.me | www.geus.me | [github.com/tdegeus/cppcolormap](https://github.com/tdegeus/cppcolormap)
+
+**Contributors**
+
+*   [Wolf Vollprecht](https://github.com/wolfv)
 
 # Usage from C++
 
@@ -53,7 +51,7 @@ Library with colormaps for C++/Python.
 
 ### Using conda
 
-```bash
+```
 conda install -c conda-forge cppcolormap
 ```
 
@@ -132,49 +130,52 @@ The following metrics can be used:
 
 ## Compiling
 
-### By hand
-
-Presuming that the compiler is `c++`, compile using:
-
-```
-c++ -I/path/to/cppcolormap/include ...
-```
-
-### Using pkg-config
-
-Presuming that the compiler is `c++`, compile using:
-
-```
-c++ `pkg-config --cflags cppcolormap` ...
-```
-
-### Using `CMakeLists.txt`
+### Using CMake
 
 Using *cppcolormap* the `CMakeLists.txt` can be as follows
 
 ```cmake
 cmake_minimum_required(VERSION 3.1)
-
 project(example)
-
-find_package(xtensor REQUIRED)
 find_package(cppcolormap REQUIRED)
-
 add_executable(example example.cpp)
-
-target_link_libraries(example
-    PRIVATE
-    xtensor
-    cppcolormap)
+target_link_libraries(example PRIVATE cppcolormap)
 ```
 
-[download "CMakeLists.txt"](./example/CMakeLists.txt)
+Note that the target `cppcolormap` includes the target `xtensor` (itself automatically enforcing the minimal C++14 standard), which is automatically searched using `find_package(cppcolormap)`.
 
-Compilation can then proceed using 
+Compilation can then proceed using
 
-```bash
-cmake .
-make
+*   Unix:
+
+    ```
+    cmake .
+    make
+    ```
+
+*   Windows:
+
+    ```none
+    cmake -G"NMake Makefiles" .
+    nmake
+    ```
+
+[Download example "CMakeLists.txt"](./example/CMakeLists.txt)
+
+### Using pkg-config
+
+Presuming that the compiler is `c++`, compile using (Unix):
+
+```
+c++ `pkg-config --cflags cppcolormap` `pkg-config --cflags xtensor` -std=c++14 ...
+```
+
+### By hand
+
+Presuming that the compiler is `c++`, compile using (Unix):
+
+```
+c++ -I/path/to/cppcolormap/include -I/path/to/xtensor/include  -std=c++14 ...
 ```
 
 # Usage from Python
@@ -183,7 +184,7 @@ make
 
 ### Using conda
 
-```bash
+```
 conda install -c conda-forge python-cppcolormap
 ```
 
@@ -194,10 +195,11 @@ conda install -c conda-forge python-cppcolormap
 git checkout https://github.com/tdegeus/cppcolormap.git
 cd cppcolormap
 
-# Compile & build
-python setup.py build
-python setup.py install
+# Compile and install 
+python -m pip install .
 ```
+
+Note that you have to install the dependencies pybind11, xtensor, and pyxtensor first.
 
 ## Usage
 
@@ -229,7 +231,7 @@ idx = cm.match(cmap1, cmap2)
 idx = cm.match(cmap1, cmap2, cm.metric.perceptual)
 ```
 
-(See metrics above.)
+(See metrics [above](#find-match).)
 
 ## Example
 
@@ -251,9 +253,7 @@ C = np.c_[C, np.ones(C.shape[0])]
 cmap = matplotlib.colors.LinearSegmentedColormap.from_list('my_colormap', C)
 
 fig, ax = plt.subplots()
-
 cax = ax.imshow(d, cmap=cmap)
-
 plt.show()
 ```
 
@@ -353,12 +353,3 @@ plt.show()
 
 >   Based on the corporate color scheme of the 
 >   [Eindhoven University of Technology](http://www.tue.nl).
-
-# Create a new release
-
-1.  Update the version number in `include/cppcolormap.h`. 
-
-2.  Upload the changes to GitHub and create a new release there (with the correct version number).
-
-3.  Update the package at [conda-forge](https://github.com/conda-forge/pdfcombine-feedstock).
-
