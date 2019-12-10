@@ -48,12 +48,29 @@ Download: [.zip file](https://github.com/tdegeus/cppcolormap/zipball/master) | [
 
 # Overview
 
-![](./examples/overview/Colorcycles.png) 
-![](./examples/overview/Diverging.png) 
-![](./examples/overview/Qualitative.png) 
-![](./examples/overview/Sequential.png) 
-![](./examples/overview/matplotlib.png) 
-![](./examples/overview/monocolor.png) 
+<p align="center"> 
+    <img src="./examples/overview/Sequential.png">
+</p>
+
+<p align="center"> 
+    <img src="./examples/overview/Diverging.png">
+</p>
+
+<p align="center"> 
+    <img src="./examples/overview/matplotlib.png">
+</p>
+
+<p align="center"> 
+    <img src="./examples/overview/monocolor.png">
+</p>
+
+<p align="center"> 
+    <img src="./examples/overview/Qualitative.png">
+</p>
+
+<p align="center"> 
+    <img src="./examples/overview/Colorcycles.png">
+</p>
 
 # Usage from C++
 
