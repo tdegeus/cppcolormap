@@ -8,12 +8,35 @@
 
 C++ and Python library specifying colormaps. 
 
+<p align="center"> 
+    <img src="./examples/overview/Sequential.png">
+</p>
+
+<p align="center"> 
+    <img src="./examples/overview/Diverging.png">
+</p>
+
+<p align="center"> 
+    <img src="./examples/overview/matplotlib.png">
+</p>
+
+<p align="center"> 
+    <img src="./examples/overview/monocolor.png">
+</p>
+
+<p align="center"> 
+    <img src="./examples/overview/Qualitative.png">
+</p>
+
+<p align="center"> 
+    <img src="./examples/overview/Colorcycles.png">
+</p>
+
 # Contents
 
 <!-- MarkdownTOC levels="1,2" -->
 
 - [Disclaimer](#disclaimer)
-- [Overview](#overview)
 - [Usage from C++](#usage-from-c)
     - [Getting cppcolormap](#getting-cppcolormap)
     - [Usage](#usage)
@@ -45,32 +68,6 @@ Download: [.zip file](https://github.com/tdegeus/cppcolormap/zipball/master) | [
 **Contributors**
 
 *   [Wolf Vollprecht](https://github.com/wolfv)
-
-# Overview
-
-<p align="center"> 
-    <img src="./examples/overview/Sequential.png">
-</p>
-
-<p align="center"> 
-    <img src="./examples/overview/Diverging.png">
-</p>
-
-<p align="center"> 
-    <img src="./examples/overview/matplotlib.png">
-</p>
-
-<p align="center"> 
-    <img src="./examples/overview/monocolor.png">
-</p>
-
-<p align="center"> 
-    <img src="./examples/overview/Qualitative.png">
-</p>
-
-<p align="center"> 
-    <img src="./examples/overview/Colorcycles.png">
-</p>
 
 # Usage from C++
 

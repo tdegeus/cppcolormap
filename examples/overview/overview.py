@@ -92,14 +92,14 @@ for cmap_category, cmap_list in cmaps.items():
 # Colorcyles
 
 cmaps = (
-    "xterm",
-    "tue")
+    "tue",
+    "xterm")
 
 def plot_color_gradients(cmap_category, cmap_list, nrows):
 
     fig, axes = plt.subplots(nrows=nrows)
     fig.subplots_adjust(top=0.95, bottom=0.01, left=0.2, right=0.99)
-    axes[0].set_title(cmap_category + ' colormaps', fontsize=14)
+    axes[0].set_title(cmap_category, fontsize=14)
 
     for ax, name in zip(axes, cmap_list):
         c = cm.colorcycle(name)
