@@ -31,10 +31,10 @@ cmaps = {
         "PuRd",
         "RdPu",
         "OrRd",
-        "RdOrYl",
         "YlGn",
         "YlGnBu",
-        "YlOrRd"),
+        "YlOrRd",
+        "RdOrYl"),
     'Diverging' : (
         "BrBG",
         "PuOr",

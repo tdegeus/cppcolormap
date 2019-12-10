@@ -282,8 +282,8 @@ inline xt::xtensor<double,2> Greens(size_t N=9)
 inline xt::xtensor<double,2> Greys(size_t N=2)
 {
     xt::xtensor<double,2> data = {
-        {  0,   0,   0},
         {255, 255, 255},
+        {  0,   0,   0},
     };
 
     return interp(data / 255.0, N);
