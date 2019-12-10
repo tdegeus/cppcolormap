@@ -13,6 +13,7 @@ C++ and Python library specifying colormaps.
 <!-- MarkdownTOC levels="1,2" -->
 
 - [Disclaimer](#disclaimer)
+- [Overview](#overview)
 - [Usage from C++](#usage-from-c)
     - [Getting cppcolormap](#getting-cppcolormap)
     - [Usage](#usage)
@@ -44,6 +45,15 @@ Download: [.zip file](https://github.com/tdegeus/cppcolormap/zipball/master) | [
 **Contributors**
 
 *   [Wolf Vollprecht](https://github.com/wolfv)
+
+# Overview
+
+![](./examples/overview/Colorcycles.png) 
+![](./examples/overview/Diverging.png) 
+![](./examples/overview/Qualitative.png) 
+![](./examples/overview/Sequential.png) 
+![](./examples/overview/matplotlib.png) 
+![](./examples/overview/monocolor.png) 
 
 # Usage from C++
 
