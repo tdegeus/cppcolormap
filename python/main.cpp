@@ -101,20 +101,20 @@ m.def("jet_r"    , &cppcolormap::jet_r    , "jet_r     - matplotlib", py::arg("N
 
 // -------------------------------------------------------------------------------------------------
 
-m.def("White", &cppcolormap::White, "White", py::arg("N")=1);
-m.def("Grey" , &cppcolormap::Grey , "Grey" , py::arg("N")=1);
-m.def("Black", &cppcolormap::Black, "Black", py::arg("N")=1);
-m.def("Red"  , &cppcolormap::Red  , "Red"  , py::arg("N")=1);
-m.def("Blue" , &cppcolormap::Blue , "Blue" , py::arg("N")=1);
+m.def("White"       , &cppcolormap::White       , "White"                , py::arg("N")=1);
+m.def("Grey"        , &cppcolormap::Grey        , "Grey"                 , py::arg("N")=1);
+m.def("Black"       , &cppcolormap::Black       , "Black"                , py::arg("N")=1);
+m.def("Red"         , &cppcolormap::Red         , "Red"                  , py::arg("N")=1);
+m.def("Blue"        , &cppcolormap::Blue        , "Blue"                 , py::arg("N")=1);
+m.def("tuewarmred"  , &cppcolormap::tuewarmred  , "tuewarmred   - tue.nl", py::arg("N")=1);
+m.def("tuedarkblue" , &cppcolormap::tuedarkblue , "tuedarkblue  - tue.nl", py::arg("N")=1);
+m.def("tueblue"     , &cppcolormap::tueblue     , "tueblue      - tue.nl", py::arg("N")=1);
+m.def("tuelightblue", &cppcolormap::tuelightblue, "tuelightblue - tue.nl", py::arg("N")=1);
 
 // -------------------------------------------------------------------------------------------------
 
-m.def("xterm"       , &cppcolormap::xterm       , "xterm"                );
-m.def("tue"         , &cppcolormap::tue         , "tue          - tue.nl");
-m.def("tuewarmred"  , &cppcolormap::tuewarmred  , "tuewarmred   - tue.nl");
-m.def("tuedarkblue" , &cppcolormap::tuedarkblue , "tuedarkblue  - tue.nl");
-m.def("tueblue"     , &cppcolormap::tueblue     , "tueblue      - tue.nl");
-m.def("tuelightblue", &cppcolormap::tuelightblue, "tuelightblue - tue.nl");
+m.def("xterm", &cppcolormap::xterm, "xterm"       );
+m.def("tue"  , &cppcolormap::tue  , "tue - tue.nl");
 
 // -------------------------------------------------------------------------------------------------
 
@@ -123,8 +123,15 @@ m.def("tue_r"  , &cppcolormap::tue_r  , "tue_r - tue.nl");
 
 // -------------------------------------------------------------------------------------------------
 
-m.def("colorcycle",&cppcolormap::colorcycle,"Color-cycle by name",py::arg("cmap")                 );
-m.def("colormap"  ,&cppcolormap::colormap  ,"Colormap by name"   ,py::arg("cmap"),py::arg("N")=256);
+m.def("colormap", &cppcolormap::colormap,
+    "Colormap by name",
+    py::arg("cmap"),
+    py::arg("N")=256);
+
+m.def("colorcycle",
+    &cppcolormap::colorcycle,
+    "Color-cycle by name",
+    py::arg("cmap"));
 
 // -------------------------------------------------------------------------------------------------
 
