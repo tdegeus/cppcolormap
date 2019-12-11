@@ -101,15 +101,82 @@ m.def("jet_r"    , &cppcolormap::jet_r    , "jet_r     - matplotlib", py::arg("N
 
 // -------------------------------------------------------------------------------------------------
 
-m.def("White"       , &cppcolormap::White       , "White"                , py::arg("N")=1);
-m.def("Grey"        , &cppcolormap::Grey        , "Grey"                 , py::arg("N")=1);
-m.def("Black"       , &cppcolormap::Black       , "Black"                , py::arg("N")=1);
-m.def("Red"         , &cppcolormap::Red         , "Red"                  , py::arg("N")=1);
-m.def("Blue"        , &cppcolormap::Blue        , "Blue"                 , py::arg("N")=1);
-m.def("tuewarmred"  , &cppcolormap::tuewarmred  , "tuewarmred   - tue.nl", py::arg("N")=1);
-m.def("tuedarkblue" , &cppcolormap::tuedarkblue , "tuedarkblue  - tue.nl", py::arg("N")=1);
-m.def("tueblue"     , &cppcolormap::tueblue     , "tueblue      - tue.nl", py::arg("N")=1);
-m.def("tuelightblue", &cppcolormap::tuelightblue, "tuelightblue - tue.nl", py::arg("N")=1);
+m.def("White"         , &cppcolormap::White         , "White"         , py::arg("N")=1);
+m.def("Grey"          , &cppcolormap::Grey          , "Grey"          , py::arg("N")=1);
+m.def("Black"         , &cppcolormap::Black         , "Black"         , py::arg("N")=1);
+m.def("Red"           , &cppcolormap::Red           , "Red"           , py::arg("N")=1);
+m.def("Blue"          , &cppcolormap::Blue          , "Blue"          , py::arg("N")=1);
+m.def("tuewarmred"    , &cppcolormap::tuewarmred    , "tuewarmred"    , py::arg("N")=1);
+m.def("tuedarkblue"   , &cppcolormap::tuedarkblue   , "tuedarkblue"   , py::arg("N")=1);
+m.def("tueblue"       , &cppcolormap::tueblue       , "tueblue"       , py::arg("N")=1);
+m.def("tuelightblue"  , &cppcolormap::tuelightblue  , "tuelightblue"  , py::arg("N")=1);
+m.def("Apricot"       , &cppcolormap::Apricot       , "Apricot"       , py::arg("N")=1);
+m.def("Aquamarine"    , &cppcolormap::Aquamarine    , "Aquamarine"    , py::arg("N")=1);
+m.def("Bittersweet"   , &cppcolormap::Bittersweet   , "Bittersweet"   , py::arg("N")=1);
+m.def("Black"         , &cppcolormap::Black         , "Black"         , py::arg("N")=1);
+m.def("Blue"          , &cppcolormap::Blue          , "Blue"          , py::arg("N")=1);
+m.def("BlueGreen"     , &cppcolormap::BlueGreen     , "BlueGreen"     , py::arg("N")=1);
+m.def("BlueViolet"    , &cppcolormap::BlueViolet    , "BlueViolet"    , py::arg("N")=1);
+m.def("BrickRed"      , &cppcolormap::BrickRed      , "BrickRed"      , py::arg("N")=1);
+m.def("Brown"         , &cppcolormap::Brown         , "Brown"         , py::arg("N")=1);
+m.def("BurntOrange"   , &cppcolormap::BurntOrange   , "BurntOrange"   , py::arg("N")=1);
+m.def("CadetBlue"     , &cppcolormap::CadetBlue     , "CadetBlue"     , py::arg("N")=1);
+m.def("CarnationPink" , &cppcolormap::CarnationPink , "CarnationPink" , py::arg("N")=1);
+m.def("Cerulean"      , &cppcolormap::Cerulean      , "Cerulean"      , py::arg("N")=1);
+m.def("CornflowerBlue", &cppcolormap::CornflowerBlue, "CornflowerBlue", py::arg("N")=1);
+m.def("Cyan"          , &cppcolormap::Cyan          , "Cyan"          , py::arg("N")=1);
+m.def("Dandelion"     , &cppcolormap::Dandelion     , "Dandelion"     , py::arg("N")=1);
+m.def("DarkOrchid"    , &cppcolormap::DarkOrchid    , "DarkOrchid"    , py::arg("N")=1);
+m.def("Emerald"       , &cppcolormap::Emerald       , "Emerald"       , py::arg("N")=1);
+m.def("ForestGreen"   , &cppcolormap::ForestGreen   , "ForestGreen"   , py::arg("N")=1);
+m.def("Fuchsia"       , &cppcolormap::Fuchsia       , "Fuchsia"       , py::arg("N")=1);
+m.def("Goldenrod"     , &cppcolormap::Goldenrod     , "Goldenrod"     , py::arg("N")=1);
+m.def("Gray"          , &cppcolormap::Gray          , "Gray"          , py::arg("N")=1);
+m.def("Green"         , &cppcolormap::Green         , "Green"         , py::arg("N")=1);
+m.def("GreenYellow"   , &cppcolormap::GreenYellow   , "GreenYellow"   , py::arg("N")=1);
+m.def("JungleGreen"   , &cppcolormap::JungleGreen   , "JungleGreen"   , py::arg("N")=1);
+m.def("Lavender"      , &cppcolormap::Lavender      , "Lavender"      , py::arg("N")=1);
+m.def("LimeGreen"     , &cppcolormap::LimeGreen     , "LimeGreen"     , py::arg("N")=1);
+m.def("Magenta"       , &cppcolormap::Magenta       , "Magenta"       , py::arg("N")=1);
+m.def("Mahogany"      , &cppcolormap::Mahogany      , "Mahogany"      , py::arg("N")=1);
+m.def("Maroon"        , &cppcolormap::Maroon        , "Maroon"        , py::arg("N")=1);
+m.def("Melon"         , &cppcolormap::Melon         , "Melon"         , py::arg("N")=1);
+m.def("MidnightBlue"  , &cppcolormap::MidnightBlue  , "MidnightBlue"  , py::arg("N")=1);
+m.def("Mulberry"      , &cppcolormap::Mulberry      , "Mulberry"      , py::arg("N")=1);
+m.def("NavyBlue"      , &cppcolormap::NavyBlue      , "NavyBlue"      , py::arg("N")=1);
+m.def("OliveGreen"    , &cppcolormap::OliveGreen    , "OliveGreen"    , py::arg("N")=1);
+m.def("Orange"        , &cppcolormap::Orange        , "Orange"        , py::arg("N")=1);
+m.def("OrangeRed"     , &cppcolormap::OrangeRed     , "OrangeRed"     , py::arg("N")=1);
+m.def("Orchid"        , &cppcolormap::Orchid        , "Orchid"        , py::arg("N")=1);
+m.def("Peach"         , &cppcolormap::Peach         , "Peach"         , py::arg("N")=1);
+m.def("Periwinkle"    , &cppcolormap::Periwinkle    , "Periwinkle"    , py::arg("N")=1);
+m.def("PineGreen"     , &cppcolormap::PineGreen     , "PineGreen"     , py::arg("N")=1);
+m.def("Plum"          , &cppcolormap::Plum          , "Plum"          , py::arg("N")=1);
+m.def("ProcessBlue"   , &cppcolormap::ProcessBlue   , "ProcessBlue"   , py::arg("N")=1);
+m.def("Purple"        , &cppcolormap::Purple        , "Purple"        , py::arg("N")=1);
+m.def("RawSienna"     , &cppcolormap::RawSienna     , "RawSienna"     , py::arg("N")=1);
+m.def("Red"           , &cppcolormap::Red           , "Red"           , py::arg("N")=1);
+m.def("RedOrange"     , &cppcolormap::RedOrange     , "RedOrange"     , py::arg("N")=1);
+m.def("RedViolet"     , &cppcolormap::RedViolet     , "RedViolet"     , py::arg("N")=1);
+m.def("Rhodamine"     , &cppcolormap::Rhodamine     , "Rhodamine"     , py::arg("N")=1);
+m.def("RoyalBlue"     , &cppcolormap::RoyalBlue     , "RoyalBlue"     , py::arg("N")=1);
+m.def("RoyalPurple"   , &cppcolormap::RoyalPurple   , "RoyalPurple"   , py::arg("N")=1);
+m.def("RubineRed"     , &cppcolormap::RubineRed     , "RubineRed"     , py::arg("N")=1);
+m.def("Salmon"        , &cppcolormap::Salmon        , "Salmon"        , py::arg("N")=1);
+m.def("SeaGreen"      , &cppcolormap::SeaGreen      , "SeaGreen"      , py::arg("N")=1);
+m.def("Sepia"         , &cppcolormap::Sepia         , "Sepia"         , py::arg("N")=1);
+m.def("SkyBlue"       , &cppcolormap::SkyBlue       , "SkyBlue"       , py::arg("N")=1);
+m.def("SpringGreen"   , &cppcolormap::SpringGreen   , "SpringGreen"   , py::arg("N")=1);
+m.def("Tan"           , &cppcolormap::Tan           , "Tan"           , py::arg("N")=1);
+m.def("TealBlue"      , &cppcolormap::TealBlue      , "TealBlue"      , py::arg("N")=1);
+m.def("Thistle"       , &cppcolormap::Thistle       , "Thistle"       , py::arg("N")=1);
+m.def("Turquoise"     , &cppcolormap::Turquoise     , "Turquoise"     , py::arg("N")=1);
+m.def("Violet"        , &cppcolormap::Violet        , "Violet"        , py::arg("N")=1);
+m.def("VioletRed"     , &cppcolormap::VioletRed     , "VioletRed"     , py::arg("N")=1);
+m.def("WildStrawberry", &cppcolormap::WildStrawberry, "WildStrawberry", py::arg("N")=1);
+m.def("Yellow"        , &cppcolormap::Yellow        , "Yellow"        , py::arg("N")=1);
+m.def("YellowGreen"   , &cppcolormap::YellowGreen   , "YellowGreen"   , py::arg("N")=1);
+m.def("YellowOrange"  , &cppcolormap::YellowOrange  , "YellowOrange"  , py::arg("N")=1);
 
 // -------------------------------------------------------------------------------------------------
 
@@ -132,6 +199,22 @@ m.def("colorcycle",
     &cppcolormap::colorcycle,
     "Color-cycle by name",
     py::arg("cmap"));
+
+m.def("hex2rgb",
+    py::overload_cast<const std::vector<std::string>&>(&cppcolormap::hex2rgb),
+    "Convert hex -> rgb");
+
+m.def("hex2rgb",
+    py::overload_cast<const std::string&>(&cppcolormap::hex2rgb),
+    "Convert hex -> rgb");
+
+m.def("rgb2hex",
+    py::overload_cast<const xt::xtensor<double,2>&>(&cppcolormap::rgb2hex),
+    "Convert rgb -> hex");
+
+m.def("rgb2hex",
+    py::overload_cast<const xt::xtensor<double,1>&>(&cppcolormap::rgb2hex),
+    "Convert rgb -> hex");
 
 // -------------------------------------------------------------------------------------------------
 
