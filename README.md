@@ -25,6 +25,14 @@ C++ and Python library specifying colormaps.
 </p>
 
 <p align="center"> 
+    <img src="./examples/overview/monocolor_dvips_1.png">
+</p>
+
+<p align="center"> 
+    <img src="./examples/overview/monocolor_dvips_2.png">
+</p>
+
+<p align="center"> 
     <img src="./examples/overview/Qualitative.png">
 </p>
 
@@ -49,9 +57,9 @@ C++ and Python library specifying colormaps.
     - [Example](#example)
 - [Available colormaps](#available-colormaps)
     - [ColorBrewer](#colorbrewer)
-    - [Matplotlib](#matplotlib)
-    - [Monochromatic colormaps](#monochromatic-colormaps)
-- [Available color-cycles](#available-color-cycles)
+    - [matplotlib](#matplotlib)
+    - [monocolor](#monocolor)
+- [Available colorcycles](#available-colorcycles)
     - [Xterm](#xterm)
     - [Eindhoven University of Technology](#eindhoven-university-of-technology)
 
@@ -122,7 +130,7 @@ int main()
 }
 ```
 
-Note that the colorcycles are not interpolatable. Consequently the functions do have a size option. Note also that the colormaps can also be called directly, e.g.
+Note that the colorcycles are not interpolatable. Consequently the functions do have a size option. Note also that the colormaps and colorcycles can also be called directly, e.g.
 
 ```cpp
 #include <cppcolormap.h>
@@ -237,11 +245,11 @@ N = 256
 
 # specify the colormap as string
 cols = cm.colormap("Reds", N)
-cols = cm.colorcycle("tue", N)
+cols = cm.colorcycle("tue")
 
 # or call the functions directly
 cols = cm.Reds(N)
-cols = cm.tue(N)
+cols = cm.tue()
 ```
 
 (see lists of [colormaps](#available-colormaps) and [color-cycles](#available-color-cycles) below).
@@ -269,7 +277,7 @@ x, y = np.meshgrid(
   np.linspace(0, 1, 100), 
   np.linspace(0, 1, 100))
 
-d = np.sqrt(x**2 + y**2)
+d = np.sqrt(x ** 2.0 + y ** 2.0)
 
 C = cm.Reds(256)
 C = np.c_[C, np.ones(C.shape[0])]
@@ -328,7 +336,7 @@ plt.show()
 >   
 >   [colorbrewer2.org](http://colorbrewer2.org)
 
-## Matplotlib
+## matplotlib
 
 | Name     | Inverse colormap |
 |----------|------------------|
@@ -345,35 +353,107 @@ plt.show()
 >   
 >   [GitHub](https://github.com/BIDS/colormap)
 
-## Monochromatic colormaps
+## monocolor
 
-| Name     | Inverse colormap |
-|----------|------------------|
-| White    | -                |    
-| Grey     | -                |   
-| Black    | -                |    
-| Red      | -                |  
-| Blue     | -                |   
+| Name           | Inverse colormap | Source |
+|----------------|------------------|--------|
+| White          | -                | -      |
+| Grey           | -                | -      |
+| Black          | -                | -      |
+| Red            | -                | -      |
+| Blue           | -                | -      |
+| tuedarkblue    | -                | 1      |
+| tueblue        | -                | 1      |
+| tuelightblue   | -                | 1      |
+| tuewarmred     | -                | 1      |
+| Apricot        | -                | 2      |  
+| Aquamarine     | -                | 2      |  
+| Bittersweet    | -                | 2      |  
+| Black          | -                | 2      |  
+| Blue           | -                | 2      |  
+| BlueGreen      | -                | 2      |  
+| BlueViolet     | -                | 2      |  
+| BrickRed       | -                | 2      |  
+| Brown          | -                | 2      |  
+| BurntOrange    | -                | 2      |  
+| CadetBlue      | -                | 2      |  
+| CarnationPink  | -                | 2      |  
+| Cerulean       | -                | 2      |  
+| CornflowerBlue | -                | 2      |  
+| Cyan           | -                | 2      |  
+| Dandelion      | -                | 2      |  
+| DarkOrchid     | -                | 2      |  
+| Emerald        | -                | 2      |  
+| ForestGreen    | -                | 2      |  
+| Fuchsia        | -                | 2      |  
+| Goldenrod      | -                | 2      |  
+| Gray           | -                | 2      |  
+| Green          | -                | 2      |  
+| GreenYellow    | -                | 2      |  
+| JungleGreen    | -                | 2      |  
+| Lavender       | -                | 2      |  
+| LimeGreen      | -                | 2      |  
+| Magenta        | -                | 2      |  
+| Mahogany       | -                | 2      |  
+| Maroon         | -                | 2      |  
+| Melon          | -                | 2      |  
+| MidnightBlue   | -                | 2      |  
+| Mulberry       | -                | 2      |  
+| NavyBlue       | -                | 2      |  
+| OliveGreen     | -                | 2      |  
+| Orange         | -                | 2      |  
+| OrangeRed      | -                | 2      |  
+| Orchid         | -                | 2      |  
+| Peach          | -                | 2      |  
+| Periwinkle     | -                | 2      |  
+| PineGreen      | -                | 2      |  
+| Plum           | -                | 2      |  
+| ProcessBlue    | -                | 2      |  
+| Purple         | -                | 2      |  
+| RawSienna      | -                | 2      |  
+| Red            | -                | 2      |  
+| RedOrange      | -                | 2      |  
+| RedViolet      | -                | 2      |  
+| Rhodamine      | -                | 2      |  
+| RoyalBlue      | -                | 2      |  
+| RoyalPurple    | -                | 2      |  
+| RubineRed      | -                | 2      |  
+| Salmon         | -                | 2      |  
+| SeaGreen       | -                | 2      |  
+| Sepia          | -                | 2      |  
+| SkyBlue        | -                | 2      |  
+| SpringGreen    | -                | 2      |  
+| Tan            | -                | 2      |  
+| TealBlue       | -                | 2      |  
+| Thistle        | -                | 2      |  
+| Turquoise      | -                | 2      |  
+| Violet         | -                | 2      |  
+| VioletRed      | -                | 2      |  
+| White          | -                | 2      |  
+| WildStrawberry | -                | 2      |  
+| Yellow         | -                | 2      |  
+| YellowGreen    | -                | 2      |  
+| YellowOrange   | -                | 2      |  
 
-# Available color-cycles
+1.  [Eindhoven University of Technology](http://www.tue.nl)
+2.  [LaTeX xcolor (dvipsnames)](https://en.wikibooks.org/wiki/LaTeX/Colors)
+
+# Available colorcycles
 
 ## Xterm
 
-| Name     | Inverse colormap |
-|----------|------------------|
-| xterm    | xterm_r          |
+| Name  | Inverse colormap |
+|-------|------------------|
+| xterm | xterm_r          |
 
 >   See [this site](https://jonasjacek.github.io/colors/)
 
 ## Eindhoven University of Technology
 
-| Name         | Inverse colormap |
-|--------------|------------------|
-| tue          | tue_r            |
-| tuedarkblue  | -                |           
-| tueblue      | -                |       
-| tuelightblue | -                |            
-| tuewarmred   | -                |          
+| Name | Inverse colormap |
+|------|------------------|
+| tue  | tue_r            |
+
 
 >   Based on the corporate color scheme of the 
 >   [Eindhoven University of Technology](http://www.tue.nl).

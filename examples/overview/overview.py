@@ -52,14 +52,80 @@ cmaps = {
         "jet"),
     'monocolor' : (
         "White",
+        "Gray",
         "Grey",
         "Black",
         "Red",
         "Blue",
+        "Green",
+        "Yellow",
+        "Purple",
+        "Cyan",
+        "Orange",
         "tuewarmred",
         "tuedarkblue",
         "tueblue",
-        "tuelightblue")}
+        "tuelightblue"),
+    'monocolor - dvips (1)' : (
+        "Plum",
+        "Fuchsia",
+        "BlueViolet",
+        "Violet",
+        "RoyalPurple",
+        "MidnightBlue",
+        "NavyBlue",
+        "RoyalBlue",
+        "CadetBlue",
+        "Periwinkle",
+        "PineGreen",
+        "Cerulean",
+        "JungleGreen",
+        "Emerald",
+        "TealBlue",
+        "CornflowerBlue",
+        "ProcessBlue",
+        "Aquamarine",
+        "BlueGreen",
+        "Turquoise",
+        "SkyBlue",
+        "SeaGreen",
+        "ForestGreen",
+        "OliveGreen",
+        "YellowGreen",
+        "LimeGreen",
+        "SpringGreen",
+        "GreenYellow"),
+    'monocolor - dvips (2)' : (
+        "Goldenrod",
+        "Dandelion",
+        "Apricot",
+        "YellowOrange",
+        "Lavender",
+        "Melon",
+        "Tan",
+        "Peach",
+        "BurntOrange",
+        "Salmon",
+        "Thistle",
+        "CarnationPink",
+        "Orchid",
+        "RedOrange",
+        "VioletRed",
+        "Rhodamine",
+        "DarkOrchid",
+        "Bittersweet",
+        "WildStrawberry",
+        "OrangeRed",
+        "Magenta",
+        "RubineRed",
+        "BrickRed",
+        "Maroon",
+        "Mulberry",
+        "Mahogany",
+        "RedViolet",
+        "RawSienna",
+        "Sepia",
+        "Brown")}
 
 nrows = max(len(cmap_list) for cmap_category, cmap_list in cmaps.items())
 gradient = np.linspace(0, 1, 256)
@@ -83,7 +149,7 @@ def plot_color_gradients(cmap_category, cmap_list, nrows):
     for ax in axes:
         ax.set_axis_off()
 
-    plt.savefig(cmap_category + '.png')
+    plt.savefig(cmap_category.replace(' ', '_').replace('(','').replace(')','').replace('_-_', '_') + '.png')
     plt.close()
 
 for cmap_category, cmap_list in cmaps.items():
@@ -116,7 +182,7 @@ def plot_color_gradients(cmap_category, cmap_list, nrows):
     for ax in axes:
         ax.set_axis_off()
 
-    plt.savefig(cmap_category + '.png')
+    plt.savefig(cmap_category.replace(' ', '_').replace('(','').replace(')','').replace('_-_', '_') + '.png')
     plt.close()
 
 plot_color_gradients('Colorcycles', cmaps, nrows)
