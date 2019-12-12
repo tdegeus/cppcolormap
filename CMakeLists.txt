@@ -48,7 +48,7 @@ include(GNUInstallDirs)
 
 install(
     FILES
-        "include/cppcolormap.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/cppcolormap.h"
     DESTINATION
         include)
 
@@ -80,13 +80,13 @@ set(CMAKE_SIZEOF_VOID_P ${_CPPCOLORMAP})
 
 install(
     FILES
-        cppcolormapConfig.cmake
+        "${CMAKE_CURRENT_SOURCE_DIR}/cppcolormapConfig.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/cppcolormapConfigVersion.cmake"
     DESTINATION
         "${CMAKE_INSTALL_LIBDIR}/cmake/cppcolormap")
 
 configure_file(
-    "cppcolormap.pc.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cppcolormap.pc.in"
     "${CMAKE_CURRENT_BINARY_DIR}/cppcolormap.pc"
      @ONLY)
 
