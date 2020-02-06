@@ -13,15 +13,14 @@ patch = re.split(r'(.*)(\#define CPPCOLORMAP_VERSION_PATCH\ )([0-9]+)(.*)', head
 
 __version__ = '.'.join([major, minor, patch])
 
-ext_modules = [
-    Extension(
-        'cppcolormap',
-        ['python/main.cpp'],
-        include_dirs=[
-            os.path.abspath('include/'),
-            pyxtensor.find_pyxtensor(),
-            pyxtensor.find_pybind11()],
-        language='c++')]
+ext_modules = [Extension(
+    'cppcolormap',
+    ['python/main.cpp'],
+    include_dirs=[
+        os.path.abspath('include/'),
+        pyxtensor.find_pyxtensor(),
+        pyxtensor.find_pybind11()],
+    language='c++')]
 
 setup(
     name = 'cppcolormap',
