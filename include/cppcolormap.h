@@ -136,7 +136,7 @@ inline xt::xtensor<double,2> interp(const xt::xtensor<double,2>& data, size_t N)
     xt::xtensor<double,1> xi = xt::linspace(0.0, 1.0, N);
 
     for (size_t j = 0; j < data.shape(1); j++) {
-        auto c  = xt::view(data, xt::all(), j);
+        auto c = xt::view(data, xt::all(), j);
         auto ci = xt::view(out, xt::all(), j);
 
         ci = xt::interp(xi, x, c);
