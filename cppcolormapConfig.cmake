@@ -11,6 +11,7 @@
 #   cppcolormap_INCLUDE_DIRS - the directory containing cppcolormap headers
 
 include(CMakeFindDependencyMacro)
+
 find_dependency(xtensor)
 
 if(NOT TARGET cppcolormap)
