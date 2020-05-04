@@ -87,9 +87,9 @@ std::vector<std::string> rgb2hex(const xt::xtensor<double,2>& data)
 
     for (size_t i = 0; i < data.shape(0); ++i) {
         out.push_back(detail::rgb2hex(
-            data(i, 0) * 255.0,
-            data(i, 1) * 255.0,
-            data(i, 2) * 255.0));
+            static_cast<size_t>(data(i, 0) * 255.0),
+            static_cast<size_t>(data(i, 1) * 255.0),
+            static_cast<size_t>(data(i, 2) * 255.0)));
     }
 
     return out;
@@ -100,9 +100,9 @@ std::vector<std::string> rgb2hex(const xt::xtensor<double,2>& data)
 std::string rgb2hex(const xt::xtensor<double,1>& data)
 {
     return detail::rgb2hex(
-        data(0) * 255.0,
-        data(1) * 255.0,
-        data(2) * 255.0);
+        static_cast<size_t>(data(0) * 255.0),
+        static_cast<size_t>(data(1) * 255.0),
+        static_cast<size_t>(data(2) * 255.0));
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1142,7 +1142,8 @@ namespace detail
         idx(0) = 0;
         idx(n - 1) = N;
 
-        xt::xtensor<double,2> ret = xt::empty<double>({N, 3ul});
+        std::array<size_t,2> shape = {N, 3};
+        xt::xtensor<double,2> ret(shape);
 
         for (size_t i = 0; i < n - 1; ++i) {
             for (size_t j = 0; j < 3; ++j) {
@@ -1424,7 +1425,8 @@ namespace detail
 
 inline xt::xtensor<double,2> afmhot(size_t N = 256)
 {
-    xt::xtensor<double,2> data = xt::empty<double>({N, 3ul});
+    std::array<size_t,2> shape = {N, 3};
+    xt::xtensor<double,2> data(shape);
     xt::xtensor<double,1> x = xt::linspace<double>(0.0, 1.0, N);
     xt::view(data, xt::all(), 0) = detail::gnu_palette(34, x);
     xt::view(data, xt::all(), 1) = detail::gnu_palette(35, x);
