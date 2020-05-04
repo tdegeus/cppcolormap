@@ -3185,14 +3185,14 @@ inline xt::xtensor<double,2> hot_r(size_t N = 256) { return xt::flip(hot(N), 0);
 inline xt::xtensor<double,2> copper_r(size_t N = 256) { return xt::flip(copper(N), 0); }
 inline xt::xtensor<double,2> hsv_r(size_t N = 256) { return xt::flip(hsv(N), 0); }
 inline xt::xtensor<double,2> nipy_spectral_r(size_t N = 256) { return xt::flip(nipy_spectral(N), 0); }
-inline xt::xtensor<double,2> terrain_r(size_t N = 256) { return xt::flip(terrain(N), 0); }
-inline xt::xtensor<double,2> seismic_r(size_t N = 256) { return xt::flip(seismic(N), 0); }
+inline xt::xtensor<double,2> jet_r(size_t N = 256) { return xt::flip(jet(N), 0); }
+inline xt::xtensor<double,2> terrain_r(size_t N = 5) { return xt::flip(terrain(N), 0); }
+inline xt::xtensor<double,2> seismic_r(size_t N = 6) { return xt::flip(seismic(N), 0); }
 inline xt::xtensor<double,2> afmhot_r(size_t N = 256) { return xt::flip(afmhot(N), 0); }
 inline xt::xtensor<double,2> magma_r(size_t N = 256) { return xt::flip(magma(N), 0); }
 inline xt::xtensor<double,2> inferno_r(size_t N = 256) { return xt::flip(inferno(N), 0); }
 inline xt::xtensor<double,2> plasma_r(size_t N = 256) { return xt::flip(plasma(N), 0); }
 inline xt::xtensor<double,2> viridis_r(size_t N = 256) { return xt::flip(viridis(N), 0); }
-inline xt::xtensor<double,2> jet_r(size_t N = 256) { return xt::flip(jet(N), 0); }
 
 // =================================================================================================
 // read from string
@@ -3244,6 +3244,7 @@ inline xt::xtensor<double,2> colormap(const std::string& cmap, size_t N = 256)
     if (cmap == "copper") { return copper(N); }
     if (cmap == "hsv") { return hsv(N); }
     if (cmap == "nipy_spectral") { return nipy_spectral(N); }
+    if (cmap == "jet") { return jet(N); }
     if (cmap == "terrain") { return terrain(N); }
     if (cmap == "seismic") { return seismic(N); }
     if (cmap == "afmhot") { return afmhot(N); }
@@ -3251,7 +3252,6 @@ inline xt::xtensor<double,2> colormap(const std::string& cmap, size_t N = 256)
     if (cmap == "inferno") { return inferno(N); }
     if (cmap == "plasma") { return plasma(N); }
     if (cmap == "viridis") { return viridis(N); }
-    if (cmap == "jet") { return jet(N); }
     if (cmap == "Accent_r") { return Accent_r(N); }
     if (cmap == "Dark2_r") { return Dark2_r(N); }
     if (cmap == "Paired_r") { return Paired_r(N); }
@@ -3296,6 +3296,7 @@ inline xt::xtensor<double,2> colormap(const std::string& cmap, size_t N = 256)
     if (cmap == "copper_r") { return copper_r(N); }
     if (cmap == "hsv_r") { return hsv_r(N); }
     if (cmap == "nipy_spectral_r") { return nipy_spectral_r(N); }
+    if (cmap == "jet_r") { return jet_r(N); }
     if (cmap == "terrain_r") { return terrain_r(N); }
     if (cmap == "seismic_r") { return seismic_r(N); }
     if (cmap == "afmhot_r") { return afmhot_r(N); }
@@ -3303,7 +3304,6 @@ inline xt::xtensor<double,2> colormap(const std::string& cmap, size_t N = 256)
     if (cmap == "inferno_r") { return inferno_r(N); }
     if (cmap == "plasma_r") { return plasma_r(N); }
     if (cmap == "viridis_r") { return viridis_r(N); }
-    if (cmap == "jet_r") { return jet_r(N); }
     if (cmap == "White") { return White(N); }
     if (cmap == "Grey") { return Grey(N); }
     if (cmap == "Black") { return Black(N); }
