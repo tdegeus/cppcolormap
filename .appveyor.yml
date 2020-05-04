@@ -45,6 +45,13 @@ install:
   - python -m pip install .
 
 build_script:
+  # Run Python test
+  - python test\python\main.py
+  # Compile and run C++ test
+  - cd test\cpp
+  - cmake -G "NMake Makefiles" .
+  - nmake
+  - .\test
   # Run Python example
   - python examples\python\match.py
   # Compile and run C++ example
