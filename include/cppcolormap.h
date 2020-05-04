@@ -8,8 +8,8 @@
 #define CPPCOLORMAP_H
 
 #define CPPCOLORMAP_VERSION_MAJOR 1
-#define CPPCOLORMAP_VERSION_MINOR 1
-#define CPPCOLORMAP_VERSION_PATCH 1
+#define CPPCOLORMAP_VERSION_MINOR 2
+#define CPPCOLORMAP_VERSION_PATCH 0
 
 #define CPPCOLORMAP_VERSION_AT_LEAST(x,y,z) \
     (CPPCOLORMAP_VERSION_MAJOR>x || (CPPCOLORMAP_VERSION_MAJOR>=x && \
@@ -20,6 +20,9 @@
     (CPPCOLORMAP_VERSION_MAJOR==x && \
      CPPCOLORMAP_VERSION_MINOR==y && \
      CPPCOLORMAP_VERSION_PATCH==z)
+
+// use "M_PI" from "math.h"
+#define _USE_MATH_DEFINES
 
 #include <vector>
 #include <string>
@@ -34,13 +37,15 @@
 #include <xtensor/xmanipulation.hpp>
 #include <xtensor/xio.hpp>
 
-namespace cppcolormap {
+namespace cppcolormap
+{
 
 // =================================================================================================
 // convert RGB <-> HEX
 // =================================================================================================
 
-namespace detail {
+namespace detail
+{
 
     // https://www.codespeedy.com/convert-rgb-to-hex-color-code-in-cpp/
     std::string rgb2hex(size_t r, size_t g, size_t b)
@@ -71,8 +76,8 @@ namespace detail {
 
         return rgb;
     }
-} // namespace detail
 
+} // namespace detail
 
 // -------------------------------------------------------------------------------------------------
 
@@ -82,9 +87,9 @@ std::vector<std::string> rgb2hex(const xt::xtensor<double,2>& data)
 
     for (size_t i = 0; i < data.shape(0); ++i) {
         out.push_back(detail::rgb2hex(
-            data(i, 0) * 255.0,
-            data(i, 1) * 255.0,
-            data(i, 2) * 255.0));
+            static_cast<size_t>(data(i, 0) * 255.0),
+            static_cast<size_t>(data(i, 1) * 255.0),
+            static_cast<size_t>(data(i, 2) * 255.0)));
     }
 
     return out;
@@ -95,9 +100,9 @@ std::vector<std::string> rgb2hex(const xt::xtensor<double,2>& data)
 std::string rgb2hex(const xt::xtensor<double,1>& data)
 {
     return detail::rgb2hex(
-        data(0) * 255.0,
-        data(1) * 255.0,
-        data(2) * 255.0);
+        static_cast<size_t>(data(0) * 255.0),
+        static_cast<size_t>(data(1) * 255.0),
+        static_cast<size_t>(data(2) * 255.0));
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -132,13 +137,12 @@ inline xt::xtensor<double,2> interp(const xt::xtensor<double,2>& data, size_t N)
 
     xt::xtensor<double,2> out = xt::empty<double>({N, data.shape(1)});
 
-    xt::xtensor<double,1> x  = xt::linspace(0.0, 1.0, data.shape(0));
+    xt::xtensor<double,1> x = xt::linspace(0.0, 1.0, data.shape(0));
     xt::xtensor<double,1> xi = xt::linspace(0.0, 1.0, N);
 
     for (size_t j = 0; j < data.shape(1); j++) {
         auto c = xt::view(data, xt::all(), j);
         auto ci = xt::view(out, xt::all(), j);
-
         ci = xt::interp(xi, x, c);
     }
 
@@ -811,7 +815,656 @@ inline xt::xtensor<double,2> PRGn(size_t N = 11)
 }
 
 // =================================================================================================
-// matplotlib colormaps
+// matplotlib colormaps - from anchors
+// =================================================================================================
+
+namespace detail
+{
+
+    inline xt::xtensor<double,1> from_anchor_color(size_t N, const xt::xtensor<double,2>& x)
+    {
+        size_t n = x.shape(0);
+        xt::xtensor<size_t,1> idx = xt::view(x, xt::all(), 0) * (double)N;
+        idx(0) = 0;
+        idx(n - 1) = N;
+
+        xt::xtensor<double,1> ret = xt::empty<double>({N});
+
+        for (size_t i = 0; i < n - 1; ++i) {
+            xt::view(ret, xt::range(idx(i), idx(i + 1))) =
+                x(i, 2) + (x(i + 1, 1) - x(i, 2)) * xt::linspace<double>(0.0, 1.0, idx(i + 1) - idx(i));
+        }
+
+        return ret;
+    }
+
+    inline xt::xtensor<double,2> from_anchor(
+        size_t N,
+        const xt::xtensor<double,2>& r,
+        const xt::xtensor<double,2>& g,
+        const xt::xtensor<double,2>& b)
+    {
+        std::array<size_t,2> shape = {N, 3};
+        xt::xtensor<double,2> ret(shape);
+        xt::view(ret, xt::all(), 0) = from_anchor_color(N, r);
+        xt::view(ret, xt::all(), 1) = from_anchor_color(N, g);
+        xt::view(ret, xt::all(), 2) = from_anchor_color(N, b);
+        return ret;
+    }
+
+} // namespace detail
+
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<double,2> spring(size_t N = 256)
+{
+    xt::xtensor<double,2> r = {
+        {0.0, 1.0, 1.0},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> g = {
+        {0.0, 0.0, 0.0},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> b = {
+        {0.0, 1.0, 1.0},
+        {1.0, 0.0, 0.0}};
+
+    return detail::from_anchor(N, r, g, b);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<double,2> summer(size_t N = 256)
+{
+    xt::xtensor<double,2> r = {
+        {0.0, 0.0, 0.0},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> g = {
+        {0.0, 0.5, 0.5},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> b = {
+        {0.0, 0.4, 0.4},
+        {1.0, 0.4, 0.4}};
+
+    return detail::from_anchor(N, r, g, b);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<double,2> autumn(size_t N = 256)
+{
+    xt::xtensor<double,2> r = {
+        {0.0, 1.0, 1.0},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> g = {
+        {0.0, 0.0, 0.0},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> b = {
+        {0.0, 0.0, 0.0},
+        {1.0, 0.0, 0.0}};
+
+    return detail::from_anchor(N, r, g, b);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<double,2> winter(size_t N = 256)
+{
+    xt::xtensor<double,2> r = {
+        {0.0, 0.0, 0.0},
+        {1.0, 0.0, 0.0}};
+
+    xt::xtensor<double,2> g = {
+        {0.0, 0.0, 0.0},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> b = {
+        {0.0, 1.0, 1.0},
+        {1.0, 0.5, 0.5}};
+
+    return detail::from_anchor(N, r, g, b);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<double,2> bone(size_t N = 256)
+{
+    xt::xtensor<double,2> r = {
+        {0.0, 0.0, 0.0},
+        {0.746032, 0.652778, 0.652778},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> g = {
+        {0.0, 0.0, 0.0},
+        {0.365079, 0.319444, 0.319444},
+        {0.746032, 0.777778, 0.777778},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> b = {
+        {0.0, 0.0, 0.0},
+        {0.365079, 0.444444, 0.444444},
+        {1.0, 1.0, 1.0}};
+
+    return detail::from_anchor(N, r, g, b);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<double,2> cool(size_t N = 256)
+{
+    xt::xtensor<double,2> r = {
+        {0.0, 0.0, 0.0},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> g = {
+        {0.0, 1.0, 1.0},
+        {1.0, 0.0, 0.0}};
+
+    xt::xtensor<double,2> b = {
+        {0.0, 1.0, 1.0},
+        {1.0, 1.0, 1.0}};
+
+    return detail::from_anchor(N, r, g, b);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<double,2> hot(size_t N = 256)
+{
+    xt::xtensor<double,2> r = {
+        {0.0, 0.0416, 0.0416},
+        {0.365079, 1.000000, 1.000000},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> g = {
+        {0.0, 0.0, 0.0},
+        {0.365079, 0.000000, 0.000000},
+        {0.746032, 1.000000, 1.000000},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> b = {
+        {0.0, 0.0, 0.0},
+        {0.746032, 0.000000, 0.000000},
+        {1.0, 1.0, 1.0}};
+
+    return detail::from_anchor(N, r, g, b);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<double,2> copper(size_t N = 256)
+{
+    xt::xtensor<double,2> r = {
+        {0.0, 0.0, 0.0},
+        {0.809524, 1.000000, 1.000000},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> g = {
+        {0.0, 0.0, 0.0},
+        {1.0, 0.7812, 0.7812}};
+
+    xt::xtensor<double,2> b = {
+        {0.0, 0.0, 0.0},
+        {1.0, 0.4975, 0.4975}};
+
+    return detail::from_anchor(N, r, g, b);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<double,2> hsv(size_t N = 256)
+{
+    xt::xtensor<double,2> r = {
+        {0.0, 1.0, 1.0},
+        {0.158730, 1.000000, 1.000000},
+        {0.174603, 0.968750, 0.968750},
+        {0.333333, 0.031250, 0.031250},
+        {0.349206, 0.000000, 0.000000},
+        {0.666667, 0.000000, 0.000000},
+        {0.682540, 0.031250, 0.031250},
+        {0.841270, 0.968750, 0.968750},
+        {0.857143, 1.000000, 1.000000},
+        {1.0, 1.0, 1.0}};
+
+    xt::xtensor<double,2> g = {
+        {0.0, 0.0, 0.0},
+        {0.158730, 0.937500, 0.937500},
+        {0.174603, 1.000000, 1.000000},
+        {0.507937, 1.000000, 1.000000},
+        {0.666667, 0.062500, 0.062500},
+        {0.682540, 0.000000, 0.000000},
+        {1.0, 0.0, 0.0}};
+
+    xt::xtensor<double,2> b = {
+        {0.0, 0.0, 0.0},
+        {0.333333, 0.000000, 0.000000},
+        {0.349206, 0.062500, 0.062500},
+        {0.507937, 1.000000, 1.000000},
+        {0.841270, 1.000000, 1.000000},
+        {0.857143, 0.937500, 0.937500},
+        {1.0, 0.09375, 0.09375}};
+
+    return detail::from_anchor(N, r, g, b);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<double,2> nipy_spectral(size_t N = 256)
+{
+    xt::xtensor<double,2> r = {
+        {0.0, 0.0, 0.0},
+        {0.05, 0.4667, 0.4667},
+        {0.10, 0.5333, 0.5333},
+        {0.15, 0.0, 0.0},
+        {0.20, 0.0, 0.0},
+        {0.25, 0.0, 0.0},
+        {0.30, 0.0, 0.0},
+        {0.35, 0.0, 0.0},
+        {0.40, 0.0, 0.0},
+        {0.45, 0.0, 0.0},
+        {0.50, 0.0, 0.0},
+        {0.55, 0.0, 0.0},
+        {0.60, 0.0, 0.0},
+        {0.65, 0.7333, 0.7333},
+        {0.70, 0.9333, 0.9333},
+        {0.75, 1.0, 1.0},
+        {0.80, 1.0, 1.0},
+        {0.85, 1.0, 1.0},
+        {0.90, 0.8667, 0.8667},
+        {0.95, 0.80, 0.80},
+        {1.0, 0.80, 0.80}};
+
+    xt::xtensor<double,2> g = {
+        {0.0, 0.0, 0.0},
+        {0.05, 0.0, 0.0},
+        {0.10, 0.0, 0.0},
+        {0.15, 0.0, 0.0},
+        {0.20, 0.0, 0.0},
+        {0.25, 0.4667, 0.4667},
+        {0.30, 0.6000, 0.6000},
+        {0.35, 0.6667, 0.6667},
+        {0.40, 0.6667, 0.6667},
+        {0.45, 0.6000, 0.6000},
+        {0.50, 0.7333, 0.7333},
+        {0.55, 0.8667, 0.8667},
+        {0.60, 1.0, 1.0},
+        {0.65, 1.0, 1.0},
+        {0.70, 0.9333, 0.9333},
+        {0.75, 0.8000, 0.8000},
+        {0.80, 0.6000, 0.6000},
+        {0.85, 0.0, 0.0},
+        {0.90, 0.0, 0.0},
+        {0.95, 0.0, 0.0},
+        {1.0, 0.80, 0.80}};
+
+    xt::xtensor<double,2> b = {
+        {0.0, 0.0, 0.0},
+        {0.05, 0.5333, 0.5333},
+        {0.10, 0.6000, 0.6000},
+        {0.15, 0.6667, 0.6667},
+        {0.20, 0.8667, 0.8667},
+        {0.25, 0.8667, 0.8667},
+        {0.30, 0.8667, 0.8667},
+        {0.35, 0.6667, 0.6667},
+        {0.40, 0.5333, 0.5333},
+        {0.45, 0.0, 0.0},
+        {0.5, 0.0, 0.0},
+        {0.55, 0.0, 0.0},
+        {0.60, 0.0, 0.0},
+        {0.65, 0.0, 0.0},
+        {0.70, 0.0, 0.0},
+        {0.75, 0.0, 0.0},
+        {0.80, 0.0, 0.0},
+        {0.85, 0.0, 0.0},
+        {0.90, 0.0, 0.0},
+        {0.95, 0.0, 0.0},
+        {1.0, 0.80, 0.80}};
+
+    return detail::from_anchor(N, r, g, b);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<double,2> jet(size_t N = 256)
+{
+    xt::xtensor<double,2> r = {
+        {0.00, 0.0, 0.0},
+        {0.35, 0.0, 0.0},
+        {0.66, 1.0, 1.0},
+        {0.89, 1.0, 1.0},
+        {1.00, 0.5, 0.5}};
+
+    xt::xtensor<double,2> g = {
+        {0.000, 0.0, 0.0},
+        {0.125, 0.0, 0.0},
+        {0.375, 1.0, 1.0},
+        {0.640, 1.0, 1.0},
+        {0.910, 0.0, 0.0},
+        {1.000, 0.0, 0.0}};
+
+    xt::xtensor<double,2> b = {
+        {0.00, 0.5, 0.5},
+        {0.11, 1.0, 1.0},
+        {0.34, 1.0, 1.0},
+        {0.65, 0.0, 0.0},
+        {1.00, 0.0, 0.0}};
+
+    return detail::from_anchor(N, r, g, b);
+}
+
+// =================================================================================================
+// matplotlib colormaps - from fraction
+// =================================================================================================
+
+namespace detail
+{
+
+    inline xt::xtensor<double,2> from_fraction(size_t N, const xt::xtensor<double,2>& x)
+    {
+        size_t n = x.shape(0);
+        xt::xtensor<size_t,1> idx = xt::view(x, xt::all(), 0) * (double)N;
+        idx(0) = 0;
+        idx(n - 1) = N;
+
+        std::array<size_t,2> shape = {N, 3};
+        xt::xtensor<double,2> ret(shape);
+
+        for (size_t i = 0; i < n - 1; ++i) {
+            for (size_t j = 0; j < 3; ++j) {
+                xt::view(ret, xt::range(idx(i), idx(i + 1)), j)
+                    = x(i, j + 1)
+                    + (x(i + 1, j + 1) - x(i, j + 1))
+                    * xt::linspace<double>(0.0, 1.0, idx(i + 1) - idx(i));
+            }
+        }
+
+        return ret;
+    }
+
+} // namespace detail
+
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<double,2> terrain(size_t N = 6)
+{
+    xt::xtensor<double,2> data = {
+        {0.00, 0.2, 0.2, 0.6},
+        {0.15, 0.0, 0.6, 1.0},
+        {0.25, 0.0, 0.8, 0.4},
+        {0.50, 1.0, 1.0, 0.6},
+        {0.75, 0.5, 0.36, 0.33},
+        {1.00, 1.0, 1.0, 1.0}};
+
+    return detail::from_fraction(N, data);
+}
+
+// =================================================================================================
+// matplotlib colormaps - from GNU plot
+// =================================================================================================
+
+namespace detail
+{
+    // Gnuplot palette functions
+    inline xt::xtensor<double,1> _g0(const xt::xtensor<double,1>& x)
+    {
+        return xt::zeros_like(x);
+    }
+
+    inline xt::xtensor<double,1> _g1(const xt::xtensor<double,1>& x)
+    {
+        return 0.5 * xt::ones_like(x);
+    }
+
+    inline xt::xtensor<double,1> _g2(const xt::xtensor<double,1>& x)
+    {
+        return xt::ones_like(x);
+    }
+
+    inline xt::xtensor<double,1> _g3(const xt::xtensor<double,1>& x)
+    {
+        return x;
+    }
+
+    inline xt::xtensor<double,1> _g4(const xt::xtensor<double,1>& x)
+    {
+        return xt::pow(x, 2.0);
+    }
+
+    inline xt::xtensor<double,1> _g5(const xt::xtensor<double,1>& x)
+    {
+        return xt::pow(x, 3.0);
+    }
+
+    inline xt::xtensor<double,1> _g6(const xt::xtensor<double,1>& x)
+    {
+        return xt::pow(x, 4.0);
+    }
+
+    inline xt::xtensor<double,1> _g7(const xt::xtensor<double,1>& x)
+    {
+        return xt::sqrt(x);
+    }
+
+    inline xt::xtensor<double,1> _g8(const xt::xtensor<double,1>& x)
+    {
+        return xt::sqrt(xt::sqrt(x));
+    }
+
+    inline xt::xtensor<double,1> _g9(const xt::xtensor<double,1>& x)
+    {
+        return xt::sin(x * M_PI * 0.5);
+    }
+
+    inline xt::xtensor<double,1> _g10(const xt::xtensor<double,1>& x)
+    {
+        return xt::cos(x * M_PI * 0.5);
+    }
+
+    inline xt::xtensor<double,1> _g11(const xt::xtensor<double,1>& x)
+    {
+        return xt::abs(x - 0.5);
+    }
+
+    inline xt::xtensor<double,1> _g12(const xt::xtensor<double,1>& x)
+    {
+        return xt::pow(2.0 * x - 1.0, 2.0);
+    }
+
+    inline xt::xtensor<double,1> _g13(const xt::xtensor<double,1>& x)
+    {
+        return xt::sin(x * M_PI);
+    }
+
+    inline xt::xtensor<double,1> _g14(const xt::xtensor<double,1>& x)
+    {
+        return xt::abs(xt::cos(x * M_PI));
+    }
+
+    inline xt::xtensor<double,1> _g15(const xt::xtensor<double,1>& x)
+    {
+        return xt::sin(x * 2.0 * M_PI);
+    }
+
+    inline xt::xtensor<double,1> _g16(const xt::xtensor<double,1>& x)
+    {
+        return xt::cos(x * 2.0 * M_PI);
+    }
+
+    inline xt::xtensor<double,1> _g17(const xt::xtensor<double,1>& x)
+    {
+        return xt::abs(xt::sin(x * 2.0 * M_PI));
+    }
+
+    inline xt::xtensor<double,1> _g18(const xt::xtensor<double,1>& x)
+    {
+        return xt::abs(xt::cos(x * 2.0 * M_PI));
+    }
+
+    inline xt::xtensor<double,1> _g19(const xt::xtensor<double,1>& x)
+    {
+        return xt::abs(xt::sin(x * 4.0 * M_PI));
+    }
+
+    inline xt::xtensor<double,1> _g20(const xt::xtensor<double,1>& x)
+    {
+        return xt::abs(xt::cos(x * 4.0 * M_PI));
+    }
+
+    inline xt::xtensor<double,1> _g21(const xt::xtensor<double,1>& x)
+    {
+        return 3.0 * x;
+    }
+
+    inline xt::xtensor<double,1> _g22(const xt::xtensor<double,1>& x)
+    {
+        return 3.0 * x - 1.0;
+    }
+
+    inline xt::xtensor<double,1> _g23(const xt::xtensor<double,1>& x)
+    {
+        return 3.0 * x - 2.0;
+    }
+
+    inline xt::xtensor<double,1> _g24(const xt::xtensor<double,1>& x)
+    {
+        return xt::abs(3.0 * x - 1.0);
+    }
+
+    inline xt::xtensor<double,1> _g25(const xt::xtensor<double,1>& x)
+    {
+        return xt::abs(3.0 * x - 2.0);
+    }
+
+    inline xt::xtensor<double,1> _g26(const xt::xtensor<double,1>& x)
+    {
+        return (3.0 * x - 1.0) * 0.5;
+    }
+
+    inline xt::xtensor<double,1> _g27(const xt::xtensor<double,1>& x)
+    {
+        return (3.0 * x - 2.0) * 0.5;
+    }
+
+    inline xt::xtensor<double,1> _g28(const xt::xtensor<double,1>& x)
+    {
+        return xt::abs((3.0 * x - 1.0) * 0.5);
+    }
+
+    inline xt::xtensor<double,1> _g29(const xt::xtensor<double,1>& x)
+    {
+        return xt::abs((3.0 * x - 2.0) * 0.5);
+    }
+
+    inline xt::xtensor<double,1> _g30(const xt::xtensor<double,1>& x)
+    {
+        return x / 0.32 - 0.78125;
+    }
+
+    inline xt::xtensor<double,1> _g31(const xt::xtensor<double,1>& x)
+    {
+        return 2.0 * x - 0.84;
+    }
+
+    inline xt::xtensor<double,1> _g32(const xt::xtensor<double,1>& x)
+    {
+        auto ret = xt::zeros_like(x);
+        ret = xt::where(xt::less(x, 0.25), 4.0 * x, ret);
+        ret = xt::where(xt::greater_equal(x, 0.25) && xt::less(x, 0.92), -2.0 * x + 1.84, ret);
+        ret = xt::where(xt::greater_equal(x, 0.92), x / 0.08 - 11.5, ret);
+        return ret;
+    }
+
+    inline xt::xtensor<double,1> _g33(const xt::xtensor<double,1>& x)
+    {
+        return xt::abs(2.0 * x - 0.5);
+    }
+
+    inline xt::xtensor<double,1> _g34(const xt::xtensor<double,1>& x)
+    {
+        return 2.0 * x;
+    }
+
+    inline xt::xtensor<double,1> _g35(const xt::xtensor<double,1>& x)
+    {
+        return 2.0 * x - 0.5;
+    }
+
+    inline xt::xtensor<double,1> _g36(const xt::xtensor<double,1>& x)
+    {
+        return 2.0 * x - 1.0;
+    }
+
+    inline xt::xtensor<double,1> gnu_palette(size_t i, const xt::xtensor<double,1>& x)
+    {
+        xt::xtensor<double,1> ret;
+
+        if (i == 0) { ret = _g0(x); }
+        else if (i == 1) { ret = _g1(x); }
+        else if (i == 2) { ret = _g2(x); }
+        else if (i == 3) { ret = _g3(x); }
+        else if (i == 4) { ret = _g4(x); }
+        else if (i == 5) { ret = _g5(x); }
+        else if (i == 6) { ret = _g6(x); }
+        else if (i == 7) { ret = _g7(x); }
+        else if (i == 8) { ret = _g8(x); }
+        else if (i == 9) { ret = _g9(x); }
+        else if (i == 10) { ret = _g10(x); }
+        else if (i == 11) { ret = _g11(x); }
+        else if (i == 12) { ret = _g12(x); }
+        else if (i == 13) { ret = _g13(x); }
+        else if (i == 14) { ret = _g14(x); }
+        else if (i == 15) { ret = _g15(x); }
+        else if (i == 16) { ret = _g16(x); }
+        else if (i == 17) { ret = _g17(x); }
+        else if (i == 18) { ret = _g18(x); }
+        else if (i == 19) { ret = _g19(x); }
+        else if (i == 20) { ret = _g20(x); }
+        else if (i == 21) { ret = _g21(x); }
+        else if (i == 22) { ret = _g22(x); }
+        else if (i == 23) { ret = _g23(x); }
+        else if (i == 24) { ret = _g24(x); }
+        else if (i == 25) { ret = _g25(x); }
+        else if (i == 26) { ret = _g26(x); }
+        else if (i == 27) { ret = _g27(x); }
+        else if (i == 28) { ret = _g28(x); }
+        else if (i == 29) { ret = _g29(x); }
+        else if (i == 30) { ret = _g30(x); }
+        else if (i == 31) { ret = _g31(x); }
+        else if (i == 32) { ret = _g32(x); }
+        else if (i == 33) { ret = _g33(x); }
+        else if (i == 34) { ret = _g34(x); }
+        else if (i == 35) { ret = _g35(x); }
+        else if (i == 36) { ret = _g36(x); }
+        else { throw std::runtime_error("gnu_palette out-of-bounds"); }
+
+        ret = xt::where(xt::greater(ret, 1.0), 1.0, ret);
+        ret = xt::where(xt::less(ret, 0.0), 0.0, ret);
+
+        return ret;
+    }
+
+} // namespace detail
+
+// -------------------------------------------------------------------------------------------------
+
+inline xt::xtensor<double,2> afmhot(size_t N = 256)
+{
+    std::array<size_t,2> shape = {N, 3};
+    xt::xtensor<double,2> data(shape);
+    xt::xtensor<double,1> x = xt::linspace<double>(0.0, 1.0, N);
+    xt::view(data, xt::all(), 0) = detail::gnu_palette(34, x);
+    xt::view(data, xt::all(), 1) = detail::gnu_palette(35, x);
+    xt::view(data, xt::all(), 2) = detail::gnu_palette(36, x);
+    return data;
+}
+
+// =================================================================================================
+// matplotlib colormaps - other
 // =================================================================================================
 
 inline xt::xtensor<double,2> magma(size_t N = 256)
@@ -1878,266 +2531,14 @@ inline xt::xtensor<double,2> viridis(size_t N = 256)
 
 // -------------------------------------------------------------------------------------------------
 
-inline xt::xtensor<double,2> jet(size_t N = 256)
+inline xt::xtensor<double,2> seismic(size_t N = 5)
 {
     xt::xtensor<double,2> data = {
-      {0.00000000, 0.00000000, 0.50000000},
-      {0.00000000, 0.00000000, 0.51782531},
-      {0.00000000, 0.00000000, 0.53565062},
-      {0.00000000, 0.00000000, 0.55347594},
-      {0.00000000, 0.00000000, 0.57130125},
-      {0.00000000, 0.00000000, 0.58912656},
-      {0.00000000, 0.00000000, 0.60695187},
-      {0.00000000, 0.00000000, 0.62477718},
-      {0.00000000, 0.00000000, 0.64260250},
-      {0.00000000, 0.00000000, 0.66042781},
-      {0.00000000, 0.00000000, 0.67825312},
-      {0.00000000, 0.00000000, 0.69607843},
-      {0.00000000, 0.00000000, 0.71390374},
-      {0.00000000, 0.00000000, 0.73172906},
-      {0.00000000, 0.00000000, 0.74955437},
-      {0.00000000, 0.00000000, 0.76737968},
-      {0.00000000, 0.00000000, 0.78520499},
-      {0.00000000, 0.00000000, 0.80303030},
-      {0.00000000, 0.00000000, 0.82085561},
-      {0.00000000, 0.00000000, 0.83868093},
-      {0.00000000, 0.00000000, 0.85650624},
-      {0.00000000, 0.00000000, 0.87433155},
-      {0.00000000, 0.00000000, 0.89215686},
-      {0.00000000, 0.00000000, 0.90998217},
-      {0.00000000, 0.00000000, 0.92780749},
-      {0.00000000, 0.00000000, 0.94563280},
-      {0.00000000, 0.00000000, 0.96345811},
-      {0.00000000, 0.00000000, 0.98128342},
-      {0.00000000, 0.00000000, 0.99910873},
-      {0.00000000, 0.00000000, 1.00000000},
-      {0.00000000, 0.00000000, 1.00000000},
-      {0.00000000, 0.00000000, 1.00000000},
-      {0.00000000, 0.00196078, 1.00000000},
-      {0.00000000, 0.01764706, 1.00000000},
-      {0.00000000, 0.03333333, 1.00000000},
-      {0.00000000, 0.04901961, 1.00000000},
-      {0.00000000, 0.06470588, 1.00000000},
-      {0.00000000, 0.08039216, 1.00000000},
-      {0.00000000, 0.09607843, 1.00000000},
-      {0.00000000, 0.11176471, 1.00000000},
-      {0.00000000, 0.12745098, 1.00000000},
-      {0.00000000, 0.14313725, 1.00000000},
-      {0.00000000, 0.15882353, 1.00000000},
-      {0.00000000, 0.17450980, 1.00000000},
-      {0.00000000, 0.19019608, 1.00000000},
-      {0.00000000, 0.20588235, 1.00000000},
-      {0.00000000, 0.22156863, 1.00000000},
-      {0.00000000, 0.23725490, 1.00000000},
-      {0.00000000, 0.25294118, 1.00000000},
-      {0.00000000, 0.26862745, 1.00000000},
-      {0.00000000, 0.28431373, 1.00000000},
-      {0.00000000, 0.30000000, 1.00000000},
-      {0.00000000, 0.31568627, 1.00000000},
-      {0.00000000, 0.33137255, 1.00000000},
-      {0.00000000, 0.34705882, 1.00000000},
-      {0.00000000, 0.36274510, 1.00000000},
-      {0.00000000, 0.37843137, 1.00000000},
-      {0.00000000, 0.39411765, 1.00000000},
-      {0.00000000, 0.40980392, 1.00000000},
-      {0.00000000, 0.42549020, 1.00000000},
-      {0.00000000, 0.44117647, 1.00000000},
-      {0.00000000, 0.45686275, 1.00000000},
-      {0.00000000, 0.47254902, 1.00000000},
-      {0.00000000, 0.48823529, 1.00000000},
-      {0.00000000, 0.50392157, 1.00000000},
-      {0.00000000, 0.51960784, 1.00000000},
-      {0.00000000, 0.53529412, 1.00000000},
-      {0.00000000, 0.55098039, 1.00000000},
-      {0.00000000, 0.56666667, 1.00000000},
-      {0.00000000, 0.58235294, 1.00000000},
-      {0.00000000, 0.59803922, 1.00000000},
-      {0.00000000, 0.61372549, 1.00000000},
-      {0.00000000, 0.62941176, 1.00000000},
-      {0.00000000, 0.64509804, 1.00000000},
-      {0.00000000, 0.66078431, 1.00000000},
-      {0.00000000, 0.67647059, 1.00000000},
-      {0.00000000, 0.69215686, 1.00000000},
-      {0.00000000, 0.70784314, 1.00000000},
-      {0.00000000, 0.72352941, 1.00000000},
-      {0.00000000, 0.73921569, 1.00000000},
-      {0.00000000, 0.75490196, 1.00000000},
-      {0.00000000, 0.77058824, 1.00000000},
-      {0.00000000, 0.78627451, 1.00000000},
-      {0.00000000, 0.80196078, 1.00000000},
-      {0.00000000, 0.81764706, 1.00000000},
-      {0.00000000, 0.83333333, 1.00000000},
-      {0.00000000, 0.84901961, 1.00000000},
-      {0.00000000, 0.86470588, 0.99620493},
-      {0.00000000, 0.88039216, 0.98355471},
-      {0.00000000, 0.89607843, 0.97090449},
-      {0.00948767, 0.91176471, 0.95825427},
-      {0.02213789, 0.92745098, 0.94560405},
-      {0.03478811, 0.94313725, 0.93295383},
-      {0.04743833, 0.95882353, 0.92030361},
-      {0.06008855, 0.97450980, 0.90765338},
-      {0.07273877, 0.99019608, 0.89500316},
-      {0.08538899, 1.00000000, 0.88235294},
-      {0.09803922, 1.00000000, 0.86970272},
-      {0.11068944, 1.00000000, 0.85705250},
-      {0.12333966, 1.00000000, 0.84440228},
-      {0.13598988, 1.00000000, 0.83175206},
-      {0.14864010, 1.00000000, 0.81910183},
-      {0.16129032, 1.00000000, 0.80645161},
-      {0.17394054, 1.00000000, 0.79380139},
-      {0.18659077, 1.00000000, 0.78115117},
-      {0.19924099, 1.00000000, 0.76850095},
-      {0.21189121, 1.00000000, 0.75585073},
-      {0.22454143, 1.00000000, 0.74320051},
-      {0.23719165, 1.00000000, 0.73055028},
-      {0.24984187, 1.00000000, 0.71790006},
-      {0.26249209, 1.00000000, 0.70524984},
-      {0.27514231, 1.00000000, 0.69259962},
-      {0.28779254, 1.00000000, 0.67994940},
-      {0.30044276, 1.00000000, 0.66729918},
-      {0.31309298, 1.00000000, 0.65464896},
-      {0.32574320, 1.00000000, 0.64199873},
-      {0.33839342, 1.00000000, 0.62934851},
-      {0.35104364, 1.00000000, 0.61669829},
-      {0.36369386, 1.00000000, 0.60404807},
-      {0.37634409, 1.00000000, 0.59139785},
-      {0.38899431, 1.00000000, 0.57874763},
-      {0.40164453, 1.00000000, 0.56609741},
-      {0.41429475, 1.00000000, 0.55344719},
-      {0.42694497, 1.00000000, 0.54079696},
-      {0.43959519, 1.00000000, 0.52814674},
-      {0.45224541, 1.00000000, 0.51549652},
-      {0.46489564, 1.00000000, 0.50284630},
-      {0.47754586, 1.00000000, 0.49019608},
-      {0.49019608, 1.00000000, 0.47754586},
-      {0.50284630, 1.00000000, 0.46489564},
-      {0.51549652, 1.00000000, 0.45224541},
-      {0.52814674, 1.00000000, 0.43959519},
-      {0.54079696, 1.00000000, 0.42694497},
-      {0.55344719, 1.00000000, 0.41429475},
-      {0.56609741, 1.00000000, 0.40164453},
-      {0.57874763, 1.00000000, 0.38899431},
-      {0.59139785, 1.00000000, 0.37634409},
-      {0.60404807, 1.00000000, 0.36369386},
-      {0.61669829, 1.00000000, 0.35104364},
-      {0.62934851, 1.00000000, 0.33839342},
-      {0.64199873, 1.00000000, 0.32574320},
-      {0.65464896, 1.00000000, 0.31309298},
-      {0.66729918, 1.00000000, 0.30044276},
-      {0.67994940, 1.00000000, 0.28779254},
-      {0.69259962, 1.00000000, 0.27514231},
-      {0.70524984, 1.00000000, 0.26249209},
-      {0.71790006, 1.00000000, 0.24984187},
-      {0.73055028, 1.00000000, 0.23719165},
-      {0.74320051, 1.00000000, 0.22454143},
-      {0.75585073, 1.00000000, 0.21189121},
-      {0.76850095, 1.00000000, 0.19924099},
-      {0.78115117, 1.00000000, 0.18659077},
-      {0.79380139, 1.00000000, 0.17394054},
-      {0.80645161, 1.00000000, 0.16129032},
-      {0.81910183, 1.00000000, 0.14864010},
-      {0.83175206, 1.00000000, 0.13598988},
-      {0.84440228, 1.00000000, 0.12333966},
-      {0.85705250, 1.00000000, 0.11068944},
-      {0.86970272, 1.00000000, 0.09803922},
-      {0.88235294, 1.00000000, 0.08538899},
-      {0.89500316, 1.00000000, 0.07273877},
-      {0.90765338, 1.00000000, 0.06008855},
-      {0.92030361, 1.00000000, 0.04743833},
-      {0.93295383, 1.00000000, 0.03478811},
-      {0.94560405, 0.98838054, 0.02213789},
-      {0.95825427, 0.97385621, 0.00948767},
-      {0.97090449, 0.95933188, 0.00000000},
-      {0.98355471, 0.94480755, 0.00000000},
-      {0.99620493, 0.93028322, 0.00000000},
-      {1.00000000, 0.91575890, 0.00000000},
-      {1.00000000, 0.90123457, 0.00000000},
-      {1.00000000, 0.88671024, 0.00000000},
-      {1.00000000, 0.87218591, 0.00000000},
-      {1.00000000, 0.85766158, 0.00000000},
-      {1.00000000, 0.84313725, 0.00000000},
-      {1.00000000, 0.82861293, 0.00000000},
-      {1.00000000, 0.81408860, 0.00000000},
-      {1.00000000, 0.79956427, 0.00000000},
-      {1.00000000, 0.78503994, 0.00000000},
-      {1.00000000, 0.77051561, 0.00000000},
-      {1.00000000, 0.75599129, 0.00000000},
-      {1.00000000, 0.74146696, 0.00000000},
-      {1.00000000, 0.72694263, 0.00000000},
-      {1.00000000, 0.71241830, 0.00000000},
-      {1.00000000, 0.69789397, 0.00000000},
-      {1.00000000, 0.68336964, 0.00000000},
-      {1.00000000, 0.66884532, 0.00000000},
-      {1.00000000, 0.65432099, 0.00000000},
-      {1.00000000, 0.63979666, 0.00000000},
-      {1.00000000, 0.62527233, 0.00000000},
-      {1.00000000, 0.61074800, 0.00000000},
-      {1.00000000, 0.59622367, 0.00000000},
-      {1.00000000, 0.58169935, 0.00000000},
-      {1.00000000, 0.56717502, 0.00000000},
-      {1.00000000, 0.55265069, 0.00000000},
-      {1.00000000, 0.53812636, 0.00000000},
-      {1.00000000, 0.52360203, 0.00000000},
-      {1.00000000, 0.50907771, 0.00000000},
-      {1.00000000, 0.49455338, 0.00000000},
-      {1.00000000, 0.48002905, 0.00000000},
-      {1.00000000, 0.46550472, 0.00000000},
-      {1.00000000, 0.45098039, 0.00000000},
-      {1.00000000, 0.43645606, 0.00000000},
-      {1.00000000, 0.42193174, 0.00000000},
-      {1.00000000, 0.40740741, 0.00000000},
-      {1.00000000, 0.39288308, 0.00000000},
-      {1.00000000, 0.37835875, 0.00000000},
-      {1.00000000, 0.36383442, 0.00000000},
-      {1.00000000, 0.34931009, 0.00000000},
-      {1.00000000, 0.33478577, 0.00000000},
-      {1.00000000, 0.32026144, 0.00000000},
-      {1.00000000, 0.30573711, 0.00000000},
-      {1.00000000, 0.29121278, 0.00000000},
-      {1.00000000, 0.27668845, 0.00000000},
-      {1.00000000, 0.26216412, 0.00000000},
-      {1.00000000, 0.24763980, 0.00000000},
-      {1.00000000, 0.23311547, 0.00000000},
-      {1.00000000, 0.21859114, 0.00000000},
-      {1.00000000, 0.20406681, 0.00000000},
-      {1.00000000, 0.18954248, 0.00000000},
-      {1.00000000, 0.17501816, 0.00000000},
-      {1.00000000, 0.16049383, 0.00000000},
-      {1.00000000, 0.14596950, 0.00000000},
-      {1.00000000, 0.13144517, 0.00000000},
-      {1.00000000, 0.11692084, 0.00000000},
-      {1.00000000, 0.10239651, 0.00000000},
-      {1.00000000, 0.08787219, 0.00000000},
-      {0.99910873, 0.07334786, 0.00000000},
-      {0.98128342, 0.05882353, 0.00000000},
-      {0.96345811, 0.04429920, 0.00000000},
-      {0.94563280, 0.02977487, 0.00000000},
-      {0.92780749, 0.01525054, 0.00000000},
-      {0.90998217, 0.00072622, 0.00000000},
-      {0.89215686, 0.00000000, 0.00000000},
-      {0.87433155, 0.00000000, 0.00000000},
-      {0.85650624, 0.00000000, 0.00000000},
-      {0.83868093, 0.00000000, 0.00000000},
-      {0.82085561, 0.00000000, 0.00000000},
-      {0.80303030, 0.00000000, 0.00000000},
-      {0.78520499, 0.00000000, 0.00000000},
-      {0.76737968, 0.00000000, 0.00000000},
-      {0.74955437, 0.00000000, 0.00000000},
-      {0.73172906, 0.00000000, 0.00000000},
-      {0.71390374, 0.00000000, 0.00000000},
-      {0.69607843, 0.00000000, 0.00000000},
-      {0.67825312, 0.00000000, 0.00000000},
-      {0.66042781, 0.00000000, 0.00000000},
-      {0.64260250, 0.00000000, 0.00000000},
-      {0.62477718, 0.00000000, 0.00000000},
-      {0.60695187, 0.00000000, 0.00000000},
-      {0.58912656, 0.00000000, 0.00000000},
-      {0.57130125, 0.00000000, 0.00000000},
-      {0.55347594, 0.00000000, 0.00000000},
-      {0.53565062, 0.00000000, 0.00000000},
-      {0.51782531, 0.00000000, 0.00000000},
-      {0.50000000, 0.00000000, 0.00000000},
-    };
+        {0.0, 0.0, 0.3},
+        {0.0, 0.0, 1.0},
+        {1.0, 1.0, 1.0},
+        {1.0, 0.0, 0.0},
+        {0.5, 0.0, 0.0}};
 
     return interp(data, N);
 }
@@ -2740,200 +3141,58 @@ inline xt::xtensor<double,2> YellowOrange(size_t N = 1)
 // inverse colormaps
 // =================================================================================================
 
-inline xt::xtensor<double,2> Accent_r(size_t N = 8)
-{
-    return xt::flip(Accent(N), 0);
-}
-
-inline xt::xtensor<double,2> Dark2_r(size_t N = 8)
-{
-    return xt::flip(Dark2(N), 0);
-}
-
-inline xt::xtensor<double,2> Paired_r(size_t N = 12)
-{
-    return xt::flip(Paired(N), 0);
-}
-
-inline xt::xtensor<double,2> Spectral_r(size_t N = 11)
-{
-    return xt::flip(Spectral(   ), 0);
-}
-
-inline xt::xtensor<double,2> Pastel1_r(size_t N = 9)
-{
-    return xt::flip(Pastel1(N), 0);
-}
-
-inline xt::xtensor<double,2> Pastel2_r(size_t N = 8)
-{
-    return xt::flip(Pastel2(N), 0);
-}
-
-inline xt::xtensor<double,2> Set1_r(size_t N = 9)
-{
-    return xt::flip(Set1(N), 0);
-}
-
-inline xt::xtensor<double,2> Set2_r(size_t N = 8)
-{
-    return xt::flip(Set2(N), 0);
-}
-
-inline xt::xtensor<double,2> Set3_r(size_t N = 12)
-{
-    return xt::flip(Set3(N), 0);
-}
-
-inline xt::xtensor<double,2> Blues_r(size_t N = 9)
-{
-    return xt::flip(Blues(N), 0);
-}
-
-inline xt::xtensor<double,2> Greens_r(size_t N = 9)
-{
-    return xt::flip(Greens(N), 0);
-}
-
-inline xt::xtensor<double,2> Greys_r(size_t N = 2)
-{
-    return xt::flip(Greys(N), 0);
-}
-
-inline xt::xtensor<double,2> Oranges_r(size_t N = 9)
-{
-    return xt::flip(Oranges(N), 0);
-}
-
-inline xt::xtensor<double,2> Purples_r(size_t N = 9)
-{
-    return xt::flip(Purples(N), 0);
-}
-
-inline xt::xtensor<double,2> Reds_r(size_t N = 9)
-{
-    return xt::flip(Reds(N), 0);
-}
-
-inline xt::xtensor<double,2> BuPu_r(size_t N = 9)
-{
-    return xt::flip(BuPu(N), 0);
-}
-
-inline xt::xtensor<double,2> GnBu_r(size_t N = 9)
-{
-    return xt::flip(GnBu(N), 0);
-}
-
-inline xt::xtensor<double,2> PuBu_r(size_t N = 9)
-{
-    return xt::flip(PuBu(N), 0);
-}
-
-inline xt::xtensor<double,2> PuBuGn_r(size_t N = 9)
-{
-    return xt::flip(PuBuGn(N), 0);
-}
-
-inline xt::xtensor<double,2> PuRd_r(size_t N = 9)
-{
-    return xt::flip(PuRd(N), 0);
-}
-
-inline xt::xtensor<double,2> RdPu_r(size_t N = 9)
-{
-    return xt::flip(RdPu(N), 0);
-}
-
-inline xt::xtensor<double,2> OrRd_r(size_t N = 9)
-{
-    return xt::flip(OrRd(N), 0);
-}
-
-inline xt::xtensor<double,2> RdOrYl_r(size_t N = 9)
-{
-    return xt::flip(RdOrYl(N), 0);
-}
-
-inline xt::xtensor<double,2> YlGn_r(size_t N = 9)
-{
-    return xt::flip(YlGn(N), 0);
-}
-
-inline xt::xtensor<double,2> YlGnBu_r(size_t N = 9)
-{
-    return xt::flip(YlGnBu(N), 0);
-}
-
-inline xt::xtensor<double,2> YlOrRd_r(size_t N = 9)
-{
-    return xt::flip(YlOrRd(N), 0);
-}
-
-inline xt::xtensor<double,2> BrBG_r(size_t N = 11)
-{
-    return xt::flip(BrBG(N), 0);
-}
-
-inline xt::xtensor<double,2> PuOr_r(size_t N = 11)
-{
-    return xt::flip(PuOr(N), 0);
-}
-
-inline xt::xtensor<double,2> RdBu_r(size_t N = 11)
-{
-    return xt::flip(RdBu(N), 0);
-}
-
-inline xt::xtensor<double,2> RdGy_r(size_t N = 11)
-{
-    return xt::flip(RdGy(N), 0);
-}
-
-inline xt::xtensor<double,2> RdYlBu_r(size_t N = 11)
-{
-    return xt::flip(RdYlBu(N), 0);
-}
-
-inline xt::xtensor<double,2> RdYlGn_r(size_t N = 11)
-{
-    return xt::flip(RdYlGn(N), 0);
-}
-
-inline xt::xtensor<double,2> PiYG_r(size_t N = 11)
-{
-    return xt::flip(PiYG(N), 0);
-}
-
-inline xt::xtensor<double,2> PRGn_r(size_t N = 11)
-{
-    return xt::flip(PRGn(N), 0);
-}
-
-inline xt::xtensor<double,2> magma_r(size_t N = 256)
-{
-    return xt::flip(magma(N), 0);
-}
-
-inline xt::xtensor<double,2> inferno_r(size_t N = 256)
-{
-    return xt::flip(inferno(N), 0);
-}
-
-inline xt::xtensor<double,2> plasma_r(size_t N = 256)
-{
-    return xt::flip(plasma(N), 0);
-}
-
-inline xt::xtensor<double,2> viridis_r(size_t N = 256)
-{
-    return xt::flip(viridis(N), 0);
-}
-
-inline xt::xtensor<double,2> jet_r(size_t N = 256)
-{
-    return xt::flip(jet(N), 0);
-}
+inline xt::xtensor<double,2> Accent_r(size_t N = 8) { return xt::flip(Accent(N), 0); }
+inline xt::xtensor<double,2> Dark2_r(size_t N = 8) { return xt::flip(Dark2(N), 0); }
+inline xt::xtensor<double,2> Paired_r(size_t N = 12) { return xt::flip(Paired(N), 0); }
+inline xt::xtensor<double,2> Spectral_r(size_t N = 11) { return xt::flip(Spectral(   ), 0); }
+inline xt::xtensor<double,2> Pastel1_r(size_t N = 9) { return xt::flip(Pastel1(N), 0); }
+inline xt::xtensor<double,2> Pastel2_r(size_t N = 8) { return xt::flip(Pastel2(N), 0); }
+inline xt::xtensor<double,2> Set1_r(size_t N = 9) { return xt::flip(Set1(N), 0); }
+inline xt::xtensor<double,2> Set2_r(size_t N = 8) { return xt::flip(Set2(N), 0); }
+inline xt::xtensor<double,2> Set3_r(size_t N = 12) { return xt::flip(Set3(N), 0); }
+inline xt::xtensor<double,2> Blues_r(size_t N = 9) { return xt::flip(Blues(N), 0); }
+inline xt::xtensor<double,2> Greens_r(size_t N = 9) { return xt::flip(Greens(N), 0); }
+inline xt::xtensor<double,2> Greys_r(size_t N = 2) { return xt::flip(Greys(N), 0); }
+inline xt::xtensor<double,2> Oranges_r(size_t N = 9) { return xt::flip(Oranges(N), 0); }
+inline xt::xtensor<double,2> Purples_r(size_t N = 9) { return xt::flip(Purples(N), 0); }
+inline xt::xtensor<double,2> Reds_r(size_t N = 9) { return xt::flip(Reds(N), 0); }
+inline xt::xtensor<double,2> BuPu_r(size_t N = 9) { return xt::flip(BuPu(N), 0); }
+inline xt::xtensor<double,2> GnBu_r(size_t N = 9) { return xt::flip(GnBu(N), 0); }
+inline xt::xtensor<double,2> PuBu_r(size_t N = 9) { return xt::flip(PuBu(N), 0); }
+inline xt::xtensor<double,2> PuBuGn_r(size_t N = 9) { return xt::flip(PuBuGn(N), 0); }
+inline xt::xtensor<double,2> PuRd_r(size_t N = 9) { return xt::flip(PuRd(N), 0); }
+inline xt::xtensor<double,2> RdPu_r(size_t N = 9) { return xt::flip(RdPu(N), 0); }
+inline xt::xtensor<double,2> OrRd_r(size_t N = 9) { return xt::flip(OrRd(N), 0); }
+inline xt::xtensor<double,2> RdOrYl_r(size_t N = 9) { return xt::flip(RdOrYl(N), 0); }
+inline xt::xtensor<double,2> YlGn_r(size_t N = 9) { return xt::flip(YlGn(N), 0); }
+inline xt::xtensor<double,2> YlGnBu_r(size_t N = 9) { return xt::flip(YlGnBu(N), 0); }
+inline xt::xtensor<double,2> YlOrRd_r(size_t N = 9) { return xt::flip(YlOrRd(N), 0); }
+inline xt::xtensor<double,2> BrBG_r(size_t N = 11) { return xt::flip(BrBG(N), 0); }
+inline xt::xtensor<double,2> PuOr_r(size_t N = 11) { return xt::flip(PuOr(N), 0); }
+inline xt::xtensor<double,2> RdBu_r(size_t N = 11) { return xt::flip(RdBu(N), 0); }
+inline xt::xtensor<double,2> RdGy_r(size_t N = 11) { return xt::flip(RdGy(N), 0); }
+inline xt::xtensor<double,2> RdYlBu_r(size_t N = 11) { return xt::flip(RdYlBu(N), 0); }
+inline xt::xtensor<double,2> RdYlGn_r(size_t N = 11) { return xt::flip(RdYlGn(N), 0); }
+inline xt::xtensor<double,2> PiYG_r(size_t N = 11) { return xt::flip(PiYG(N), 0); }
+inline xt::xtensor<double,2> PRGn_r(size_t N = 11) { return xt::flip(PRGn(N), 0); }
+inline xt::xtensor<double,2> spring_r(size_t N = 256) { return xt::flip(spring(N), 0); }
+inline xt::xtensor<double,2> summer_r(size_t N = 256) { return xt::flip(summer(N), 0); }
+inline xt::xtensor<double,2> autumn_r(size_t N = 256) { return xt::flip(autumn(N), 0); }
+inline xt::xtensor<double,2> winter_r(size_t N = 256) { return xt::flip(winter(N), 0); }
+inline xt::xtensor<double,2> bone_r(size_t N = 256) { return xt::flip(bone(N), 0); }
+inline xt::xtensor<double,2> cool_r(size_t N = 256) { return xt::flip(cool(N), 0); }
+inline xt::xtensor<double,2> hot_r(size_t N = 256) { return xt::flip(hot(N), 0); }
+inline xt::xtensor<double,2> copper_r(size_t N = 256) { return xt::flip(copper(N), 0); }
+inline xt::xtensor<double,2> hsv_r(size_t N = 256) { return xt::flip(hsv(N), 0); }
+inline xt::xtensor<double,2> nipy_spectral_r(size_t N = 256) { return xt::flip(nipy_spectral(N), 0); }
+inline xt::xtensor<double,2> jet_r(size_t N = 256) { return xt::flip(jet(N), 0); }
+inline xt::xtensor<double,2> terrain_r(size_t N = 5) { return xt::flip(terrain(N), 0); }
+inline xt::xtensor<double,2> seismic_r(size_t N = 6) { return xt::flip(seismic(N), 0); }
+inline xt::xtensor<double,2> afmhot_r(size_t N = 256) { return xt::flip(afmhot(N), 0); }
+inline xt::xtensor<double,2> magma_r(size_t N = 256) { return xt::flip(magma(N), 0); }
+inline xt::xtensor<double,2> inferno_r(size_t N = 256) { return xt::flip(inferno(N), 0); }
+inline xt::xtensor<double,2> plasma_r(size_t N = 256) { return xt::flip(plasma(N), 0); }
+inline xt::xtensor<double,2> viridis_r(size_t N = 256) { return xt::flip(viridis(N), 0); }
 
 // =================================================================================================
 // read from string
@@ -2941,609 +3200,183 @@ inline xt::xtensor<double,2> jet_r(size_t N = 256)
 
 inline xt::xtensor<double,2> colormap(const std::string& cmap, size_t N = 256)
 {
-    if (cmap == "Accent") {
-        return Accent(N);
-    }
-
-    if (cmap == "Dark2") {
-        return Dark2(N);
-    }
-
-    if (cmap == "Paired") {
-        return Paired(N);
-    }
-
-    if (cmap == "Spectral") {
-        return Spectral(N);
-    }
-
-    if (cmap == "Pastel1") {
-        return Pastel1(N);
-    }
-
-    if (cmap == "Pastel2") {
-        return Pastel2(N);
-    }
-
-    if (cmap == "Set1") {
-        return Set1(N);
-    }
-
-    if (cmap == "Set2") {
-        return Set2(N);
-    }
-
-    if (cmap == "Set3") {
-        return Set3(N);
-    }
-
-    if (cmap == "Blues") {
-        return Blues(N);
-    }
-
-    if (cmap == "Greens") {
-        return Greens(N);
-    }
-
-    if (cmap == "Greys") {
-        return Greys(N);
-    }
-
-    if (cmap == "Oranges") {
-        return Oranges(N);
-    }
-
-    if (cmap == "Purples") {
-        return Purples(N);
-    }
-
-    if (cmap == "Reds") {
-        return Reds(N);
-    }
-
-    if (cmap == "BuPu") {
-        return BuPu(N);
-    }
-
-    if (cmap == "GnBu") {
-        return GnBu(N);
-    }
-
-    if (cmap == "PuBu") {
-        return PuBu(N);
-    }
-
-    if (cmap == "PuBuGn") {
-        return PuBuGn(N);
-    }
-
-    if (cmap == "PuRd") {
-        return PuRd(N);
-    }
-
-    if (cmap == "RdPu") {
-        return RdPu(N);
-    }
-
-    if (cmap == "OrRd") {
-        return OrRd(N);
-    }
-
-    if (cmap == "RdOrYl") {
-        return RdOrYl(N);
-    }
-
-    if (cmap == "YlGn") {
-        return YlGn(N);
-    }
-
-    if (cmap == "YlGnBu") {
-        return YlGnBu(N);
-    }
-
-    if (cmap == "YlOrRd") {
-        return YlOrRd(N);
-    }
-
-    if (cmap == "BrBG") {
-        return BrBG(N);
-    }
-
-    if (cmap == "PuOr") {
-        return PuOr(N);
-    }
-
-    if (cmap == "RdBu") {
-        return RdBu(N);
-    }
-
-    if (cmap == "RdGy") {
-        return RdGy(N);
-    }
-
-    if (cmap == "RdYlBu") {
-        return RdYlBu(N);
-    }
-
-    if (cmap == "RdYlGn") {
-        return RdYlGn(N);
-    }
-
-    if (cmap == "PiYG") {
-        return PiYG(N);
-    }
-
-    if (cmap == "PRGn") {
-        return PRGn(N);
-    }
-
-    if (cmap == "magma") {
-        return magma(N);
-    }
-
-    if (cmap == "inferno") {
-        return inferno(N);
-    }
-
-    if (cmap == "plasma") {
-        return plasma(N);
-    }
-
-    if (cmap == "viridis") {
-        return viridis(N);
-    }
-
-    if (cmap == "jet") {
-        return jet(N);
-    }
-
-    if (cmap == "Accent_r") {
-        return Accent_r(N);
-    }
-
-    if (cmap == "Dark2_r") {
-        return Dark2_r(N);
-    }
-
-    if (cmap == "Paired_r") {
-        return Paired_r(N);
-    }
-
-    if (cmap == "Spectral_r") {
-        return Spectral_r(N);
-    }
-
-    if (cmap == "Pastel1_r") {
-        return Pastel1_r(N);
-    }
-
-    if (cmap == "Pastel2_r") {
-        return Pastel2_r(N);
-    }
-
-    if (cmap == "Set1_r") {
-        return Set1_r(N);
-    }
-
-    if (cmap == "Set2_r") {
-        return Set2_r(N);
-    }
-
-    if (cmap == "Set3_r") {
-        return Set3_r(N);
-    }
-
-    if (cmap == "Blues_r") {
-        return Blues_r(N);
-    }
-
-    if (cmap == "Greens_r") {
-        return Greens_r(N);
-    }
-
-    if (cmap == "Greys_r") {
-        return Greys_r(N);
-    }
-
-    if (cmap == "Oranges_r") {
-        return Oranges_r(N);
-    }
-
-    if (cmap == "Purples_r") {
-        return Purples_r(N);
-    }
-
-    if (cmap == "Reds_r") {
-        return Reds_r(N);
-    }
-
-    if (cmap == "BuPu_r") {
-        return BuPu_r(N);
-    }
-
-    if (cmap == "GnBu_r") {
-        return GnBu_r(N);
-    }
-
-    if (cmap == "PuBu_r") {
-        return PuBu_r(N);
-    }
-
-    if (cmap == "PuBuGn_r") {
-        return PuBuGn_r(N);
-    }
-
-    if (cmap == "PuRd_r") {
-        return PuRd_r(N);
-    }
-
-    if (cmap == "RdPu_r") {
-        return RdPu_r(N);
-    }
-
-    if (cmap == "OrRd_r") {
-        return OrRd_r(N);
-    }
-
-    if (cmap == "RdOrYl_r") {
-        return RdOrYl_r(N);
-    }
-
-    if (cmap == "YlGn_r") {
-        return YlGn_r(N);
-    }
-
-    if (cmap == "YlGnBu_r") {
-        return YlGnBu_r(N);
-    }
-
-    if (cmap == "YlOrRd_r") {
-        return YlOrRd_r(N);
-    }
-
-    if (cmap == "BrBG_r") {
-        return BrBG_r(N);
-    }
-
-    if (cmap == "PuOr_r") {
-        return PuOr_r(N);
-    }
-
-    if (cmap == "RdBu_r") {
-        return RdBu_r(N);
-    }
-
-    if (cmap == "RdGy_r") {
-        return RdGy_r(N);
-    }
-
-    if (cmap == "RdYlBu_r") {
-        return RdYlBu_r(N);
-    }
-
-    if (cmap == "RdYlGn_r") {
-        return RdYlGn_r(N);
-    }
-
-    if (cmap == "PiYG_r") {
-        return PiYG_r(N);
-    }
-
-    if (cmap == "PRGn_r") {
-        return PRGn_r(N);
-    }
-
-    if (cmap == "magma_r") {
-        return magma_r(N);
-    }
-
-    if (cmap == "inferno_r") {
-        return inferno_r(N);
-    }
-
-    if (cmap == "plasma_r") {
-        return plasma_r(N);
-    }
-
-    if (cmap == "viridis_r") {
-        return viridis_r(N);
-    }
-
-    if (cmap == "jet_r") {
-        return jet_r(N);
-    }
-
-    if (cmap == "White") {
-        return White(N);
-    }
-
-    if (cmap == "Grey") {
-        return Grey(N);
-    }
-
-    if (cmap == "Black") {
-        return Black(N);
-    }
-
-    if (cmap == "Red") {
-        return Red(N);
-    }
-
-    if (cmap == "Blue") {
-        return Blue(N);
-    }
-
-    if (cmap == "tuewarmred") {
-        return tuewarmred(N);
-    }
-
-    if (cmap == "tuedarkblue") {
-        return tuedarkblue(N);
-    }
-
-    if (cmap == "tueblue") {
-        return tueblue(N);
-    }
-
-    if (cmap == "tuelightblue") {
-        return tuelightblue(N);
-    }
-
-    if (cmap == "Apricot") {
-        return Apricot(N);
-    }
-
-    if (cmap == "Aquamarine") {
-        return Aquamarine(N);
-    }
-
-    if (cmap == "Bittersweet") {
-        return Bittersweet(N);
-    }
-
-    if (cmap == "BlueGreen") {
-        return BlueGreen(N);
-    }
-
-    if (cmap == "BlueViolet") {
-        return BlueViolet(N);
-    }
-
-    if (cmap == "BrickRed") {
-        return BrickRed(N);
-    }
-
-    if (cmap == "Brown") {
-        return Brown(N);
-    }
-
-    if (cmap == "BurntOrange") {
-        return BurntOrange(N);
-    }
-
-    if (cmap == "CadetBlue") {
-        return CadetBlue(N);
-    }
-
-    if (cmap == "CarnationPink") {
-        return CarnationPink(N);
-    }
-
-    if (cmap == "Cerulean") {
-        return Cerulean(N);
-    }
-
-    if (cmap == "CornflowerBlue") {
-        return CornflowerBlue(N);
-    }
-
-    if (cmap == "Cyan") {
-        return Cyan(N);
-    }
-
-    if (cmap == "Dandelion") {
-        return Dandelion(N);
-    }
-
-    if (cmap == "DarkOrchid") {
-        return DarkOrchid(N);
-    }
-
-    if (cmap == "Emerald") {
-        return Emerald(N);
-    }
-
-    if (cmap == "ForestGreen") {
-        return ForestGreen(N);
-    }
-
-    if (cmap == "Fuchsia") {
-        return Fuchsia(N);
-    }
-
-    if (cmap == "Goldenrod") {
-        return Goldenrod(N);
-    }
-
-    if (cmap == "Gray") {
-        return Gray(N);
-    }
-
-    if (cmap == "Green") {
-        return Green(N);
-    }
-
-    if (cmap == "GreenYellow") {
-        return GreenYellow(N);
-    }
-
-    if (cmap == "JungleGreen") {
-        return JungleGreen(N);
-    }
-
-    if (cmap == "Lavender") {
-        return Lavender(N);
-    }
-
-    if (cmap == "LimeGreen") {
-        return LimeGreen(N);
-    }
-
-    if (cmap == "Magenta") {
-        return Magenta(N);
-    }
-
-    if (cmap == "Mahogany") {
-        return Mahogany(N);
-    }
-
-    if (cmap == "Maroon") {
-        return Maroon(N);
-    }
-
-    if (cmap == "Melon") {
-        return Melon(N);
-    }
-
-    if (cmap == "MidnightBlue") {
-        return MidnightBlue(N);
-    }
-
-    if (cmap == "Mulberry") {
-        return Mulberry(N);
-    }
-
-    if (cmap == "NavyBlue") {
-        return NavyBlue(N);
-    }
-
-    if (cmap == "OliveGreen") {
-        return OliveGreen(N);
-    }
-
-    if (cmap == "Orange") {
-        return Orange(N);
-    }
-
-    if (cmap == "OrangeRed") {
-        return OrangeRed(N);
-    }
-
-    if (cmap == "Orchid") {
-        return Orchid(N);
-    }
-
-    if (cmap == "Peach") {
-        return Peach(N);
-    }
-
-    if (cmap == "Periwinkle") {
-        return Periwinkle(N);
-    }
-
-    if (cmap == "PineGreen") {
-        return PineGreen(N);
-    }
-
-    if (cmap == "Plum") {
-        return Plum(N);
-    }
-
-    if (cmap == "ProcessBlue") {
-        return ProcessBlue(N);
-    }
-
-    if (cmap == "Purple") {
-        return Purple(N);
-    }
-
-    if (cmap == "RawSienna") {
-        return RawSienna(N);
-    }
-
-    if (cmap == "RedOrange") {
-        return RedOrange(N);
-    }
-
-    if (cmap == "RedViolet") {
-        return RedViolet(N);
-    }
-
-    if (cmap == "Rhodamine") {
-        return Rhodamine(N);
-    }
-
-    if (cmap == "RoyalBlue") {
-        return RoyalBlue(N);
-    }
-
-    if (cmap == "RoyalPurple") {
-        return RoyalPurple(N);
-    }
-
-    if (cmap == "RubineRed") {
-        return RubineRed(N);
-    }
-
-    if (cmap == "Salmon") {
-        return Salmon(N);
-    }
-
-    if (cmap == "SeaGreen") {
-        return SeaGreen(N);
-    }
-
-    if (cmap == "Sepia") {
-        return Sepia(N);
-    }
-
-    if (cmap == "SkyBlue") {
-        return SkyBlue(N);
-    }
-
-    if (cmap == "SpringGreen") {
-        return SpringGreen(N);
-    }
-
-    if (cmap == "Tan") {
-        return Tan(N);
-    }
-
-    if (cmap == "TealBlue") {
-        return TealBlue(N);
-    }
-
-    if (cmap == "Thistle") {
-        return Thistle(N);
-    }
-
-    if (cmap == "Turquoise") {
-        return Turquoise(N);
-    }
-
-    if (cmap == "Violet") {
-        return Violet(N);
-    }
-
-    if (cmap == "VioletRed") {
-        return VioletRed(N);
-    }
-
-    if (cmap == "WildStrawberry") {
-        return WildStrawberry(N);
-    }
-
-    if (cmap == "Yellow") {
-        return Yellow(N);
-    }
-
-    if (cmap == "YellowGreen") {
-        return YellowGreen(N);
-    }
-
-    if (cmap == "YellowOrange") {
-        return YellowOrange(N);
-    }
+    if (cmap == "Accent") { return Accent(N); }
+    if (cmap == "Dark2") { return Dark2(N); }
+    if (cmap == "Paired") { return Paired(N); }
+    if (cmap == "Spectral") { return Spectral(N); }
+    if (cmap == "Pastel1") { return Pastel1(N); }
+    if (cmap == "Pastel2") { return Pastel2(N); }
+    if (cmap == "Set1") { return Set1(N); }
+    if (cmap == "Set2") { return Set2(N); }
+    if (cmap == "Set3") { return Set3(N); }
+    if (cmap == "Blues") { return Blues(N); }
+    if (cmap == "Greens") { return Greens(N); }
+    if (cmap == "Greys") { return Greys(N); }
+    if (cmap == "Oranges") { return Oranges(N); }
+    if (cmap == "Purples") { return Purples(N); }
+    if (cmap == "Reds") { return Reds(N); }
+    if (cmap == "BuPu") { return BuPu(N); }
+    if (cmap == "GnBu") { return GnBu(N); }
+    if (cmap == "PuBu") { return PuBu(N); }
+    if (cmap == "PuBuGn") { return PuBuGn(N); }
+    if (cmap == "PuRd") { return PuRd(N); }
+    if (cmap == "RdPu") { return RdPu(N); }
+    if (cmap == "OrRd") { return OrRd(N); }
+    if (cmap == "RdOrYl") { return RdOrYl(N); }
+    if (cmap == "YlGn") { return YlGn(N); }
+    if (cmap == "YlGnBu") { return YlGnBu(N); }
+    if (cmap == "YlOrRd") { return YlOrRd(N); }
+    if (cmap == "BrBG") { return BrBG(N); }
+    if (cmap == "PuOr") { return PuOr(N); }
+    if (cmap == "RdBu") { return RdBu(N); }
+    if (cmap == "RdGy") { return RdGy(N); }
+    if (cmap == "RdYlBu") { return RdYlBu(N); }
+    if (cmap == "RdYlGn") { return RdYlGn(N); }
+    if (cmap == "PiYG") { return PiYG(N); }
+    if (cmap == "PRGn") { return PRGn(N); }
+    if (cmap == "spring") { return spring(N); }
+    if (cmap == "summer") { return summer(N); }
+    if (cmap == "autumn") { return autumn(N); }
+    if (cmap == "winter") { return winter(N); }
+    if (cmap == "bone") { return bone(N); }
+    if (cmap == "cool") { return cool(N); }
+    if (cmap == "hot") { return hot(N); }
+    if (cmap == "copper") { return copper(N); }
+    if (cmap == "hsv") { return hsv(N); }
+    if (cmap == "nipy_spectral") { return nipy_spectral(N); }
+    if (cmap == "jet") { return jet(N); }
+    if (cmap == "terrain") { return terrain(N); }
+    if (cmap == "seismic") { return seismic(N); }
+    if (cmap == "afmhot") { return afmhot(N); }
+    if (cmap == "magma") { return magma(N); }
+    if (cmap == "inferno") { return inferno(N); }
+    if (cmap == "plasma") { return plasma(N); }
+    if (cmap == "viridis") { return viridis(N); }
+    if (cmap == "Accent_r") { return Accent_r(N); }
+    if (cmap == "Dark2_r") { return Dark2_r(N); }
+    if (cmap == "Paired_r") { return Paired_r(N); }
+    if (cmap == "Spectral_r") { return Spectral_r(N); }
+    if (cmap == "Pastel1_r") { return Pastel1_r(N); }
+    if (cmap == "Pastel2_r") { return Pastel2_r(N); }
+    if (cmap == "Set1_r") { return Set1_r(N); }
+    if (cmap == "Set2_r") { return Set2_r(N); }
+    if (cmap == "Set3_r") { return Set3_r(N); }
+    if (cmap == "Blues_r") { return Blues_r(N); }
+    if (cmap == "Greens_r") { return Greens_r(N); }
+    if (cmap == "Greys_r") { return Greys_r(N); }
+    if (cmap == "Oranges_r") { return Oranges_r(N); }
+    if (cmap == "Purples_r") { return Purples_r(N); }
+    if (cmap == "Reds_r") { return Reds_r(N); }
+    if (cmap == "BuPu_r") { return BuPu_r(N); }
+    if (cmap == "GnBu_r") { return GnBu_r(N); }
+    if (cmap == "PuBu_r") { return PuBu_r(N); }
+    if (cmap == "PuBuGn_r") { return PuBuGn_r(N); }
+    if (cmap == "PuRd_r") { return PuRd_r(N); }
+    if (cmap == "RdPu_r") { return RdPu_r(N); }
+    if (cmap == "OrRd_r") { return OrRd_r(N); }
+    if (cmap == "RdOrYl_r") { return RdOrYl_r(N); }
+    if (cmap == "YlGn_r") { return YlGn_r(N); }
+    if (cmap == "YlGnBu_r") { return YlGnBu_r(N); }
+    if (cmap == "YlOrRd_r") { return YlOrRd_r(N); }
+    if (cmap == "BrBG_r") { return BrBG_r(N); }
+    if (cmap == "PuOr_r") { return PuOr_r(N); }
+    if (cmap == "RdBu_r") { return RdBu_r(N); }
+    if (cmap == "RdGy_r") { return RdGy_r(N); }
+    if (cmap == "RdYlBu_r") { return RdYlBu_r(N); }
+    if (cmap == "RdYlGn_r") { return RdYlGn_r(N); }
+    if (cmap == "PiYG_r") { return PiYG_r(N); }
+    if (cmap == "PRGn_r") { return PRGn_r(N); }
+    if (cmap == "spring_r") { return spring_r(N); }
+    if (cmap == "summer_r") { return summer_r(N); }
+    if (cmap == "autumn_r") { return autumn_r(N); }
+    if (cmap == "winter_r") { return winter_r(N); }
+    if (cmap == "bone_r") { return bone_r(N); }
+    if (cmap == "cool_r") { return cool_r(N); }
+    if (cmap == "hot_r") { return hot_r(N); }
+    if (cmap == "copper_r") { return copper_r(N); }
+    if (cmap == "hsv_r") { return hsv_r(N); }
+    if (cmap == "nipy_spectral_r") { return nipy_spectral_r(N); }
+    if (cmap == "jet_r") { return jet_r(N); }
+    if (cmap == "terrain_r") { return terrain_r(N); }
+    if (cmap == "seismic_r") { return seismic_r(N); }
+    if (cmap == "afmhot_r") { return afmhot_r(N); }
+    if (cmap == "magma_r") { return magma_r(N); }
+    if (cmap == "inferno_r") { return inferno_r(N); }
+    if (cmap == "plasma_r") { return plasma_r(N); }
+    if (cmap == "viridis_r") { return viridis_r(N); }
+    if (cmap == "White") { return White(N); }
+    if (cmap == "Grey") { return Grey(N); }
+    if (cmap == "Black") { return Black(N); }
+    if (cmap == "Red") { return Red(N); }
+    if (cmap == "Blue") { return Blue(N); }
+    if (cmap == "tuewarmred") { return tuewarmred(N); }
+    if (cmap == "tuedarkblue") { return tuedarkblue(N); }
+    if (cmap == "tueblue") { return tueblue(N); }
+    if (cmap == "tuelightblue") { return tuelightblue(N); }
+    if (cmap == "Apricot") { return Apricot(N); }
+    if (cmap == "Aquamarine") { return Aquamarine(N); }
+    if (cmap == "Bittersweet") { return Bittersweet(N); }
+    if (cmap == "BlueGreen") { return BlueGreen(N); }
+    if (cmap == "BlueViolet") { return BlueViolet(N); }
+    if (cmap == "BrickRed") { return BrickRed(N); }
+    if (cmap == "Brown") { return Brown(N); }
+    if (cmap == "BurntOrange") { return BurntOrange(N); }
+    if (cmap == "CadetBlue") { return CadetBlue(N); }
+    if (cmap == "CarnationPink") { return CarnationPink(N); }
+    if (cmap == "Cerulean") { return Cerulean(N); }
+    if (cmap == "CornflowerBlue") { return CornflowerBlue(N); }
+    if (cmap == "Cyan") { return Cyan(N); }
+    if (cmap == "Dandelion") { return Dandelion(N); }
+    if (cmap == "DarkOrchid") { return DarkOrchid(N); }
+    if (cmap == "Emerald") { return Emerald(N); }
+    if (cmap == "ForestGreen") { return ForestGreen(N); }
+    if (cmap == "Fuchsia") { return Fuchsia(N); }
+    if (cmap == "Goldenrod") { return Goldenrod(N); }
+    if (cmap == "Gray") { return Gray(N); }
+    if (cmap == "Green") { return Green(N); }
+    if (cmap == "GreenYellow") { return GreenYellow(N); }
+    if (cmap == "JungleGreen") { return JungleGreen(N); }
+    if (cmap == "Lavender") { return Lavender(N); }
+    if (cmap == "LimeGreen") { return LimeGreen(N); }
+    if (cmap == "Magenta") { return Magenta(N); }
+    if (cmap == "Mahogany") { return Mahogany(N); }
+    if (cmap == "Maroon") { return Maroon(N); }
+    if (cmap == "Melon") { return Melon(N); }
+    if (cmap == "MidnightBlue") { return MidnightBlue(N); }
+    if (cmap == "Mulberry") { return Mulberry(N); }
+    if (cmap == "NavyBlue") { return NavyBlue(N); }
+    if (cmap == "OliveGreen") { return OliveGreen(N); }
+    if (cmap == "Orange") { return Orange(N); }
+    if (cmap == "OrangeRed") { return OrangeRed(N); }
+    if (cmap == "Orchid") { return Orchid(N); }
+    if (cmap == "Peach") { return Peach(N); }
+    if (cmap == "Periwinkle") { return Periwinkle(N); }
+    if (cmap == "PineGreen") { return PineGreen(N); }
+    if (cmap == "Plum") { return Plum(N); }
+    if (cmap == "ProcessBlue") { return ProcessBlue(N); }
+    if (cmap == "Purple") { return Purple(N); }
+    if (cmap == "RawSienna") { return RawSienna(N); }
+    if (cmap == "RedOrange") { return RedOrange(N); }
+    if (cmap == "RedViolet") { return RedViolet(N); }
+    if (cmap == "Rhodamine") { return Rhodamine(N); }
+    if (cmap == "RoyalBlue") { return RoyalBlue(N); }
+    if (cmap == "RoyalPurple") { return RoyalPurple(N); }
+    if (cmap == "RubineRed") { return RubineRed(N); }
+    if (cmap == "Salmon") { return Salmon(N); }
+    if (cmap == "SeaGreen") { return SeaGreen(N); }
+    if (cmap == "Sepia") { return Sepia(N); }
+    if (cmap == "SkyBlue") { return SkyBlue(N); }
+    if (cmap == "SpringGreen") { return SpringGreen(N); }
+    if (cmap == "Tan") { return Tan(N); }
+    if (cmap == "TealBlue") { return TealBlue(N); }
+    if (cmap == "Thistle") { return Thistle(N); }
+    if (cmap == "Turquoise") { return Turquoise(N); }
+    if (cmap == "Violet") { return Violet(N); }
+    if (cmap == "VioletRed") { return VioletRed(N); }
+    if (cmap == "WildStrawberry") { return WildStrawberry(N); }
+    if (cmap == "Yellow") { return Yellow(N); }
+    if (cmap == "YellowGreen") { return YellowGreen(N); }
+    if (cmap == "YellowOrange") { return YellowOrange(N); }
 
     throw std::runtime_error("Colormap not recognized");
 }
