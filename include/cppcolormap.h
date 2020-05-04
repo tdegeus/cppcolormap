@@ -844,7 +844,8 @@ namespace detail
         const xt::xtensor<double,2>& g,
         const xt::xtensor<double,2>& b)
     {
-        xt::xtensor<double,2> ret = xt::empty<double>({N, 3ul});
+        std::array<size_t,2> shape = {N, 3};
+        xt::xtensor<double,2> ret(shape);
         xt::view(ret, xt::all(), 0) = from_anchor_color(N, r);
         xt::view(ret, xt::all(), 1) = from_anchor_color(N, g);
         xt::view(ret, xt::all(), 2) = from_anchor_color(N, b);
