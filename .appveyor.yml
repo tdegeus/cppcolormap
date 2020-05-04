@@ -48,12 +48,16 @@ build_script:
   # Run Python test
   - python test\python\main.py
   # Compile and run C++ test
-  - cmake -G "NMake Makefiles" test\cpp
+  - cd test\cpp
+  - cmake -G "NMake Makefiles" .
   - nmake
   - .\test
+  - cd ..\..
   # Run Python example
   - python examples\python\match.py
   # Compile and run C++ example
-  - cmake -G "NMake Makefiles" examples\cpp
+  - cd examples\cpp
+  - cmake -G "NMake Makefiles" .
   - nmake
   - .\example
+  - cd ..\..
