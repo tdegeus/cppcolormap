@@ -100,15 +100,13 @@ script:
   # Run Python example
   - python test/python/main.py
   # Compile and run C++ example
-  - cd test/cpp
-  - cmake .
+  - cmake test/cpp
   - make
   - ./test
   # Run Python example
   - python examples/python/match.py
   # Compile and run C++ example
-  - cd examples/cpp
-  - cmake .
+  - cmake examples/cpp
   - make
   - ./example
 
