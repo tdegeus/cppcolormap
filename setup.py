@@ -18,6 +18,7 @@ ext_modules = [Extension(
     ['python/main.cpp'],
     include_dirs=[
         os.path.abspath('include/'),
+        pyxtensor.find_xtensor(),
         pyxtensor.find_pyxtensor(),
         pyxtensor.find_pybind11()],
     language='c++')]
