@@ -32,12 +32,13 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - conda install -c conda-forge python
-  - conda install -c conda-forge numpy
-  - conda install -c conda-forge matplotlib
-  - conda install -c conda-forge cmake
-  - conda install -c conda-forge xtensor
-  - conda install -c conda-forge pyxtensor
+  - conda install -c conda-forge mamba
+  - mamba install -c conda-forge python
+  - mamba install -c conda-forge numpy
+  - mamba install -c conda-forge matplotlib
+  - mamba install -c conda-forge cmake
+  - mamba install -c conda-forge xtensor
+  - mamba install -c conda-forge pyxtensor
   # Build/install the library
   - cmake -G "NMake Makefiles" -DCMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -DCMAKE_BUILD_TYPE=RELEASE .
   - nmake
