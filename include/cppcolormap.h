@@ -150,6 +150,109 @@ inline xt::xtensor<double,2> interp(const xt::xtensor<double,2>& data, size_t N)
 }
 
 // =================================================================================================
+// interpret data as colormap
+// =================================================================================================
+
+namespace detail {
+
+    template <class D, class C, typename V, class R>
+    inline void as_colors(const D& data, const C& colors, V vmin, V vmax, R& ret)
+    {
+        assert(vmax > vmin);
+        assert(colors.shape(0) > 0);
+
+        auto d = xt::eval((data - vmin) / (vmax - vmin));
+        d = xt::where(data < vmin, 0, d);
+        d = xt::where(data > vmax, 1, d);
+        auto index = xt::eval(xt::cast<size_t>(d * (colors.shape(0) - 1)));
+        size_t stride = colors.shape(1);
+
+        for (size_t i = 0; i < data.size(); ++i) {
+            size_t j = index.data()[i];
+            std::copy(
+                &colors.data()[j * stride],
+                &colors.data()[(j + 1) * stride],
+                &ret.data()[i * stride]);
+        }
+    }
+}
+
+/**
+Convert data to colors using a colormap.
+
+\param data The data.
+\param colors The colormap, e.g. ``cppcolormap::jet()``.
+\param vmin The lower limit of the color-axis.
+\param vmax The upper limit of the color-axis.
+*/
+template <typename S, typename T, size_t N>
+inline xt::xtensor<T, N + 1> as_colors(
+    const xt::xtensor<S, N>& data,
+    const xt::xtensor<T, 2> colors,
+    S vmin,
+    S vmax)
+{
+    std::array<size_t, N + 1> shape;
+    std::copy(data.shape().cbegin(), data.shape().cend(), shape.begin());
+    shape[N] = 3;
+    xt::xtensor<T, N + 1> ret = xt::empty<T>(shape);
+    detail::as_colors(data, colors, vmin, vmax, ret);
+    return ret;
+}
+
+/**
+Convert data to colors using a colormap.
+
+\param data The data.
+\param colors The colormap, e.g. ``cppcolormap::jet()``.
+\param vmin The lower limit of the color-axis.
+\param vmax The upper limit of the color-axis.
+*/
+template <typename S, typename T>
+inline xt::xarray<T> as_colors(
+    const xt::xarray<S>& data,
+    const xt::xtensor<T, 2> colors,
+    S vmin,
+    S vmax)
+{
+    size_t N = data.dimension();
+    std::vector<size_t> shape(N + 1);
+    std::copy(data.shape().cbegin(), data.shape().cend(), shape.begin());
+    shape[N] = 3;
+    xt::xarray<T> ret = xt::empty<T>(shape);
+    detail::as_colors(data, colors, vmin, vmax, ret);
+    return ret;
+}
+
+/**
+Convert data to colors using a colormap.
+
+\param data The data.
+\param colors The colormap, e.g. ``cppcolormap::jet()``.
+*/
+template <typename S, typename T, size_t N>
+inline xt::xtensor<T, N + 1> as_colors(
+    const xt::xtensor<S, N>& data,
+    const xt::xtensor<T, 2> colors)
+{
+    return as_colors(data, colors, xt::amin(data)(), xt::amax(data)());
+}
+
+/**
+Convert data to colors using a colormap.
+
+\param data The data.
+\param colors The colormap, e.g. ``cppcolormap::jet()``.
+*/
+template <typename S, typename T>
+inline xt::xarray<T> as_colors(
+    const xt::xarray<S>& data,
+    const xt::xtensor<T, 2> colors)
+{
+    return as_colors(data, colors, xt::amin(data)(), xt::amax(data)());
+}
+
+// =================================================================================================
 // qualitative colormaps
 // =================================================================================================
 
