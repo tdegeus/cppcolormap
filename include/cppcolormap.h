@@ -185,7 +185,7 @@ namespace detail {
             size_t N = data.dimension();
             std::vector<size_t> shape(N + 1);
             std::copy(data.shape().cbegin(), data.shape().cend(), shape.begin());
-            shape[N] = 3;
+            shape[N] = colors.shape(1);
             xt::xarray<T> ret = xt::empty<T>(shape);
             as_colors_func(data, colors, vmin, vmax, ret);
             return ret;
@@ -207,7 +207,7 @@ namespace detail {
         {
             std::array<size_t, N + 1> shape;
             std::copy(data.shape().cbegin(), data.shape().cend(), shape.begin());
-            shape[N] = 3;
+            shape[N] = colors.shape(1);
             xt::xtensor<T, N + 1> ret = xt::empty<T>(shape);
             detail::as_colors_func(data, colors, vmin, vmax, ret);
             return ret;
