@@ -13,6 +13,12 @@ cppcolormap
    api_cpp.rst
    api_python.rst
 
+.. toctree::
+   :caption: DEVELOP
+   :maxdepth: 1
+
+   changelog.rst
+
 Indices and tables
 ==================
 
