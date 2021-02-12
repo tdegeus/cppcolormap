@@ -1,8 +1,9 @@
 name: Published doxygen output to GitHub pages
 
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - master
 
 jobs:
 
