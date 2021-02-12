@@ -242,6 +242,30 @@ m.def("rgb2hex",
     py::overload_cast<const xt::xtensor<double,1>&>(&cppcolormap::rgb2hex),
     "Convert rgb -> hex");
 
+m.def("as_colors", [](
+        const xt::xarray<double>& data,
+        const xt::xtensor<double, 2>& colors,
+        double vmin,
+        double vmax) {
+            return cppcolormap::as_colors(data, colors, vmin, vmax);
+    },
+    "Convert data to colors using a colormap."
+    "See :cpp:func:`cppcolormap::as_colors`.",
+    py::arg("data"),
+    py::arg("colors"),
+    py::arg("vmin"),
+    py::arg("vmax"));
+
+m.def("as_colors", [](
+        const xt::xarray<double>& data,
+        const xt::xtensor<double, 2>& colors) {
+            return cppcolormap::as_colors(data, colors);
+    },
+    "Convert data to colors using a colormap."
+    "See :cpp:func:`cppcolormap::as_colors`.",
+    py::arg("data"),
+    py::arg("colors"));
+
 // -------------------------------------------------------------------------------------------------
 
 py::enum_<cppcolormap::metric>(m, "metric", "Distance metric for color matching")
