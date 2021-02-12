@@ -14,6 +14,8 @@ WARN_IF_UNDOCUMENTED = NO
 MACRO_EXPANSION = YES
 PREDEFINED = IN_DOXYGEN
 EXCLUDE_SYMBOLS = detail
+INPUT = ../README.md
+USE_MDFILE_AS_MAINPAGE = ../README.md
 
 # Allow for rst directives and advanced functions e.g. grid tables
 ALIASES  = "rst=\verbatim embed:rst:leading-asterisk"

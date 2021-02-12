@@ -3,8 +3,9 @@
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/cppcolormap.svg)](https://anaconda.org/conda-forge/cppcolormap)
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/python-cppcolormap.svg)](https://anaconda.org/conda-forge/python-cppcolormap)
 
-**Documentation: cppcolormap.readthedocs.org**
-**Doxygen documentation: tdegeus.github.io/cppcolormap**
+**Documentation: [cppcolormap.readthedocs.org](https://cppcolormap.readthedocs.org)**
+
+**Doxygen documentation: [tdegeus.github.io/cppcolormap](https://tdegeus.github.io/cppcolormap)**
 
 # cppcolormap
 
