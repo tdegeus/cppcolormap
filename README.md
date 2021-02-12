@@ -1,8 +1,10 @@
-
-[![Travis](https://travis-ci.org/tdegeus/cppcolormap.svg?branch=master)](https://travis-ci.org/tdegeus/cppcolormap)
-[![Appveyor](https://ci.appveyor.com/api/projects/status/lmrkifr8q9vledv5?svg=true)](https://ci.appveyor.com/project/tdegeus/cppcolormap)
+[![CI](https://github.com/tdegeus/cppcolormap/workflows/CI/badge.svg)](https://github.com/tdegeus/cppcolormap/actions)
+[![Documentation Status](https://readthedocs.org/projects/cppcolormap/badge/?version=latest)](https://readthedocs.org/projects/cppcolormap/badge/?version=latest)
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/cppcolormap.svg)](https://anaconda.org/conda-forge/cppcolormap)
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/python-cppcolormap.svg)](https://anaconda.org/conda-forge/python-cppcolormap)
+
+**Documentation: cppcolormap.readthedocs.org**
+**Doxygen documentation: tdegeus.github.io/cppcolormap**
 
 # cppcolormap
 
