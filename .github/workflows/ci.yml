@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  default-shell:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - runs-on: ubuntu-latest
+            config: -DBUILD_TESTS=1 -DBUILD_EXAMPLES=1
+            conda: environment.yaml
+            prop: tests & examples
+            compiler: gcc
+            gcc: 8
+          - runs-on: macos-latest
+            config: -DBUILD_TESTS=1 -DBUILD_EXAMPLES=0
+            conda: environment.yaml
+            prop: tests
+          - runs-on: windows-latest
+            config: -DBUILD_TESTS=1 -DBUILD_EXAMPLES=0
+            conda: environment.yaml
+            prop: tests
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    name: "${{ matrix.runs-on }} • x64 ${{ matrix.args }}"
+    runs-on: ${{ matrix.runs-on }}
+
+    steps:
+
+    - name: Basic GitHub action setup
+      uses: actions/checkout@v2
+
+    - name: Set conda environment "test"
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        mamba-version: "*"
+        channels: conda-forge,defaults
+        channel-priority: true
+        environment-file: ${{ matrix.conda }}
+        activate-environment: test
+        auto-activate-base: false
+
+    - name: Select GCC
+      if: matrix.gcc
+      run: |
+         echo "CC=gcc-${{ matrix.gcc }}" >> $GITHUB_ENV
+         echo "CXX=g++-${{ matrix.gcc }}" >> $GITHUB_ENV
+
+    - name: Configure using CMake (!Windows)
+      if: runner.os != 'Windows'
+      run: cmake . ${{ matrix.config }}
+
+    - name: Configure using CMake (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        conda install -c conda-forge clang_win-64 ninja
+        cmake . -G Ninja ${{ matrix.config }} -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+
+    - name: Build C++ ${{ matrix.prop }}
+      run: cmake --build .
+
+    - name: Run C++ ${{ matrix.prop }}
+      run: cmake --build . --target "RUN_TESTS_AND_EXAMPLES"
+
+    - name: Build and install Python module
+      run: |
+        python setup.py build
+        python setup.py install
+
+    - name: Python tests
+      run: |
+        python test/python/main.py
+        python examples/python/match.py
+        python examples/overview/overview.py

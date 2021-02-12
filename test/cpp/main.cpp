@@ -1,6 +1,9 @@
+#define CATCH_CONFIG_MAIN  // tells Catch to provide a main() - only do this in one cpp file
+#include <catch2/catch.hpp>
+
 #include <cppcolormap.h>
 
-int main()
+TEST_CASE("cppcolormap::colormap", "cppcolormap.h")
 {
     std::vector<std::string> cmaps {
         "Accent",
@@ -183,7 +186,15 @@ int main()
 
     for (auto& cmap : cmaps) {
         auto c = cppcolormap::colormap(cmap);
+        REQUIRE(xt::amin(c)() >= 0.0);
+        REQUIRE(xt::amax(c)() <= 1.0);
     }
+}
 
-    return 0;
+TEST_CASE("cppcolormap::as_colors", "cppcolormap.h")
+{
+    auto c = cppcolormap::Greys(5);
+    xt::xtensor<double, 1> data = xt::arange<double>(c.shape(0));
+    auto m = cppcolormap::as_colors(data, c);
+    REQUIRE(xt::allclose(c, m));
 }
