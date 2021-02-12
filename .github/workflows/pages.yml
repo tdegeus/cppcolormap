@@ -1,0 +1,43 @@
+name: Published doxygen output to GitHub pages
+
+on:
+  release:
+    types: [created]
+
+jobs:
+
+  publish:
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+
+    - name: Basic GitHub action setup
+      uses: actions/checkout@v2
+
+    - name: Set conda environment "test"
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        mamba-version: "*"
+        channels: conda-forge,defaults
+        channel-priority: true
+        environment-file: docs/environment.yaml
+        activate-environment: test
+        auto-activate-base: false
+
+    - name: Run doxygen
+      working-directory: docs
+      run: doxygen
+
+    - name: Deploy to GitHub Pages
+      if: success()
+      uses: crazy-max/ghaction-github-pages@v2
+      with:
+        target_branch: gh-pages
+        build_dir: docs/html
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
