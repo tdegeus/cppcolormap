@@ -83,3 +83,5 @@ jobs:
     - name: Python tests
       run: |
         python test/python/main.py
+        python examples/python/match.py
+        python overview/overview.py
