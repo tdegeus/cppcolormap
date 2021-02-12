@@ -5,3 +5,5 @@ dependencies:
   - xtensor
   - pyxtensor
   - catch2
+  - numpy
+  - matplotlib
