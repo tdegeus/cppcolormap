@@ -1,4 +1,4 @@
-name: Published doxygen output to GitHub pages
+name: Doxygen -> gh-pages
 
 on:
   push:
