@@ -12,14 +12,14 @@
 #define CPPCOLORMAP_VERSION_PATCH 0
 
 #define CPPCOLORMAP_VERSION_AT_LEAST(x,y,z) \
-    (CPPCOLORMAP_VERSION_MAJOR>x || (CPPCOLORMAP_VERSION_MAJOR>=x && \
-    (CPPCOLORMAP_VERSION_MINOR>y || (CPPCOLORMAP_VERSION_MINOR>=y && \
-                                     CPPCOLORMAP_VERSION_PATCH>=z))))
+    (CPPCOLORMAP_VERSION_MAJOR > x || (CPPCOLORMAP_VERSION_MAJOR >= x && \
+    (CPPCOLORMAP_VERSION_MINOR > y || (CPPCOLORMAP_VERSION_MINOR >= y && \
+                                       CPPCOLORMAP_VERSION_PATCH >= z))))
 
 #define CPPCOLORMAP_VERSION(x,y,z) \
-    (CPPCOLORMAP_VERSION_MAJOR==x && \
-     CPPCOLORMAP_VERSION_MINOR==y && \
-     CPPCOLORMAP_VERSION_PATCH==z)
+    (CPPCOLORMAP_VERSION_MAJOR == x && \
+     CPPCOLORMAP_VERSION_MINOR == y && \
+     CPPCOLORMAP_VERSION_PATCH == z)
 
 // use "M_PI" from "math.h"
 #define _USE_MATH_DEFINES
@@ -31,11 +31,11 @@
 #include <sstream>
 #include <math.h>
 #include <xtensor/xtensor.hpp>
+#include <xtensor/xarray.hpp>
 #include <xtensor/xview.hpp>
 #include <xtensor/xsort.hpp>
 #include <xtensor/xmath.hpp>
 #include <xtensor/xmanipulation.hpp>
-#include <xtensor/xio.hpp>
 
 namespace cppcolormap
 {

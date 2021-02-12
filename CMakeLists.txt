@@ -6,6 +6,9 @@ cmake_minimum_required(VERSION 3.0)
 
 project(cppcolormap)
 
+option(BUILD_TESTS "${PROJECT_NAME} Build tests" 0)
+option(BUILD_EXAMPLES "${PROJECT_NAME} Build examples" 0)
+
 # Version
 # =======
 
@@ -71,3 +74,19 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cppcolormap.pc.in"
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cppcolormap.pc"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig/")
+
+# Tests & examples
+# ================
+
+set(CTEST_TEST_TARGET_ALIAS RUN_TESTS_AND_EXAMPLES)
+include(CTest)
+
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(test/cpp)
+endif()
+
+if(BUILD_EXAMPLES)
+    enable_testing()
+    add_subdirectory(examples/cpp)
+endif()
