@@ -1,4 +1,5 @@
 [![CI](https://github.com/tdegeus/cppcolormap/workflows/CI/badge.svg)](https://github.com/tdegeus/cppcolormap/actions)
+[![Doxygen -> gh-pages](https://github.com/tdegeus/cppcolormap/workflows/gh-pages/badge.svg)](https://github.com/tdegeus/cppcolormap/actions)
 [![Documentation Status](https://readthedocs.org/projects/cppcolormap/badge/?version=latest)](https://readthedocs.org/projects/cppcolormap/badge/?version=latest)
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/cppcolormap.svg)](https://anaconda.org/conda-forge/cppcolormap)
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/python-cppcolormap.svg)](https://anaconda.org/conda-forge/python-cppcolormap)
