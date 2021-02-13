@@ -1,6 +1,6 @@
 PROJECT_NAME = "cppcolormap"
 XML_OUTPUT = xml
-INPUT = ../include
+INPUT = ../include doxy_landing.md
 GENERATE_LATEX = NO
 GENERATE_MAN = NO
 GENERATE_RTF = NO
@@ -14,6 +14,7 @@ WARN_IF_UNDOCUMENTED = NO
 MACRO_EXPANSION = YES
 PREDEFINED = IN_DOXYGEN
 EXCLUDE_SYMBOLS = detail
+GENERATE_TREEVIEW = YES
 
 # Allow for rst directives and advanced functions e.g. grid tables
 ALIASES  = "rst=\verbatim embed:rst:leading-asterisk"
