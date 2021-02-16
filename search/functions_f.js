@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['rawsienna_310',['RawSienna',['../cppcolormap_8h.html#a9f3f9eab80c88586c0137d47ec13330c',1,'cppcolormap']]],
+  ['rdbu_311',['RdBu',['../cppcolormap_8h.html#a9eadeae597409364a313fc5e4c3a5592',1,'cppcolormap']]],
+  ['rdbu_5fr_312',['RdBu_r',['../cppcolormap_8h.html#a45dd2ae38f17438f24db128d352467bc',1,'cppcolormap']]],
+  ['rdgy_313',['RdGy',['../cppcolormap_8h.html#aa458eeb90838e4b47ea5a0b1edf9e64c',1,'cppcolormap']]],
+  ['rdgy_5fr_314',['RdGy_r',['../cppcolormap_8h.html#a2a602c65aa92f456d822574d84f278b7',1,'cppcolormap']]],
+  ['rdoryl_315',['RdOrYl',['../cppcolormap_8h.html#af69afad64af977b34a99a358c2974f86',1,'cppcolormap']]],
+  ['rdoryl_5fr_316',['RdOrYl_r',['../cppcolormap_8h.html#a11db1508711902f9ac3865e95634e27f',1,'cppcolormap']]],
+  ['rdpu_317',['RdPu',['../cppcolormap_8h.html#a49c68bca62c8d6b7b81cb8828c829904',1,'cppcolormap']]],
+  ['rdpu_5fr_318',['RdPu_r',['../cppcolormap_8h.html#ae98ffc4b376a749c99598692f4276c5f',1,'cppcolormap']]],
+  ['rdylbu_319',['RdYlBu',['../cppcolormap_8h.html#a8f9e521699265b025af3e5580393127d',1,'cppcolormap']]],
+  ['rdylbu_5fr_320',['RdYlBu_r',['../cppcolormap_8h.html#ac93d6c26d29b41f39b46671b8e731b4c',1,'cppcolormap']]],
+  ['rdylgn_321',['RdYlGn',['../cppcolormap_8h.html#a5c1447ed6e3e8e1fa719c01bd0cc0a63',1,'cppcolormap']]],
+  ['rdylgn_5fr_322',['RdYlGn_r',['../cppcolormap_8h.html#ae5a7bf0ad0661d9095fa6707f8979239',1,'cppcolormap']]],
+  ['red_323',['Red',['../cppcolormap_8h.html#acdfb1f04814a461cb4dc61f0edb239ce',1,'cppcolormap']]],
+  ['redorange_324',['RedOrange',['../cppcolormap_8h.html#a55e0e2115e8902344cf7802f2eb073a1',1,'cppcolormap']]],
+  ['reds_325',['Reds',['../cppcolormap_8h.html#af15d76fb73eb429741a0db55af2d88b9',1,'cppcolormap']]],
+  ['reds_5fr_326',['Reds_r',['../cppcolormap_8h.html#a436b0b531da3036a77f95fa215df4cf8',1,'cppcolormap']]],
+  ['redviolet_327',['RedViolet',['../cppcolormap_8h.html#af4eabc44c0c9e23a1ba4d21ff3c84f58',1,'cppcolormap']]],
+  ['rgb2hex_328',['rgb2hex',['../cppcolormap_8h.html#a0fece95fc1b43fab369804e3eb51d3f1',1,'cppcolormap::rgb2hex(const xt::xtensor&lt; double, 2 &gt; &amp;data)'],['../cppcolormap_8h.html#ab1094788401188c9f5d08884c5617b6b',1,'cppcolormap::rgb2hex(const xt::xtensor&lt; double, 1 &gt; &amp;data)']]],
+  ['rhodamine_329',['Rhodamine',['../cppcolormap_8h.html#a4236705231b9cc7793a47aa875e9c77a',1,'cppcolormap']]],
+  ['royalblue_330',['RoyalBlue',['../cppcolormap_8h.html#a00ee83517ad2c9d056c27c1962c5b676',1,'cppcolormap']]],
+  ['royalpurple_331',['RoyalPurple',['../cppcolormap_8h.html#af815b9b1008adea982adc3e311774a0a',1,'cppcolormap']]],
+  ['rubinered_332',['RubineRed',['../cppcolormap_8h.html#a2ece4cb1ef0c9cf2f380dc14c2f5165f',1,'cppcolormap']]]
+];
