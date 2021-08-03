@@ -1,9 +1,13 @@
 name: gh-pages
 
 on:
+
   push:
     branches:
       - master
+
+  release:
+    types: [released]
 
 jobs:
 
@@ -19,6 +23,8 @@ jobs:
 
     - name: Basic GitHub action setup
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     - name: Set conda environment "test"
       uses: conda-incubator/setup-miniconda@v2
