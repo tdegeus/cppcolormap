@@ -1,11 +1,11 @@
-#define CATCH_CONFIG_MAIN  // tells Catch to provide a main() - only do this in one cpp file
+#define CATCH_CONFIG_MAIN // tells Catch to provide a main() - only do this in one cpp file
 #include <catch2/catch.hpp>
 
 #include <cppcolormap.h>
 
 TEST_CASE("cppcolormap::colormap", "cppcolormap.h")
 {
-    std::vector<std::string> cmaps {
+    std::vector<std::string> cmaps{
         "Accent",
         "Dark2",
         "Paired",

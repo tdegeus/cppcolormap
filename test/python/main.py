@@ -177,7 +177,8 @@ cmaps = [
     "WildStrawberry",
     "Yellow",
     "YellowGreen",
-    "YellowOrange"]
+    "YellowOrange",
+]
 
 for cmap in cmaps:
     c = cppcolormap.colormap(cmap)

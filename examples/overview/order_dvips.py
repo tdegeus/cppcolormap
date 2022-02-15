@@ -68,7 +68,8 @@ names = (
     "WildStrawberry",
     "Yellow",
     "YellowGreen",
-    "YellowOrange")
+    "YellowOrange",
+)
 
 dvips = np.array([list(cm.colormap(name, 1)[0, :]) for name in names])
 jet = cm.jet(256)
@@ -76,4 +77,4 @@ jet = cm.jet(256)
 
 idx = cm.match(dvips, jet, cm.metric.perceptual)
 jdx = np.argsort(idx)
-print('\n'.join([names[i] for i in jdx]))
+print("\n".join([names[i] for i in jdx]))

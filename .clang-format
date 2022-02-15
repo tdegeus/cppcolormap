@@ -10,15 +10,28 @@ AlignConsecutiveAssignments: false
 AlignEscapedNewlines: DontAlign
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: None
-AllowShortIfStatementsOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakTemplateDeclarations: Yes
+PenaltyBreakBeforeFirstCallParameter: 1
+PenaltyReturnTypeOnItsOwnLine: 100
+PointerBindsToType: true
+BreakBeforeBraces: Stroustrup
+
+# Do not align consecutive comments that follow a line of code
+AlignTrailingComments: false
+
+# force argument on one line each
 BinPackArguments: false
 BinPackParameters: false
-BreakBeforeBraces: Stroustrup
+ExperimentalAutoDetectBinPacking: false
+AllowAllParametersOfDeclarationOnNextLine: false
+
+# AlwaysBreakAfterDefinitionReturnType: All
+
 BraceWrapping:
-    AfterFunction: true
-    AfterClass: false
-    BeforeCatch: true
-    BeforeElse: true
+  AfterFunction: true
+  AfterClass: false
+  BeforeCatch: true
+  BeforeElse: true
