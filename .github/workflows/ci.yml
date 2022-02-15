@@ -20,8 +20,6 @@ jobs:
           config: -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=1 -DBUILD_EXAMPLES=1
           conda: environment.yaml
           prop: tests & examples
-          compiler: gcc
-          gcc: 8
         - runs-on: macos-latest
           config: -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=1 -DBUILD_EXAMPLES=0
           conda: environment.yaml
@@ -52,12 +50,6 @@ jobs:
         environment-file: ${{ matrix.conda }}
         activate-environment: test
         auto-activate-base: false
-
-    - name: Select GCC
-      if: matrix.gcc
-      run: |
-        echo "CC=gcc-${{ matrix.gcc }}" >> $GITHUB_ENV
-        echo "CXX=g++-${{ matrix.gcc }}" >> $GITHUB_ENV
 
     - name: Configure using CMake (!Windows)
       if: runner.os != 'Windows'
