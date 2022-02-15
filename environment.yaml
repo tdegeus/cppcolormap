@@ -1,9 +1,17 @@
 channels:
 - conda-forge
 dependencies:
-- cmake
-- xtensor
-- pyxtensor
 - catch2
-- numpy
+- cmake
+- doxygen
 - matplotlib
+- ninja
+- numpy
+- pybind11
+- python
+- scikit-build
+- setuptools_scm
+- sphinx
+- sphinx_rtd_theme
+- xtensor
+- xtensor-python

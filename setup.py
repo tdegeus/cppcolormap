@@ -1,43 +1,20 @@
-import os
-import re
+from setuptools_scm import get_version
+from skbuild import setup
 
-import pyxtensor
-from setuptools import Extension
-from setuptools import setup
-
-header = open("./include/cppcolormap.h").read()
-major = re.split(r"(.*)(\#define CPPCOLORMAP_VERSION_MAJOR\ )([0-9]+)(.*)", header)[3]
-minor = re.split(r"(.*)(\#define CPPCOLORMAP_VERSION_MINOR\ )([0-9]+)(.*)", header)[3]
-patch = re.split(r"(.*)(\#define CPPCOLORMAP_VERSION_PATCH\ )([0-9]+)(.*)", header)[3]
-
-__version__ = ".".join([major, minor, patch])
-
-ext_modules = [
-    Extension(
-        "cppcolormap",
-        ["python/main.cpp"],
-        include_dirs=[
-            os.path.abspath("include/"),
-            pyxtensor.find_xtensor(),
-            pyxtensor.find_pyxtensor(),
-            pyxtensor.find_pybind11(),
-        ],
-        language="c++",
-    )
-]
+project_name = "cppcolormap"
 
 setup(
-    name="cppcolormap",
+    name=project_name,
     description="Library with colormaps",
     long_description="Library with colormaps",
     keywords="colormap, plot, matplotlib",
-    version=__version__,
+    version=get_version(),
     license="MIT",
     author="Tom de Geus",
     author_email="tom@geus.me",
-    url="https://github.com/tdegeus/cppcolormap",
-    ext_modules=ext_modules,
-    setup_requires=["pybind11", "pyxtensor"],
-    cmdclass={"build_ext": pyxtensor.BuildExt},
-    zip_safe=False,
+    url=f"https://github.com/tdegeus/{project_name}",
+    packages=[f"{project_name}"],
+    package_dir={"": "python"},
+    cmake_install_dir=f"python/{project_name}",
+    cmake_minimum_required_version="3.13...3.21",
 )
