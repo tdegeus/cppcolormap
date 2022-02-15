@@ -13,79 +13,77 @@
 #define CPPCOLORMAP_VERSION_MINOR 3
 #define CPPCOLORMAP_VERSION_PATCH 0
 
-#define CPPCOLORMAP_VERSION_AT_LEAST(x,y,z) \
-    (CPPCOLORMAP_VERSION_MAJOR > x || (CPPCOLORMAP_VERSION_MAJOR >= x && \
-    (CPPCOLORMAP_VERSION_MINOR > y || (CPPCOLORMAP_VERSION_MINOR >= y && \
-                                       CPPCOLORMAP_VERSION_PATCH >= z))))
+#define CPPCOLORMAP_VERSION_AT_LEAST(x, y, z) \
+    (CPPCOLORMAP_VERSION_MAJOR > x || \
+     (CPPCOLORMAP_VERSION_MAJOR >= x && \
+      (CPPCOLORMAP_VERSION_MINOR > y || \
+       (CPPCOLORMAP_VERSION_MINOR >= y && CPPCOLORMAP_VERSION_PATCH >= z))))
 
-#define CPPCOLORMAP_VERSION(x,y,z) \
-    (CPPCOLORMAP_VERSION_MAJOR == x && \
-     CPPCOLORMAP_VERSION_MINOR == y && \
+#define CPPCOLORMAP_VERSION(x, y, z) \
+    (CPPCOLORMAP_VERSION_MAJOR == x && CPPCOLORMAP_VERSION_MINOR == y && \
      CPPCOLORMAP_VERSION_PATCH == z)
 
 // use "M_PI" from "math.h"
 #define _USE_MATH_DEFINES
 
-#include <vector>
-#include <string>
 #include <cfloat>
 #include <iostream>
-#include <sstream>
 #include <math.h>
-#include <xtensor/xtensor.hpp>
+#include <sstream>
+#include <string>
+#include <vector>
 #include <xtensor/xarray.hpp>
-#include <xtensor/xview.hpp>
-#include <xtensor/xsort.hpp>
-#include <xtensor/xmath.hpp>
 #include <xtensor/xmanipulation.hpp>
+#include <xtensor/xmath.hpp>
+#include <xtensor/xsort.hpp>
+#include <xtensor/xtensor.hpp>
+#include <xtensor/xview.hpp>
 
-namespace cppcolormap
+namespace cppcolormap {
+
+namespace detail {
+
+/**
+See: https://www.codespeedy.com/convert-rgb-to-hex-color-code-in-cpp
+
+\param r Red [0..255].
+\param g Green [0..255].
+\param b Blue [0..255].
+\return Hex string.
+*/
+std::string rgb2hex(size_t r, size_t g, size_t b)
 {
+    std::stringstream ss;
+    ss << "#" << std::hex << (r << 16 | g << 8 | b);
+    return ss.str();
+}
 
-namespace detail
+/**
+See: https://stackoverflow.com/questions/28104559/arduino-strange-behavior-converting-hex-to-rgb
+
+\param hex Hex string.
+\return RGB data.
+*/
+xt::xtensor<size_t, 1> hex2rgb(std::string hex)
 {
-
-    /**
-    See: https://www.codespeedy.com/convert-rgb-to-hex-color-code-in-cpp
-
-    \param r Red [0..255].
-    \param g Green [0..255].
-    \param b Blue [0..255].
-    \return Hex string.
-    */
-    std::string rgb2hex(size_t r, size_t g, size_t b)
-    {
-        std::stringstream ss;
-        ss << "#" << std::hex << (r << 16 | g << 8 | b);
-        return ss.str();
+    if (hex.at(0) == '#') {
+        hex.erase(0, 1);
     }
 
-    /**
-    See: https://stackoverflow.com/questions/28104559/arduino-strange-behavior-converting-hex-to-rgb
-
-    \param hex Hex string.
-    \return RGB data.
-    */
-    xt::xtensor<size_t, 1> hex2rgb(std::string hex)
-    {
-        if (hex.at(0) == '#') {
-            hex.erase(0, 1);
-        }
-
-        while (hex.length() != 6) {
-            hex += "0";
-        }
-
-        xt::xtensor<size_t, 1> rgb = xt::empty<size_t>({size_t(3)});
-
-        size_t h = (size_t)std::stol(&hex[0], nullptr, 16);
-
-        rgb(0) = h >> 16;
-        rgb(1) = h >> 8 & 0xFF;
-        rgb(2) = h & 0xFF;
-
-        return rgb;
+    while (hex.length() != 6) {
+        hex += "0";
     }
+
+    xt::xtensor<size_t, 1> rgb = xt::empty<size_t>({size_t(3)});
+
+    size_t h = (size_t)std::stol(&hex[0], nullptr, 16);
+
+    rgb(0) = h >> 16;
+    rgb(1) = h >> 8 & 0xFF;
+    rgb(2) = h & 0xFF;
+
+    return rgb;
+}
 
 } // namespace detail
 
@@ -180,65 +178,57 @@ inline xt::xtensor<double, 2> interp(const xt::xtensor<double, 2>& data, size_t 
 
 namespace detail {
 
-    template <class D, class C, typename V, class R>
-    inline void as_colors_func(const D& data, const C& colors, V vmin, V vmax, R& ret)
-    {
-        assert(vmax > vmin);
-        assert(colors.shape(0) > 0);
+template <class D, class C, typename V, class R>
+inline void as_colors_func(const D& data, const C& colors, V vmin, V vmax, R& ret)
+{
+    assert(vmax > vmin);
+    assert(colors.shape(0) > 0);
 
-        auto d = xt::eval((data - vmin) / (vmax - vmin));
-        d = xt::where(data < vmin, 0, d);
-        d = xt::where(data > vmax, 1, d);
-        auto index = xt::eval(xt::cast<size_t>(d * (colors.shape(0) - 1)));
-        size_t stride = colors.shape(1);
+    auto d = xt::eval((data - vmin) / (vmax - vmin));
+    d = xt::where(data < vmin, 0, d);
+    d = xt::where(data > vmax, 1, d);
+    auto index = xt::eval(xt::cast<size_t>(d * (colors.shape(0) - 1)));
+    size_t stride = colors.shape(1);
 
-        for (size_t i = 0; i < data.size(); ++i) {
-            size_t j = index.data()[i];
-            std::copy(
-                &colors.data()[j * stride],
-                &colors.data()[(j + 1) * stride],
-                &ret.data()[i * stride]);
-        }
+    for (size_t i = 0; i < data.size(); ++i) {
+        size_t j = index.data()[i];
+        std::copy(
+            &colors.data()[j * stride], &colors.data()[(j + 1) * stride], &ret.data()[i * stride]);
     }
-
-    template <class E, typename = void>
-    struct as_colors_impl
-    {
-        template <typename T, typename S>
-        static xt::xarray<T> run(const E& data, const xt::xtensor<T, 2> colors, S vmin, S vmax)
-        {
-            size_t N = data.dimension();
-            std::vector<size_t> shape(N + 1);
-            std::copy(data.shape().cbegin(), data.shape().cend(), shape.begin());
-            shape[N] = colors.shape(1);
-            xt::xarray<T> ret = xt::empty<T>(shape);
-            as_colors_func(data, colors, vmin, vmax, ret);
-            return ret;
-        }
-    };
-
-    template <class E>
-    struct as_colors_impl<E, typename xt::has_fixed_rank_t<E>>
-    {
-        using value_type = typename E::value_type;
-        constexpr static size_t N = xt::get_rank<E>::value;
-
-        template <typename T, typename S>
-        static xt::xtensor<T, N + 1> run(
-            const E& data,
-            const xt::xtensor<T, 2> colors,
-            S vmin,
-            S vmax)
-        {
-            std::array<size_t, N + 1> shape;
-            std::copy(data.shape().cbegin(), data.shape().cend(), shape.begin());
-            shape[N] = colors.shape(1);
-            xt::xtensor<T, N + 1> ret = xt::empty<T>(shape);
-            detail::as_colors_func(data, colors, vmin, vmax, ret);
-            return ret;
-        }
-    };
 }
+
+template <class E, typename = void>
+struct as_colors_impl {
+    template <typename T, typename S>
+    static xt::xarray<T> run(const E& data, const xt::xtensor<T, 2> colors, S vmin, S vmax)
+    {
+        size_t N = data.dimension();
+        std::vector<size_t> shape(N + 1);
+        std::copy(data.shape().cbegin(), data.shape().cend(), shape.begin());
+        shape[N] = colors.shape(1);
+        xt::xarray<T> ret = xt::empty<T>(shape);
+        as_colors_func(data, colors, vmin, vmax, ret);
+        return ret;
+    }
+};
+
+template <class E>
+struct as_colors_impl<E, typename xt::has_fixed_rank_t<E>> {
+    using value_type = typename E::value_type;
+    constexpr static size_t N = xt::get_rank<E>::value;
+
+    template <typename T, typename S>
+    static xt::xtensor<T, N + 1> run(const E& data, const xt::xtensor<T, 2> colors, S vmin, S vmax)
+    {
+        std::array<size_t, N + 1> shape;
+        std::copy(data.shape().cbegin(), data.shape().cend(), shape.begin());
+        shape[N] = colors.shape(1);
+        xt::xtensor<T, N + 1> ret = xt::empty<T>(shape);
+        detail::as_colors_func(data, colors, vmin, vmax, ret);
+        return ret;
+    }
+};
+} // namespace detail
 
 /**
 Convert data to colors using a colormap.
@@ -266,7 +256,6 @@ inline auto as_colors(const E& data, const xt::xtensor<T, 2> colors)
     return detail::as_colors_impl<E>::run(data, colors, xt::amin(data)(), xt::amax(data)());
 }
 
-
 /**
 Qualitative colormap.
 
@@ -275,6 +264,7 @@ Qualitative colormap.
 */
 inline xt::xtensor<double, 2> Accent(size_t N = 8)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {127, 201, 127},
         {190, 174, 212},
@@ -285,6 +275,7 @@ inline xt::xtensor<double, 2> Accent(size_t N = 8)
         {191,  91,  23},
         {102, 102, 102},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -297,6 +288,7 @@ Qualitative colormap.
 */
 inline xt::xtensor<double, 2> Dark2(size_t N = 8)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         { 27, 158, 119},
         {217,  95,   2},
@@ -307,6 +299,7 @@ inline xt::xtensor<double, 2> Dark2(size_t N = 8)
         {166, 118,  29},
         {102, 102, 102},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -319,6 +312,7 @@ Qualitative colormap.
 */
 inline xt::xtensor<double, 2> Paired(size_t N = 12)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {166, 206, 227},
         { 31, 120, 180},
@@ -333,6 +327,7 @@ inline xt::xtensor<double, 2> Paired(size_t N = 12)
         {255, 255, 153},
         {177,  89,  40},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -345,6 +340,7 @@ Qualitative colormap.
 */
 inline xt::xtensor<double, 2> Spectral(size_t N = 11)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {158,   1,  66},
         {213,  62,  79},
@@ -358,6 +354,7 @@ inline xt::xtensor<double, 2> Spectral(size_t N = 11)
         { 50, 136, 189},
         { 94,  79, 162},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -370,6 +367,7 @@ Qualitative colormap.
 */
 inline xt::xtensor<double, 2> Pastel1(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {251, 180, 174},
         {179, 205, 227},
@@ -381,6 +379,7 @@ inline xt::xtensor<double, 2> Pastel1(size_t N = 9)
         {253, 218, 236},
         {242, 242, 242},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -393,6 +392,7 @@ Qualitative colormap.
 */
 inline xt::xtensor<double, 2> Pastel2(size_t N = 8)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {179, 226, 205},
         {253, 205, 172},
@@ -403,6 +403,7 @@ inline xt::xtensor<double, 2> Pastel2(size_t N = 8)
         {241, 226, 204},
         {204, 204, 204},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -415,6 +416,7 @@ Qualitative colormap.
 */
 inline xt::xtensor<double, 2> Set1(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {228,  26,  28},
         { 55, 126, 184},
@@ -426,6 +428,7 @@ inline xt::xtensor<double, 2> Set1(size_t N = 9)
         {247, 129, 191},
         {153, 153, 153},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -438,6 +441,7 @@ Qualitative colormap.
 */
 inline xt::xtensor<double, 2> Set2(size_t N = 8)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {102, 194, 165},
         {252, 141,  98},
@@ -448,6 +452,7 @@ inline xt::xtensor<double, 2> Set2(size_t N = 8)
         {229, 196, 148},
         {179, 179, 179},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -460,6 +465,7 @@ Qualitative colormap.
 */
 inline xt::xtensor<double, 2> Set3(size_t N = 12)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {141, 211, 199},
         {255, 255, 179},
@@ -474,6 +480,7 @@ inline xt::xtensor<double, 2> Set3(size_t N = 12)
         {204, 235, 197},
         {255, 237, 111},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -486,6 +493,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> Blues(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {247, 251, 255},
         {222, 235, 247},
@@ -497,6 +505,7 @@ inline xt::xtensor<double, 2> Blues(size_t N = 9)
         {  8,  81, 156},
         {  8,  48, 107},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -509,6 +518,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> Greens(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {247, 252, 245},
         {229, 245, 224},
@@ -520,6 +530,7 @@ inline xt::xtensor<double, 2> Greens(size_t N = 9)
         {  0, 109,  44},
         {  0,  68,  27},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -532,10 +543,12 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> Greys(size_t N = 2)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {255, 255, 255},
         {  0,   0,   0},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -548,6 +561,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> Oranges(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {255, 245, 235},
         {254, 230, 206},
@@ -559,6 +573,7 @@ inline xt::xtensor<double, 2> Oranges(size_t N = 9)
         {166,  54,   3},
         {127,  39,   4},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -571,6 +586,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> Purples(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {252, 251, 253},
         {239, 237, 245},
@@ -582,6 +598,7 @@ inline xt::xtensor<double, 2> Purples(size_t N = 9)
         { 84,  39, 143},
         { 63,   0, 125},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -594,6 +611,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> Reds(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {255, 245, 240},
         {254, 224, 210},
@@ -605,6 +623,7 @@ inline xt::xtensor<double, 2> Reds(size_t N = 9)
         {165,  15,  21},
         {103,   0,  13},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -617,6 +636,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> BuPu(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {247, 252, 253},
         {224, 236, 244},
@@ -628,6 +648,7 @@ inline xt::xtensor<double, 2> BuPu(size_t N = 9)
         {129,  15, 124},
         { 77,   0,  75},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -640,6 +661,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> GnBu(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {247, 252, 240},
         {224, 243, 219},
@@ -651,6 +673,7 @@ inline xt::xtensor<double, 2> GnBu(size_t N = 9)
         {  8, 104, 172},
         {  8,  64, 129},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -663,6 +686,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> PuBu(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {255, 247, 251},
         {236, 231, 242},
@@ -674,6 +698,7 @@ inline xt::xtensor<double, 2> PuBu(size_t N = 9)
         {  4,  90, 141},
         {  2,  56,  88},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -686,6 +711,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> PuBuGn(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {255, 247, 251},
         {236, 226, 240},
@@ -697,6 +723,7 @@ inline xt::xtensor<double, 2> PuBuGn(size_t N = 9)
         {  1, 108,  89},
         {  1,  70,  54},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -709,6 +736,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> PuRd(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {247, 244, 249},
         {231, 225, 239},
@@ -720,6 +748,7 @@ inline xt::xtensor<double, 2> PuRd(size_t N = 9)
         {152,   0,  67},
         {103,   0,  31},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -732,6 +761,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> RdPu(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {255, 247, 243},
         {253, 224, 221},
@@ -743,6 +773,7 @@ inline xt::xtensor<double, 2> RdPu(size_t N = 9)
         {122,   1, 119},
         { 73,   0, 106},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -755,6 +786,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> OrRd(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {255, 247, 236},
         {254, 232, 200},
@@ -766,6 +798,7 @@ inline xt::xtensor<double, 2> OrRd(size_t N = 9)
         {179,   0,   0},
         {127,   0,   0},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -778,6 +811,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> RdOrYl(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {128, 0  , 38 },
         {189, 0  , 38 },
@@ -789,6 +823,7 @@ inline xt::xtensor<double, 2> RdOrYl(size_t N = 9)
         {255, 237, 160},
         {255, 255, 204},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -801,6 +836,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> YlGn(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {255, 255, 229},
         {247, 252, 185},
@@ -812,6 +848,7 @@ inline xt::xtensor<double, 2> YlGn(size_t N = 9)
         {  0, 104,  55},
         {  0,  69,  41},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -824,6 +861,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> YlGnBu(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {255, 255, 217},
         {237, 248, 177},
@@ -835,6 +873,7 @@ inline xt::xtensor<double, 2> YlGnBu(size_t N = 9)
         { 37,  52, 148},
         {  8,  29,  88},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -847,6 +886,7 @@ Sequential colormap.
 */
 inline xt::xtensor<double, 2> YlOrRd(size_t N = 9)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {255, 255, 204},
         {255, 237, 160},
@@ -858,6 +898,7 @@ inline xt::xtensor<double, 2> YlOrRd(size_t N = 9)
         {189,   0,  38},
         {128,   0,  38},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -870,6 +911,7 @@ Diverging colormap.
 */
 inline xt::xtensor<double, 2> BrBG(size_t N = 11)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         { 84,  48,   5},
         {140,  81,  10},
@@ -883,6 +925,7 @@ inline xt::xtensor<double, 2> BrBG(size_t N = 11)
         {  1, 102,  94},
         {  0,  60,  48},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -895,6 +938,7 @@ Diverging colormap.
 */
 inline xt::xtensor<double, 2> PuOr(size_t N = 11)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {127,  59,   8},
         {179,  88,   6},
@@ -908,6 +952,7 @@ inline xt::xtensor<double, 2> PuOr(size_t N = 11)
         { 84,  39, 136},
         { 45,   0,  75},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -920,6 +965,7 @@ Diverging colormap.
 */
 inline xt::xtensor<double, 2> RdBu(size_t N = 11)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {103,   0,  31},
         {178,  24,  43},
@@ -933,6 +979,7 @@ inline xt::xtensor<double, 2> RdBu(size_t N = 11)
         { 33, 102, 172},
         {  5,  48,  97},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -945,6 +992,7 @@ Diverging colormap.
 */
 inline xt::xtensor<double, 2> RdGy(size_t N = 11)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {103,   0,  31},
         {178,  24,  43},
@@ -958,6 +1006,7 @@ inline xt::xtensor<double, 2> RdGy(size_t N = 11)
         { 77,  77,  77},
         { 26,  26,  26},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -970,6 +1019,7 @@ Diverging colormap.
 */
 inline xt::xtensor<double, 2> RdYlBu(size_t N = 11)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {165,   0,  38},
         {215,  48,  39},
@@ -983,6 +1033,7 @@ inline xt::xtensor<double, 2> RdYlBu(size_t N = 11)
         { 69, 117, 180},
         { 49,  54, 149},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -995,6 +1046,7 @@ Diverging colormap.
 */
 inline xt::xtensor<double, 2> RdYlGn(size_t N = 11)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {165,   0,  38},
         {215,  48,  39},
@@ -1008,6 +1060,7 @@ inline xt::xtensor<double, 2> RdYlGn(size_t N = 11)
         { 26, 152,  80},
         {  0, 104,  55},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -1020,6 +1073,7 @@ Diverging colormap.
 */
 inline xt::xtensor<double, 2> PiYG(size_t N = 11)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {142,   1,  82},
         {197,  27, 125},
@@ -1033,6 +1087,7 @@ inline xt::xtensor<double, 2> PiYG(size_t N = 11)
         { 77, 146,  33},
         { 39, 100,  25},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
@@ -1045,6 +1100,7 @@ Diverging colormap.
 */
 inline xt::xtensor<double, 2> PRGn(size_t N = 11)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         { 64,   0,  75},
         {118,  42, 131},
@@ -1058,43 +1114,43 @@ inline xt::xtensor<double, 2> PRGn(size_t N = 11)
         { 27, 120,  55},
         {  0,  68,  27},
     };
+    // clang-format on
 
     return interp(data / 255.0, N);
 }
 
-namespace detail
+namespace detail {
+
+inline xt::xtensor<double, 1> from_anchor_color(size_t N, const xt::xtensor<double, 2>& x)
 {
+    size_t n = x.shape(0);
+    xt::xtensor<size_t, 1> idx = xt::view(x, xt::all(), 0) * (double)N;
+    idx(0) = 0;
+    idx(n - 1) = N;
 
-    inline xt::xtensor<double, 1> from_anchor_color(size_t N, const xt::xtensor<double, 2>& x)
-    {
-        size_t n = x.shape(0);
-        xt::xtensor<size_t, 1> idx = xt::view(x, xt::all(), 0) * (double)N;
-        idx(0) = 0;
-        idx(n - 1) = N;
+    xt::xtensor<double, 1> ret = xt::empty<double>({N});
 
-        xt::xtensor<double, 1> ret = xt::empty<double>({N});
-
-        for (size_t i = 0; i < n - 1; ++i) {
-            xt::view(ret, xt::range(idx(i), idx(i + 1))) =
-                x(i, 2) + (x(i + 1, 1) - x(i, 2)) * xt::linspace<double>(0.0, 1.0, idx(i + 1) - idx(i));
-        }
-
-        return ret;
+    for (size_t i = 0; i < n - 1; ++i) {
+        xt::view(ret, xt::range(idx(i), idx(i + 1))) =
+            x(i, 2) + (x(i + 1, 1) - x(i, 2)) * xt::linspace<double>(0.0, 1.0, idx(i + 1) - idx(i));
     }
 
-    inline xt::xtensor<double, 2> from_anchor(
-        size_t N,
-        const xt::xtensor<double, 2>& r,
-        const xt::xtensor<double, 2>& g,
-        const xt::xtensor<double, 2>& b)
-    {
-        std::array<size_t, 2> shape = {N, 3};
-        xt::xtensor<double, 2> ret(shape);
-        xt::view(ret, xt::all(), 0) = from_anchor_color(N, r);
-        xt::view(ret, xt::all(), 1) = from_anchor_color(N, g);
-        xt::view(ret, xt::all(), 2) = from_anchor_color(N, b);
-        return ret;
-    }
+    return ret;
+}
+
+inline xt::xtensor<double, 2> from_anchor(
+    size_t N,
+    const xt::xtensor<double, 2>& r,
+    const xt::xtensor<double, 2>& g,
+    const xt::xtensor<double, 2>& b)
+{
+    std::array<size_t, 2> shape = {N, 3};
+    xt::xtensor<double, 2> ret(shape);
+    xt::view(ret, xt::all(), 0) = from_anchor_color(N, r);
+    xt::view(ret, xt::all(), 1) = from_anchor_color(N, g);
+    xt::view(ret, xt::all(), 2) = from_anchor_color(N, b);
+    return ret;
+}
 
 } // namespace detail
 
@@ -1106,6 +1162,7 @@ matplotlib colormap, from anchor.
 */
 inline xt::xtensor<double, 2> spring(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> r = {
         {0.0, 1.0, 1.0},
         {1.0, 1.0, 1.0}};
@@ -1117,6 +1174,7 @@ inline xt::xtensor<double, 2> spring(size_t N = 256)
     xt::xtensor<double, 2> b = {
         {0.0, 1.0, 1.0},
         {1.0, 0.0, 0.0}};
+    // clang-format on
 
     return detail::from_anchor(N, r, g, b);
 }
@@ -1129,6 +1187,7 @@ matplotlib colormap, from anchor.
 */
 inline xt::xtensor<double, 2> summer(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> r = {
         {0.0, 0.0, 0.0},
         {1.0, 1.0, 1.0}};
@@ -1140,6 +1199,7 @@ inline xt::xtensor<double, 2> summer(size_t N = 256)
     xt::xtensor<double, 2> b = {
         {0.0, 0.4, 0.4},
         {1.0, 0.4, 0.4}};
+    // clang-format on
 
     return detail::from_anchor(N, r, g, b);
 }
@@ -1152,6 +1212,7 @@ matplotlib colormap, from anchor.
 */
 inline xt::xtensor<double, 2> autumn(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> r = {
         {0.0, 1.0, 1.0},
         {1.0, 1.0, 1.0}};
@@ -1163,6 +1224,7 @@ inline xt::xtensor<double, 2> autumn(size_t N = 256)
     xt::xtensor<double, 2> b = {
         {0.0, 0.0, 0.0},
         {1.0, 0.0, 0.0}};
+    // clang-format on
 
     return detail::from_anchor(N, r, g, b);
 }
@@ -1175,6 +1237,7 @@ matplotlib colormap, from anchor.
 */
 inline xt::xtensor<double, 2> winter(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> r = {
         {0.0, 0.0, 0.0},
         {1.0, 0.0, 0.0}};
@@ -1186,6 +1249,7 @@ inline xt::xtensor<double, 2> winter(size_t N = 256)
     xt::xtensor<double, 2> b = {
         {0.0, 1.0, 1.0},
         {1.0, 0.5, 0.5}};
+    // clang-format on
 
     return detail::from_anchor(N, r, g, b);
 }
@@ -1198,6 +1262,7 @@ matplotlib colormap, from anchor.
 */
 inline xt::xtensor<double, 2> bone(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> r = {
         {0.0, 0.0, 0.0},
         {0.746032, 0.652778, 0.652778},
@@ -1213,6 +1278,7 @@ inline xt::xtensor<double, 2> bone(size_t N = 256)
         {0.0, 0.0, 0.0},
         {0.365079, 0.444444, 0.444444},
         {1.0, 1.0, 1.0}};
+    // clang-format on
 
     return detail::from_anchor(N, r, g, b);
 }
@@ -1225,6 +1291,7 @@ matplotlib colormap, from anchor.
 */
 inline xt::xtensor<double, 2> cool(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> r = {
         {0.0, 0.0, 0.0},
         {1.0, 1.0, 1.0}};
@@ -1236,6 +1303,7 @@ inline xt::xtensor<double, 2> cool(size_t N = 256)
     xt::xtensor<double, 2> b = {
         {0.0, 1.0, 1.0},
         {1.0, 1.0, 1.0}};
+    // clang-format on
 
     return detail::from_anchor(N, r, g, b);
 }
@@ -1248,6 +1316,7 @@ matplotlib colormap, from anchor.
 */
 inline xt::xtensor<double, 2> hot(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> r = {
         {0.0, 0.0416, 0.0416},
         {0.365079, 1.000000, 1.000000},
@@ -1263,6 +1332,7 @@ inline xt::xtensor<double, 2> hot(size_t N = 256)
         {0.0, 0.0, 0.0},
         {0.746032, 0.000000, 0.000000},
         {1.0, 1.0, 1.0}};
+    // clang-format on
 
     return detail::from_anchor(N, r, g, b);
 }
@@ -1275,6 +1345,7 @@ matplotlib colormap, from anchor.
 */
 inline xt::xtensor<double, 2> copper(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> r = {
         {0.0, 0.0, 0.0},
         {0.809524, 1.000000, 1.000000},
@@ -1287,6 +1358,7 @@ inline xt::xtensor<double, 2> copper(size_t N = 256)
     xt::xtensor<double, 2> b = {
         {0.0, 0.0, 0.0},
         {1.0, 0.4975, 0.4975}};
+    // clang-format on
 
     return detail::from_anchor(N, r, g, b);
 }
@@ -1299,6 +1371,7 @@ matplotlib colormap, from anchor.
 */
 inline xt::xtensor<double, 2> hsv(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> r = {
         {0.0, 1.0, 1.0},
         {0.158730, 1.000000, 1.000000},
@@ -1328,6 +1401,7 @@ inline xt::xtensor<double, 2> hsv(size_t N = 256)
         {0.841270, 1.000000, 1.000000},
         {0.857143, 0.937500, 0.937500},
         {1.0, 0.09375, 0.09375}};
+    // clang-format on
 
     return detail::from_anchor(N, r, g, b);
 }
@@ -1340,6 +1414,7 @@ matplotlib colormap, from anchor.
 */
 inline xt::xtensor<double, 2> nipy_spectral(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> r = {
         {0.0, 0.0, 0.0},
         {0.05, 0.4667, 0.4667},
@@ -1408,6 +1483,7 @@ inline xt::xtensor<double, 2> nipy_spectral(size_t N = 256)
         {0.90, 0.0, 0.0},
         {0.95, 0.0, 0.0},
         {1.0, 0.80, 0.80}};
+    // clang-format on
 
     return detail::from_anchor(N, r, g, b);
 }
@@ -1420,6 +1496,7 @@ matplotlib colormap, from anchor.
 */
 inline xt::xtensor<double, 2> jet(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> r = {
         {0.00, 0.0, 0.0},
         {0.35, 0.0, 0.0},
@@ -1441,34 +1518,33 @@ inline xt::xtensor<double, 2> jet(size_t N = 256)
         {0.34, 1.0, 1.0},
         {0.65, 0.0, 0.0},
         {1.00, 0.0, 0.0}};
+    // clang-format on
 
     return detail::from_anchor(N, r, g, b);
 }
 
-namespace detail
+namespace detail {
+
+inline xt::xtensor<double, 2> from_fraction(size_t N, const xt::xtensor<double, 2>& x)
 {
+    size_t n = x.shape(0);
+    xt::xtensor<size_t, 1> idx = xt::view(x, xt::all(), 0) * (double)N;
+    idx(0) = 0;
+    idx(n - 1) = N;
 
-    inline xt::xtensor<double, 2> from_fraction(size_t N, const xt::xtensor<double, 2>& x)
-    {
-        size_t n = x.shape(0);
-        xt::xtensor<size_t, 1> idx = xt::view(x, xt::all(), 0) * (double)N;
-        idx(0) = 0;
-        idx(n - 1) = N;
+    std::array<size_t, 2> shape = {N, 3};
+    xt::xtensor<double, 2> ret(shape);
 
-        std::array<size_t, 2> shape = {N, 3};
-        xt::xtensor<double, 2> ret(shape);
-
-        for (size_t i = 0; i < n - 1; ++i) {
-            for (size_t j = 0; j < 3; ++j) {
-                xt::view(ret, xt::range(idx(i), idx(i + 1)), j)
-                    = x(i, j + 1)
-                    + (x(i + 1, j + 1) - x(i, j + 1))
-                    * xt::linspace<double>(0.0, 1.0, idx(i + 1) - idx(i));
-            }
+    for (size_t i = 0; i < n - 1; ++i) {
+        for (size_t j = 0; j < 3; ++j) {
+            xt::view(ret, xt::range(idx(i), idx(i + 1)), j) =
+                x(i, j + 1) + (x(i + 1, j + 1) - x(i, j + 1)) *
+                                  xt::linspace<double>(0.0, 1.0, idx(i + 1) - idx(i));
         }
-
-        return ret;
     }
+
+    return ret;
+}
 
 } // namespace detail
 
@@ -1491,246 +1567,321 @@ inline xt::xtensor<double, 2> terrain(size_t N = 6)
     return detail::from_fraction(N, data);
 }
 
-namespace detail
+namespace detail {
+// Gnuplot palette functions
+inline xt::xtensor<double, 1> _g0(const xt::xtensor<double, 1>& x)
 {
-    // Gnuplot palette functions
-    inline xt::xtensor<double, 1> _g0(const xt::xtensor<double, 1>& x)
-    {
-        return xt::zeros_like(x);
+    return xt::zeros_like(x);
+}
+
+inline xt::xtensor<double, 1> _g1(const xt::xtensor<double, 1>& x)
+{
+    return 0.5 * xt::ones_like(x);
+}
+
+inline xt::xtensor<double, 1> _g2(const xt::xtensor<double, 1>& x)
+{
+    return xt::ones_like(x);
+}
+
+inline xt::xtensor<double, 1> _g3(const xt::xtensor<double, 1>& x)
+{
+    return x;
+}
+
+inline xt::xtensor<double, 1> _g4(const xt::xtensor<double, 1>& x)
+{
+    return xt::pow(x, 2.0);
+}
+
+inline xt::xtensor<double, 1> _g5(const xt::xtensor<double, 1>& x)
+{
+    return xt::pow(x, 3.0);
+}
+
+inline xt::xtensor<double, 1> _g6(const xt::xtensor<double, 1>& x)
+{
+    return xt::pow(x, 4.0);
+}
+
+inline xt::xtensor<double, 1> _g7(const xt::xtensor<double, 1>& x)
+{
+    return xt::sqrt(x);
+}
+
+inline xt::xtensor<double, 1> _g8(const xt::xtensor<double, 1>& x)
+{
+    return xt::sqrt(xt::sqrt(x));
+}
+
+inline xt::xtensor<double, 1> _g9(const xt::xtensor<double, 1>& x)
+{
+    return xt::sin(x * M_PI * 0.5);
+}
+
+inline xt::xtensor<double, 1> _g10(const xt::xtensor<double, 1>& x)
+{
+    return xt::cos(x * M_PI * 0.5);
+}
+
+inline xt::xtensor<double, 1> _g11(const xt::xtensor<double, 1>& x)
+{
+    return xt::abs(x - 0.5);
+}
+
+inline xt::xtensor<double, 1> _g12(const xt::xtensor<double, 1>& x)
+{
+    return xt::pow(2.0 * x - 1.0, 2.0);
+}
+
+inline xt::xtensor<double, 1> _g13(const xt::xtensor<double, 1>& x)
+{
+    return xt::sin(x * M_PI);
+}
+
+inline xt::xtensor<double, 1> _g14(const xt::xtensor<double, 1>& x)
+{
+    return xt::abs(xt::cos(x * M_PI));
+}
+
+inline xt::xtensor<double, 1> _g15(const xt::xtensor<double, 1>& x)
+{
+    return xt::sin(x * 2.0 * M_PI);
+}
+
+inline xt::xtensor<double, 1> _g16(const xt::xtensor<double, 1>& x)
+{
+    return xt::cos(x * 2.0 * M_PI);
+}
+
+inline xt::xtensor<double, 1> _g17(const xt::xtensor<double, 1>& x)
+{
+    return xt::abs(xt::sin(x * 2.0 * M_PI));
+}
+
+inline xt::xtensor<double, 1> _g18(const xt::xtensor<double, 1>& x)
+{
+    return xt::abs(xt::cos(x * 2.0 * M_PI));
+}
+
+inline xt::xtensor<double, 1> _g19(const xt::xtensor<double, 1>& x)
+{
+    return xt::abs(xt::sin(x * 4.0 * M_PI));
+}
+
+inline xt::xtensor<double, 1> _g20(const xt::xtensor<double, 1>& x)
+{
+    return xt::abs(xt::cos(x * 4.0 * M_PI));
+}
+
+inline xt::xtensor<double, 1> _g21(const xt::xtensor<double, 1>& x)
+{
+    return 3.0 * x;
+}
+
+inline xt::xtensor<double, 1> _g22(const xt::xtensor<double, 1>& x)
+{
+    return 3.0 * x - 1.0;
+}
+
+inline xt::xtensor<double, 1> _g23(const xt::xtensor<double, 1>& x)
+{
+    return 3.0 * x - 2.0;
+}
+
+inline xt::xtensor<double, 1> _g24(const xt::xtensor<double, 1>& x)
+{
+    return xt::abs(3.0 * x - 1.0);
+}
+
+inline xt::xtensor<double, 1> _g25(const xt::xtensor<double, 1>& x)
+{
+    return xt::abs(3.0 * x - 2.0);
+}
+
+inline xt::xtensor<double, 1> _g26(const xt::xtensor<double, 1>& x)
+{
+    return (3.0 * x - 1.0) * 0.5;
+}
+
+inline xt::xtensor<double, 1> _g27(const xt::xtensor<double, 1>& x)
+{
+    return (3.0 * x - 2.0) * 0.5;
+}
+
+inline xt::xtensor<double, 1> _g28(const xt::xtensor<double, 1>& x)
+{
+    return xt::abs((3.0 * x - 1.0) * 0.5);
+}
+
+inline xt::xtensor<double, 1> _g29(const xt::xtensor<double, 1>& x)
+{
+    return xt::abs((3.0 * x - 2.0) * 0.5);
+}
+
+inline xt::xtensor<double, 1> _g30(const xt::xtensor<double, 1>& x)
+{
+    return x / 0.32 - 0.78125;
+}
+
+inline xt::xtensor<double, 1> _g31(const xt::xtensor<double, 1>& x)
+{
+    return 2.0 * x - 0.84;
+}
+
+inline xt::xtensor<double, 1> _g32(const xt::xtensor<double, 1>& x)
+{
+    auto ret = xt::zeros_like(x);
+    ret = xt::where(xt::less(x, 0.25), 4.0 * x, ret);
+    ret = xt::where(xt::greater_equal(x, 0.25) && xt::less(x, 0.92), -2.0 * x + 1.84, ret);
+    ret = xt::where(xt::greater_equal(x, 0.92), x / 0.08 - 11.5, ret);
+    return ret;
+}
+
+inline xt::xtensor<double, 1> _g33(const xt::xtensor<double, 1>& x)
+{
+    return xt::abs(2.0 * x - 0.5);
+}
+
+inline xt::xtensor<double, 1> _g34(const xt::xtensor<double, 1>& x)
+{
+    return 2.0 * x;
+}
+
+inline xt::xtensor<double, 1> _g35(const xt::xtensor<double, 1>& x)
+{
+    return 2.0 * x - 0.5;
+}
+
+inline xt::xtensor<double, 1> _g36(const xt::xtensor<double, 1>& x)
+{
+    return 2.0 * x - 1.0;
+}
+
+inline xt::xtensor<double, 1> gnu_palette(size_t i, const xt::xtensor<double, 1>& x)
+{
+    xt::xtensor<double, 1> ret;
+
+    if (i == 0) {
+        ret = _g0(x);
+    }
+    else if (i == 1) {
+        ret = _g1(x);
+    }
+    else if (i == 2) {
+        ret = _g2(x);
+    }
+    else if (i == 3) {
+        ret = _g3(x);
+    }
+    else if (i == 4) {
+        ret = _g4(x);
+    }
+    else if (i == 5) {
+        ret = _g5(x);
+    }
+    else if (i == 6) {
+        ret = _g6(x);
+    }
+    else if (i == 7) {
+        ret = _g7(x);
+    }
+    else if (i == 8) {
+        ret = _g8(x);
+    }
+    else if (i == 9) {
+        ret = _g9(x);
+    }
+    else if (i == 10) {
+        ret = _g10(x);
+    }
+    else if (i == 11) {
+        ret = _g11(x);
+    }
+    else if (i == 12) {
+        ret = _g12(x);
+    }
+    else if (i == 13) {
+        ret = _g13(x);
+    }
+    else if (i == 14) {
+        ret = _g14(x);
+    }
+    else if (i == 15) {
+        ret = _g15(x);
+    }
+    else if (i == 16) {
+        ret = _g16(x);
+    }
+    else if (i == 17) {
+        ret = _g17(x);
+    }
+    else if (i == 18) {
+        ret = _g18(x);
+    }
+    else if (i == 19) {
+        ret = _g19(x);
+    }
+    else if (i == 20) {
+        ret = _g20(x);
+    }
+    else if (i == 21) {
+        ret = _g21(x);
+    }
+    else if (i == 22) {
+        ret = _g22(x);
+    }
+    else if (i == 23) {
+        ret = _g23(x);
+    }
+    else if (i == 24) {
+        ret = _g24(x);
+    }
+    else if (i == 25) {
+        ret = _g25(x);
+    }
+    else if (i == 26) {
+        ret = _g26(x);
+    }
+    else if (i == 27) {
+        ret = _g27(x);
+    }
+    else if (i == 28) {
+        ret = _g28(x);
+    }
+    else if (i == 29) {
+        ret = _g29(x);
+    }
+    else if (i == 30) {
+        ret = _g30(x);
+    }
+    else if (i == 31) {
+        ret = _g31(x);
+    }
+    else if (i == 32) {
+        ret = _g32(x);
+    }
+    else if (i == 33) {
+        ret = _g33(x);
+    }
+    else if (i == 34) {
+        ret = _g34(x);
+    }
+    else if (i == 35) {
+        ret = _g35(x);
+    }
+    else if (i == 36) {
+        ret = _g36(x);
+    }
+    else {
+        throw std::runtime_error("gnu_palette out-of-bounds");
     }
 
-    inline xt::xtensor<double, 1> _g1(const xt::xtensor<double, 1>& x)
-    {
-        return 0.5 * xt::ones_like(x);
-    }
+    ret = xt::where(xt::greater(ret, 1.0), 1.0, ret);
+    ret = xt::where(xt::less(ret, 0.0), 0.0, ret);
 
-    inline xt::xtensor<double, 1> _g2(const xt::xtensor<double, 1>& x)
-    {
-        return xt::ones_like(x);
-    }
-
-    inline xt::xtensor<double, 1> _g3(const xt::xtensor<double, 1>& x)
-    {
-        return x;
-    }
-
-    inline xt::xtensor<double, 1> _g4(const xt::xtensor<double, 1>& x)
-    {
-        return xt::pow(x, 2.0);
-    }
-
-    inline xt::xtensor<double, 1> _g5(const xt::xtensor<double, 1>& x)
-    {
-        return xt::pow(x, 3.0);
-    }
-
-    inline xt::xtensor<double, 1> _g6(const xt::xtensor<double, 1>& x)
-    {
-        return xt::pow(x, 4.0);
-    }
-
-    inline xt::xtensor<double, 1> _g7(const xt::xtensor<double, 1>& x)
-    {
-        return xt::sqrt(x);
-    }
-
-    inline xt::xtensor<double, 1> _g8(const xt::xtensor<double, 1>& x)
-    {
-        return xt::sqrt(xt::sqrt(x));
-    }
-
-    inline xt::xtensor<double, 1> _g9(const xt::xtensor<double, 1>& x)
-    {
-        return xt::sin(x * M_PI * 0.5);
-    }
-
-    inline xt::xtensor<double, 1> _g10(const xt::xtensor<double, 1>& x)
-    {
-        return xt::cos(x * M_PI * 0.5);
-    }
-
-    inline xt::xtensor<double, 1> _g11(const xt::xtensor<double, 1>& x)
-    {
-        return xt::abs(x - 0.5);
-    }
-
-    inline xt::xtensor<double, 1> _g12(const xt::xtensor<double, 1>& x)
-    {
-        return xt::pow(2.0 * x - 1.0, 2.0);
-    }
-
-    inline xt::xtensor<double, 1> _g13(const xt::xtensor<double, 1>& x)
-    {
-        return xt::sin(x * M_PI);
-    }
-
-    inline xt::xtensor<double, 1> _g14(const xt::xtensor<double, 1>& x)
-    {
-        return xt::abs(xt::cos(x * M_PI));
-    }
-
-    inline xt::xtensor<double, 1> _g15(const xt::xtensor<double, 1>& x)
-    {
-        return xt::sin(x * 2.0 * M_PI);
-    }
-
-    inline xt::xtensor<double, 1> _g16(const xt::xtensor<double, 1>& x)
-    {
-        return xt::cos(x * 2.0 * M_PI);
-    }
-
-    inline xt::xtensor<double, 1> _g17(const xt::xtensor<double, 1>& x)
-    {
-        return xt::abs(xt::sin(x * 2.0 * M_PI));
-    }
-
-    inline xt::xtensor<double, 1> _g18(const xt::xtensor<double, 1>& x)
-    {
-        return xt::abs(xt::cos(x * 2.0 * M_PI));
-    }
-
-    inline xt::xtensor<double, 1> _g19(const xt::xtensor<double, 1>& x)
-    {
-        return xt::abs(xt::sin(x * 4.0 * M_PI));
-    }
-
-    inline xt::xtensor<double, 1> _g20(const xt::xtensor<double, 1>& x)
-    {
-        return xt::abs(xt::cos(x * 4.0 * M_PI));
-    }
-
-    inline xt::xtensor<double, 1> _g21(const xt::xtensor<double, 1>& x)
-    {
-        return 3.0 * x;
-    }
-
-    inline xt::xtensor<double, 1> _g22(const xt::xtensor<double, 1>& x)
-    {
-        return 3.0 * x - 1.0;
-    }
-
-    inline xt::xtensor<double, 1> _g23(const xt::xtensor<double, 1>& x)
-    {
-        return 3.0 * x - 2.0;
-    }
-
-    inline xt::xtensor<double, 1> _g24(const xt::xtensor<double, 1>& x)
-    {
-        return xt::abs(3.0 * x - 1.0);
-    }
-
-    inline xt::xtensor<double, 1> _g25(const xt::xtensor<double, 1>& x)
-    {
-        return xt::abs(3.0 * x - 2.0);
-    }
-
-    inline xt::xtensor<double, 1> _g26(const xt::xtensor<double, 1>& x)
-    {
-        return (3.0 * x - 1.0) * 0.5;
-    }
-
-    inline xt::xtensor<double, 1> _g27(const xt::xtensor<double, 1>& x)
-    {
-        return (3.0 * x - 2.0) * 0.5;
-    }
-
-    inline xt::xtensor<double, 1> _g28(const xt::xtensor<double, 1>& x)
-    {
-        return xt::abs((3.0 * x - 1.0) * 0.5);
-    }
-
-    inline xt::xtensor<double, 1> _g29(const xt::xtensor<double, 1>& x)
-    {
-        return xt::abs((3.0 * x - 2.0) * 0.5);
-    }
-
-    inline xt::xtensor<double, 1> _g30(const xt::xtensor<double, 1>& x)
-    {
-        return x / 0.32 - 0.78125;
-    }
-
-    inline xt::xtensor<double, 1> _g31(const xt::xtensor<double, 1>& x)
-    {
-        return 2.0 * x - 0.84;
-    }
-
-    inline xt::xtensor<double, 1> _g32(const xt::xtensor<double, 1>& x)
-    {
-        auto ret = xt::zeros_like(x);
-        ret = xt::where(xt::less(x, 0.25), 4.0 * x, ret);
-        ret = xt::where(xt::greater_equal(x, 0.25) && xt::less(x, 0.92), -2.0 * x + 1.84, ret);
-        ret = xt::where(xt::greater_equal(x, 0.92), x / 0.08 - 11.5, ret);
-        return ret;
-    }
-
-    inline xt::xtensor<double, 1> _g33(const xt::xtensor<double, 1>& x)
-    {
-        return xt::abs(2.0 * x - 0.5);
-    }
-
-    inline xt::xtensor<double, 1> _g34(const xt::xtensor<double, 1>& x)
-    {
-        return 2.0 * x;
-    }
-
-    inline xt::xtensor<double, 1> _g35(const xt::xtensor<double, 1>& x)
-    {
-        return 2.0 * x - 0.5;
-    }
-
-    inline xt::xtensor<double, 1> _g36(const xt::xtensor<double, 1>& x)
-    {
-        return 2.0 * x - 1.0;
-    }
-
-    inline xt::xtensor<double, 1> gnu_palette(size_t i, const xt::xtensor<double, 1>& x)
-    {
-        xt::xtensor<double, 1> ret;
-
-        if (i == 0) { ret = _g0(x); }
-        else if (i == 1) { ret = _g1(x); }
-        else if (i == 2) { ret = _g2(x); }
-        else if (i == 3) { ret = _g3(x); }
-        else if (i == 4) { ret = _g4(x); }
-        else if (i == 5) { ret = _g5(x); }
-        else if (i == 6) { ret = _g6(x); }
-        else if (i == 7) { ret = _g7(x); }
-        else if (i == 8) { ret = _g8(x); }
-        else if (i == 9) { ret = _g9(x); }
-        else if (i == 10) { ret = _g10(x); }
-        else if (i == 11) { ret = _g11(x); }
-        else if (i == 12) { ret = _g12(x); }
-        else if (i == 13) { ret = _g13(x); }
-        else if (i == 14) { ret = _g14(x); }
-        else if (i == 15) { ret = _g15(x); }
-        else if (i == 16) { ret = _g16(x); }
-        else if (i == 17) { ret = _g17(x); }
-        else if (i == 18) { ret = _g18(x); }
-        else if (i == 19) { ret = _g19(x); }
-        else if (i == 20) { ret = _g20(x); }
-        else if (i == 21) { ret = _g21(x); }
-        else if (i == 22) { ret = _g22(x); }
-        else if (i == 23) { ret = _g23(x); }
-        else if (i == 24) { ret = _g24(x); }
-        else if (i == 25) { ret = _g25(x); }
-        else if (i == 26) { ret = _g26(x); }
-        else if (i == 27) { ret = _g27(x); }
-        else if (i == 28) { ret = _g28(x); }
-        else if (i == 29) { ret = _g29(x); }
-        else if (i == 30) { ret = _g30(x); }
-        else if (i == 31) { ret = _g31(x); }
-        else if (i == 32) { ret = _g32(x); }
-        else if (i == 33) { ret = _g33(x); }
-        else if (i == 34) { ret = _g34(x); }
-        else if (i == 35) { ret = _g35(x); }
-        else if (i == 36) { ret = _g36(x); }
-        else { throw std::runtime_error("gnu_palette out-of-bounds"); }
-
-        ret = xt::where(xt::greater(ret, 1.0), 1.0, ret);
-        ret = xt::where(xt::less(ret, 0.0), 0.0, ret);
-
-        return ret;
-    }
+    return ret;
+}
 
 } // namespace detail
 
@@ -1759,6 +1910,7 @@ matplotlib colormap.
 */
 inline xt::xtensor<double, 2> magma(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {0.001462, 0.000466, 0.013866},
         {0.002258, 0.001295, 0.018331},
@@ -2017,6 +2169,7 @@ inline xt::xtensor<double, 2> magma(size_t N = 256)
         {0.987387, 0.984288, 0.742002},
         {0.987053, 0.991438, 0.749504},
     };
+    // clang-format on
 
     return interp(data, N);
 }
@@ -2029,6 +2182,7 @@ matplotlib colormap.
 */
 inline xt::xtensor<double, 2> inferno(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {0.001462, 0.000466, 0.013866},
         {0.002267, 0.001270, 0.018570},
@@ -2287,6 +2441,7 @@ inline xt::xtensor<double, 2> inferno(size_t N = 256)
         {0.982257, 0.994109, 0.631017},
         {0.988362, 0.998364, 0.644924},
     };
+    // clang-format on
 
     return interp(data, N);
 }
@@ -2299,6 +2454,7 @@ matplotlib colormap.
 */
 inline xt::xtensor<double, 2> plasma(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {0.050383, 0.029803, 0.527975},
         {0.063536, 0.028426, 0.533124},
@@ -2557,6 +2713,7 @@ inline xt::xtensor<double, 2> plasma(size_t N = 256)
         {0.941896, 0.968590, 0.140956},
         {0.940015, 0.975158, 0.131326},
     };
+    // clang-format on
 
     return interp(data, N);
 }
@@ -2569,6 +2726,7 @@ matplotlib colormap.
 */
 inline xt::xtensor<double, 2> viridis(size_t N = 256)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {0.267004, 0.004874, 0.329415},
         {0.268510, 0.009605, 0.335427},
@@ -2827,6 +2985,7 @@ inline xt::xtensor<double, 2> viridis(size_t N = 256)
         {0.983868, 0.904867, 0.136897},
         {0.993248, 0.906157, 0.143936},
     };
+    // clang-format on
 
     return interp(data, N);
 }
@@ -2839,12 +2998,15 @@ matplotlib colormap.
 */
 inline xt::xtensor<double, 2> seismic(size_t N = 5)
 {
+    // clang-format off
     xt::xtensor<double, 2> data = {
         {0.0, 0.0, 0.3},
         {0.0, 0.0, 1.0},
         {1.0, 1.0, 1.0},
         {1.0, 0.0, 0.0},
-        {0.5, 0.0, 0.0}};
+        {0.5, 0.0, 0.0},
+    };
+    // clang-format on
 
     return interp(data, N);
 }
@@ -2989,7 +3151,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Bittersweet(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{192,  79,  23}};
+    xt::xtensor<double, 2> data = {{192, 79, 23}};
     return interp(data / 255.0, N);
 }
 
@@ -3013,7 +3175,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> BlueViolet(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{71,  57, 146}};
+    xt::xtensor<double, 2> data = {{71, 57, 146}};
     return interp(data / 255.0, N);
 }
 
@@ -3025,7 +3187,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> BrickRed(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{182,  50,  28}};
+    xt::xtensor<double, 2> data = {{182, 50, 28}};
     return interp(data / 255.0, N);
 }
 
@@ -3037,7 +3199,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Brown(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{121,  37,   0}};
+    xt::xtensor<double, 2> data = {{121, 37, 0}};
     return interp(data / 255.0, N);
 }
 
@@ -3049,7 +3211,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> BurntOrange(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{247, 146,  29}};
+    xt::xtensor<double, 2> data = {{247, 146, 29}};
     return interp(data / 255.0, N);
 }
 
@@ -3121,7 +3283,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Dandelion(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{253, 188,  66}};
+    xt::xtensor<double, 2> data = {{253, 188, 66}};
     return interp(data / 255.0, N);
 }
 
@@ -3133,7 +3295,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> DarkOrchid(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{164,  83, 138}};
+    xt::xtensor<double, 2> data = {{164, 83, 138}};
     return interp(data / 255.0, N);
 }
 
@@ -3157,7 +3319,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> ForestGreen(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 155,  85}};
+    xt::xtensor<double, 2> data = {{0, 155, 85}};
     return interp(data / 255.0, N);
 }
 
@@ -3169,7 +3331,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Fuchsia(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{140,  54, 140}};
+    xt::xtensor<double, 2> data = {{140, 54, 140}};
     return interp(data / 255.0, N);
 }
 
@@ -3181,7 +3343,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Goldenrod(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{255, 223,  66}};
+    xt::xtensor<double, 2> data = {{255, 223, 66}};
     return interp(data / 255.0, N);
 }
 
@@ -3205,7 +3367,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Green(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 166,  79}};
+    xt::xtensor<double, 2> data = {{0, 166, 79}};
     return interp(data / 255.0, N);
 }
 
@@ -3253,7 +3415,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> LimeGreen(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{141, 199,  62}};
+    xt::xtensor<double, 2> data = {{141, 199, 62}};
     return interp(data / 255.0, N);
 }
 
@@ -3265,7 +3427,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Magenta(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{236,   0, 140}};
+    xt::xtensor<double, 2> data = {{236, 0, 140}};
     return interp(data / 255.0, N);
 }
 
@@ -3277,7 +3439,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Mahogany(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{169,  52,  31}};
+    xt::xtensor<double, 2> data = {{169, 52, 31}};
     return interp(data / 255.0, N);
 }
 
@@ -3289,7 +3451,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Maroon(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{175,  50,  53}};
+    xt::xtensor<double, 2> data = {{175, 50, 53}};
     return interp(data / 255.0, N);
 }
 
@@ -3325,7 +3487,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Mulberry(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{169,  60, 147}};
+    xt::xtensor<double, 2> data = {{169, 60, 147}};
     return interp(data / 255.0, N);
 }
 
@@ -3349,7 +3511,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> OliveGreen(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{60, 128,  49}};
+    xt::xtensor<double, 2> data = {{60, 128, 49}};
     return interp(data / 255.0, N);
 }
 
@@ -3361,7 +3523,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Orange(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{245, 129,  55}};
+    xt::xtensor<double, 2> data = {{245, 129, 55}};
     return interp(data / 255.0, N);
 }
 
@@ -3373,7 +3535,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> OrangeRed(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{237,  19,  90}};
+    xt::xtensor<double, 2> data = {{237, 19, 90}};
     return interp(data / 255.0, N);
 }
 
@@ -3397,7 +3559,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Peach(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{247, 150,  90}};
+    xt::xtensor<double, 2> data = {{247, 150, 90}};
     return interp(data / 255.0, N);
 }
 
@@ -3433,7 +3595,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Plum(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{146,  38, 143}};
+    xt::xtensor<double, 2> data = {{146, 38, 143}};
     return interp(data / 255.0, N);
 }
 
@@ -3457,7 +3619,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Purple(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{153,  71, 155}};
+    xt::xtensor<double, 2> data = {{153, 71, 155}};
     return interp(data / 255.0, N);
 }
 
@@ -3469,7 +3631,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> RawSienna(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{151,  64,   6}};
+    xt::xtensor<double, 2> data = {{151, 64, 6}};
     return interp(data / 255.0, N);
 }
 
@@ -3481,7 +3643,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> RedOrange(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{242,  96,  53}};
+    xt::xtensor<double, 2> data = {{242, 96, 53}};
     return interp(data / 255.0, N);
 }
 
@@ -3493,7 +3655,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> RedViolet(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{161,  36, 107}};
+    xt::xtensor<double, 2> data = {{161, 36, 107}};
     return interp(data / 255.0, N);
 }
 
@@ -3505,7 +3667,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Rhodamine(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{239,  85, 159}};
+    xt::xtensor<double, 2> data = {{239, 85, 159}};
     return interp(data / 255.0, N);
 }
 
@@ -3529,7 +3691,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> RoyalPurple(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{97,  63, 153}};
+    xt::xtensor<double, 2> data = {{97, 63, 153}};
     return interp(data / 255.0, N);
 }
 
@@ -3541,7 +3703,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> RubineRed(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{237,   1, 125}};
+    xt::xtensor<double, 2> data = {{237, 1, 125}};
     return interp(data / 255.0, N);
 }
 
@@ -3577,7 +3739,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Sepia(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{103,  24,   0}};
+    xt::xtensor<double, 2> data = {{103, 24, 0}};
     return interp(data / 255.0, N);
 }
 
@@ -3661,7 +3823,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Violet(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{88,  66, 155}};
+    xt::xtensor<double, 2> data = {{88, 66, 155}};
     return interp(data / 255.0, N);
 }
 
@@ -3673,7 +3835,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> VioletRed(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{239,  88, 160}};
+    xt::xtensor<double, 2> data = {{239, 88, 160}};
     return interp(data / 255.0, N);
 }
 
@@ -3685,7 +3847,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> WildStrawberry(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{238,  41, 103}};
+    xt::xtensor<double, 2> data = {{238, 41, 103}};
     return interp(data / 255.0, N);
 }
 
@@ -3697,7 +3859,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> Yellow(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{255, 242,   0}};
+    xt::xtensor<double, 2> data = {{255, 242, 0}};
     return interp(data / 255.0, N);
 }
 
@@ -3721,7 +3883,7 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 */
 inline xt::xtensor<double, 2> YellowOrange(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{250, 162,  26}};
+    xt::xtensor<double, 2> data = {{250, 162, 26}};
     return interp(data / 255.0, N);
 }
 
@@ -4306,183 +4468,537 @@ Get colormap specified as string.
 */
 inline xt::xtensor<double, 2> colormap(const std::string& cmap, size_t N = 256)
 {
-    if (cmap == "Accent") { return Accent(N); }
-    if (cmap == "Dark2") { return Dark2(N); }
-    if (cmap == "Paired") { return Paired(N); }
-    if (cmap == "Spectral") { return Spectral(N); }
-    if (cmap == "Pastel1") { return Pastel1(N); }
-    if (cmap == "Pastel2") { return Pastel2(N); }
-    if (cmap == "Set1") { return Set1(N); }
-    if (cmap == "Set2") { return Set2(N); }
-    if (cmap == "Set3") { return Set3(N); }
-    if (cmap == "Blues") { return Blues(N); }
-    if (cmap == "Greens") { return Greens(N); }
-    if (cmap == "Greys") { return Greys(N); }
-    if (cmap == "Oranges") { return Oranges(N); }
-    if (cmap == "Purples") { return Purples(N); }
-    if (cmap == "Reds") { return Reds(N); }
-    if (cmap == "BuPu") { return BuPu(N); }
-    if (cmap == "GnBu") { return GnBu(N); }
-    if (cmap == "PuBu") { return PuBu(N); }
-    if (cmap == "PuBuGn") { return PuBuGn(N); }
-    if (cmap == "PuRd") { return PuRd(N); }
-    if (cmap == "RdPu") { return RdPu(N); }
-    if (cmap == "OrRd") { return OrRd(N); }
-    if (cmap == "RdOrYl") { return RdOrYl(N); }
-    if (cmap == "YlGn") { return YlGn(N); }
-    if (cmap == "YlGnBu") { return YlGnBu(N); }
-    if (cmap == "YlOrRd") { return YlOrRd(N); }
-    if (cmap == "BrBG") { return BrBG(N); }
-    if (cmap == "PuOr") { return PuOr(N); }
-    if (cmap == "RdBu") { return RdBu(N); }
-    if (cmap == "RdGy") { return RdGy(N); }
-    if (cmap == "RdYlBu") { return RdYlBu(N); }
-    if (cmap == "RdYlGn") { return RdYlGn(N); }
-    if (cmap == "PiYG") { return PiYG(N); }
-    if (cmap == "PRGn") { return PRGn(N); }
-    if (cmap == "spring") { return spring(N); }
-    if (cmap == "summer") { return summer(N); }
-    if (cmap == "autumn") { return autumn(N); }
-    if (cmap == "winter") { return winter(N); }
-    if (cmap == "bone") { return bone(N); }
-    if (cmap == "cool") { return cool(N); }
-    if (cmap == "hot") { return hot(N); }
-    if (cmap == "copper") { return copper(N); }
-    if (cmap == "hsv") { return hsv(N); }
-    if (cmap == "nipy_spectral") { return nipy_spectral(N); }
-    if (cmap == "jet") { return jet(N); }
-    if (cmap == "terrain") { return terrain(N); }
-    if (cmap == "seismic") { return seismic(N); }
-    if (cmap == "afmhot") { return afmhot(N); }
-    if (cmap == "magma") { return magma(N); }
-    if (cmap == "inferno") { return inferno(N); }
-    if (cmap == "plasma") { return plasma(N); }
-    if (cmap == "viridis") { return viridis(N); }
-    if (cmap == "Accent_r") { return Accent_r(N); }
-    if (cmap == "Dark2_r") { return Dark2_r(N); }
-    if (cmap == "Paired_r") { return Paired_r(N); }
-    if (cmap == "Spectral_r") { return Spectral_r(N); }
-    if (cmap == "Pastel1_r") { return Pastel1_r(N); }
-    if (cmap == "Pastel2_r") { return Pastel2_r(N); }
-    if (cmap == "Set1_r") { return Set1_r(N); }
-    if (cmap == "Set2_r") { return Set2_r(N); }
-    if (cmap == "Set3_r") { return Set3_r(N); }
-    if (cmap == "Blues_r") { return Blues_r(N); }
-    if (cmap == "Greens_r") { return Greens_r(N); }
-    if (cmap == "Greys_r") { return Greys_r(N); }
-    if (cmap == "Oranges_r") { return Oranges_r(N); }
-    if (cmap == "Purples_r") { return Purples_r(N); }
-    if (cmap == "Reds_r") { return Reds_r(N); }
-    if (cmap == "BuPu_r") { return BuPu_r(N); }
-    if (cmap == "GnBu_r") { return GnBu_r(N); }
-    if (cmap == "PuBu_r") { return PuBu_r(N); }
-    if (cmap == "PuBuGn_r") { return PuBuGn_r(N); }
-    if (cmap == "PuRd_r") { return PuRd_r(N); }
-    if (cmap == "RdPu_r") { return RdPu_r(N); }
-    if (cmap == "OrRd_r") { return OrRd_r(N); }
-    if (cmap == "RdOrYl_r") { return RdOrYl_r(N); }
-    if (cmap == "YlGn_r") { return YlGn_r(N); }
-    if (cmap == "YlGnBu_r") { return YlGnBu_r(N); }
-    if (cmap == "YlOrRd_r") { return YlOrRd_r(N); }
-    if (cmap == "BrBG_r") { return BrBG_r(N); }
-    if (cmap == "PuOr_r") { return PuOr_r(N); }
-    if (cmap == "RdBu_r") { return RdBu_r(N); }
-    if (cmap == "RdGy_r") { return RdGy_r(N); }
-    if (cmap == "RdYlBu_r") { return RdYlBu_r(N); }
-    if (cmap == "RdYlGn_r") { return RdYlGn_r(N); }
-    if (cmap == "PiYG_r") { return PiYG_r(N); }
-    if (cmap == "PRGn_r") { return PRGn_r(N); }
-    if (cmap == "spring_r") { return spring_r(N); }
-    if (cmap == "summer_r") { return summer_r(N); }
-    if (cmap == "autumn_r") { return autumn_r(N); }
-    if (cmap == "winter_r") { return winter_r(N); }
-    if (cmap == "bone_r") { return bone_r(N); }
-    if (cmap == "cool_r") { return cool_r(N); }
-    if (cmap == "hot_r") { return hot_r(N); }
-    if (cmap == "copper_r") { return copper_r(N); }
-    if (cmap == "hsv_r") { return hsv_r(N); }
-    if (cmap == "nipy_spectral_r") { return nipy_spectral_r(N); }
-    if (cmap == "jet_r") { return jet_r(N); }
-    if (cmap == "terrain_r") { return terrain_r(N); }
-    if (cmap == "seismic_r") { return seismic_r(N); }
-    if (cmap == "afmhot_r") { return afmhot_r(N); }
-    if (cmap == "magma_r") { return magma_r(N); }
-    if (cmap == "inferno_r") { return inferno_r(N); }
-    if (cmap == "plasma_r") { return plasma_r(N); }
-    if (cmap == "viridis_r") { return viridis_r(N); }
-    if (cmap == "White") { return White(N); }
-    if (cmap == "Grey") { return Grey(N); }
-    if (cmap == "Black") { return Black(N); }
-    if (cmap == "Red") { return Red(N); }
-    if (cmap == "Blue") { return Blue(N); }
-    if (cmap == "tuewarmred") { return tuewarmred(N); }
-    if (cmap == "tuedarkblue") { return tuedarkblue(N); }
-    if (cmap == "tueblue") { return tueblue(N); }
-    if (cmap == "tuelightblue") { return tuelightblue(N); }
-    if (cmap == "Apricot") { return Apricot(N); }
-    if (cmap == "Aquamarine") { return Aquamarine(N); }
-    if (cmap == "Bittersweet") { return Bittersweet(N); }
-    if (cmap == "BlueGreen") { return BlueGreen(N); }
-    if (cmap == "BlueViolet") { return BlueViolet(N); }
-    if (cmap == "BrickRed") { return BrickRed(N); }
-    if (cmap == "Brown") { return Brown(N); }
-    if (cmap == "BurntOrange") { return BurntOrange(N); }
-    if (cmap == "CadetBlue") { return CadetBlue(N); }
-    if (cmap == "CarnationPink") { return CarnationPink(N); }
-    if (cmap == "Cerulean") { return Cerulean(N); }
-    if (cmap == "CornflowerBlue") { return CornflowerBlue(N); }
-    if (cmap == "Cyan") { return Cyan(N); }
-    if (cmap == "Dandelion") { return Dandelion(N); }
-    if (cmap == "DarkOrchid") { return DarkOrchid(N); }
-    if (cmap == "Emerald") { return Emerald(N); }
-    if (cmap == "ForestGreen") { return ForestGreen(N); }
-    if (cmap == "Fuchsia") { return Fuchsia(N); }
-    if (cmap == "Goldenrod") { return Goldenrod(N); }
-    if (cmap == "Gray") { return Gray(N); }
-    if (cmap == "Green") { return Green(N); }
-    if (cmap == "GreenYellow") { return GreenYellow(N); }
-    if (cmap == "JungleGreen") { return JungleGreen(N); }
-    if (cmap == "Lavender") { return Lavender(N); }
-    if (cmap == "LimeGreen") { return LimeGreen(N); }
-    if (cmap == "Magenta") { return Magenta(N); }
-    if (cmap == "Mahogany") { return Mahogany(N); }
-    if (cmap == "Maroon") { return Maroon(N); }
-    if (cmap == "Melon") { return Melon(N); }
-    if (cmap == "MidnightBlue") { return MidnightBlue(N); }
-    if (cmap == "Mulberry") { return Mulberry(N); }
-    if (cmap == "NavyBlue") { return NavyBlue(N); }
-    if (cmap == "OliveGreen") { return OliveGreen(N); }
-    if (cmap == "Orange") { return Orange(N); }
-    if (cmap == "OrangeRed") { return OrangeRed(N); }
-    if (cmap == "Orchid") { return Orchid(N); }
-    if (cmap == "Peach") { return Peach(N); }
-    if (cmap == "Periwinkle") { return Periwinkle(N); }
-    if (cmap == "PineGreen") { return PineGreen(N); }
-    if (cmap == "Plum") { return Plum(N); }
-    if (cmap == "ProcessBlue") { return ProcessBlue(N); }
-    if (cmap == "Purple") { return Purple(N); }
-    if (cmap == "RawSienna") { return RawSienna(N); }
-    if (cmap == "RedOrange") { return RedOrange(N); }
-    if (cmap == "RedViolet") { return RedViolet(N); }
-    if (cmap == "Rhodamine") { return Rhodamine(N); }
-    if (cmap == "RoyalBlue") { return RoyalBlue(N); }
-    if (cmap == "RoyalPurple") { return RoyalPurple(N); }
-    if (cmap == "RubineRed") { return RubineRed(N); }
-    if (cmap == "Salmon") { return Salmon(N); }
-    if (cmap == "SeaGreen") { return SeaGreen(N); }
-    if (cmap == "Sepia") { return Sepia(N); }
-    if (cmap == "SkyBlue") { return SkyBlue(N); }
-    if (cmap == "SpringGreen") { return SpringGreen(N); }
-    if (cmap == "Tan") { return Tan(N); }
-    if (cmap == "TealBlue") { return TealBlue(N); }
-    if (cmap == "Thistle") { return Thistle(N); }
-    if (cmap == "Turquoise") { return Turquoise(N); }
-    if (cmap == "Violet") { return Violet(N); }
-    if (cmap == "VioletRed") { return VioletRed(N); }
-    if (cmap == "WildStrawberry") { return WildStrawberry(N); }
-    if (cmap == "Yellow") { return Yellow(N); }
-    if (cmap == "YellowGreen") { return YellowGreen(N); }
-    if (cmap == "YellowOrange") { return YellowOrange(N); }
+    if (cmap == "Accent") {
+        return Accent(N);
+    }
+    if (cmap == "Dark2") {
+        return Dark2(N);
+    }
+    if (cmap == "Paired") {
+        return Paired(N);
+    }
+    if (cmap == "Spectral") {
+        return Spectral(N);
+    }
+    if (cmap == "Pastel1") {
+        return Pastel1(N);
+    }
+    if (cmap == "Pastel2") {
+        return Pastel2(N);
+    }
+    if (cmap == "Set1") {
+        return Set1(N);
+    }
+    if (cmap == "Set2") {
+        return Set2(N);
+    }
+    if (cmap == "Set3") {
+        return Set3(N);
+    }
+    if (cmap == "Blues") {
+        return Blues(N);
+    }
+    if (cmap == "Greens") {
+        return Greens(N);
+    }
+    if (cmap == "Greys") {
+        return Greys(N);
+    }
+    if (cmap == "Oranges") {
+        return Oranges(N);
+    }
+    if (cmap == "Purples") {
+        return Purples(N);
+    }
+    if (cmap == "Reds") {
+        return Reds(N);
+    }
+    if (cmap == "BuPu") {
+        return BuPu(N);
+    }
+    if (cmap == "GnBu") {
+        return GnBu(N);
+    }
+    if (cmap == "PuBu") {
+        return PuBu(N);
+    }
+    if (cmap == "PuBuGn") {
+        return PuBuGn(N);
+    }
+    if (cmap == "PuRd") {
+        return PuRd(N);
+    }
+    if (cmap == "RdPu") {
+        return RdPu(N);
+    }
+    if (cmap == "OrRd") {
+        return OrRd(N);
+    }
+    if (cmap == "RdOrYl") {
+        return RdOrYl(N);
+    }
+    if (cmap == "YlGn") {
+        return YlGn(N);
+    }
+    if (cmap == "YlGnBu") {
+        return YlGnBu(N);
+    }
+    if (cmap == "YlOrRd") {
+        return YlOrRd(N);
+    }
+    if (cmap == "BrBG") {
+        return BrBG(N);
+    }
+    if (cmap == "PuOr") {
+        return PuOr(N);
+    }
+    if (cmap == "RdBu") {
+        return RdBu(N);
+    }
+    if (cmap == "RdGy") {
+        return RdGy(N);
+    }
+    if (cmap == "RdYlBu") {
+        return RdYlBu(N);
+    }
+    if (cmap == "RdYlGn") {
+        return RdYlGn(N);
+    }
+    if (cmap == "PiYG") {
+        return PiYG(N);
+    }
+    if (cmap == "PRGn") {
+        return PRGn(N);
+    }
+    if (cmap == "spring") {
+        return spring(N);
+    }
+    if (cmap == "summer") {
+        return summer(N);
+    }
+    if (cmap == "autumn") {
+        return autumn(N);
+    }
+    if (cmap == "winter") {
+        return winter(N);
+    }
+    if (cmap == "bone") {
+        return bone(N);
+    }
+    if (cmap == "cool") {
+        return cool(N);
+    }
+    if (cmap == "hot") {
+        return hot(N);
+    }
+    if (cmap == "copper") {
+        return copper(N);
+    }
+    if (cmap == "hsv") {
+        return hsv(N);
+    }
+    if (cmap == "nipy_spectral") {
+        return nipy_spectral(N);
+    }
+    if (cmap == "jet") {
+        return jet(N);
+    }
+    if (cmap == "terrain") {
+        return terrain(N);
+    }
+    if (cmap == "seismic") {
+        return seismic(N);
+    }
+    if (cmap == "afmhot") {
+        return afmhot(N);
+    }
+    if (cmap == "magma") {
+        return magma(N);
+    }
+    if (cmap == "inferno") {
+        return inferno(N);
+    }
+    if (cmap == "plasma") {
+        return plasma(N);
+    }
+    if (cmap == "viridis") {
+        return viridis(N);
+    }
+    if (cmap == "Accent_r") {
+        return Accent_r(N);
+    }
+    if (cmap == "Dark2_r") {
+        return Dark2_r(N);
+    }
+    if (cmap == "Paired_r") {
+        return Paired_r(N);
+    }
+    if (cmap == "Spectral_r") {
+        return Spectral_r(N);
+    }
+    if (cmap == "Pastel1_r") {
+        return Pastel1_r(N);
+    }
+    if (cmap == "Pastel2_r") {
+        return Pastel2_r(N);
+    }
+    if (cmap == "Set1_r") {
+        return Set1_r(N);
+    }
+    if (cmap == "Set2_r") {
+        return Set2_r(N);
+    }
+    if (cmap == "Set3_r") {
+        return Set3_r(N);
+    }
+    if (cmap == "Blues_r") {
+        return Blues_r(N);
+    }
+    if (cmap == "Greens_r") {
+        return Greens_r(N);
+    }
+    if (cmap == "Greys_r") {
+        return Greys_r(N);
+    }
+    if (cmap == "Oranges_r") {
+        return Oranges_r(N);
+    }
+    if (cmap == "Purples_r") {
+        return Purples_r(N);
+    }
+    if (cmap == "Reds_r") {
+        return Reds_r(N);
+    }
+    if (cmap == "BuPu_r") {
+        return BuPu_r(N);
+    }
+    if (cmap == "GnBu_r") {
+        return GnBu_r(N);
+    }
+    if (cmap == "PuBu_r") {
+        return PuBu_r(N);
+    }
+    if (cmap == "PuBuGn_r") {
+        return PuBuGn_r(N);
+    }
+    if (cmap == "PuRd_r") {
+        return PuRd_r(N);
+    }
+    if (cmap == "RdPu_r") {
+        return RdPu_r(N);
+    }
+    if (cmap == "OrRd_r") {
+        return OrRd_r(N);
+    }
+    if (cmap == "RdOrYl_r") {
+        return RdOrYl_r(N);
+    }
+    if (cmap == "YlGn_r") {
+        return YlGn_r(N);
+    }
+    if (cmap == "YlGnBu_r") {
+        return YlGnBu_r(N);
+    }
+    if (cmap == "YlOrRd_r") {
+        return YlOrRd_r(N);
+    }
+    if (cmap == "BrBG_r") {
+        return BrBG_r(N);
+    }
+    if (cmap == "PuOr_r") {
+        return PuOr_r(N);
+    }
+    if (cmap == "RdBu_r") {
+        return RdBu_r(N);
+    }
+    if (cmap == "RdGy_r") {
+        return RdGy_r(N);
+    }
+    if (cmap == "RdYlBu_r") {
+        return RdYlBu_r(N);
+    }
+    if (cmap == "RdYlGn_r") {
+        return RdYlGn_r(N);
+    }
+    if (cmap == "PiYG_r") {
+        return PiYG_r(N);
+    }
+    if (cmap == "PRGn_r") {
+        return PRGn_r(N);
+    }
+    if (cmap == "spring_r") {
+        return spring_r(N);
+    }
+    if (cmap == "summer_r") {
+        return summer_r(N);
+    }
+    if (cmap == "autumn_r") {
+        return autumn_r(N);
+    }
+    if (cmap == "winter_r") {
+        return winter_r(N);
+    }
+    if (cmap == "bone_r") {
+        return bone_r(N);
+    }
+    if (cmap == "cool_r") {
+        return cool_r(N);
+    }
+    if (cmap == "hot_r") {
+        return hot_r(N);
+    }
+    if (cmap == "copper_r") {
+        return copper_r(N);
+    }
+    if (cmap == "hsv_r") {
+        return hsv_r(N);
+    }
+    if (cmap == "nipy_spectral_r") {
+        return nipy_spectral_r(N);
+    }
+    if (cmap == "jet_r") {
+        return jet_r(N);
+    }
+    if (cmap == "terrain_r") {
+        return terrain_r(N);
+    }
+    if (cmap == "seismic_r") {
+        return seismic_r(N);
+    }
+    if (cmap == "afmhot_r") {
+        return afmhot_r(N);
+    }
+    if (cmap == "magma_r") {
+        return magma_r(N);
+    }
+    if (cmap == "inferno_r") {
+        return inferno_r(N);
+    }
+    if (cmap == "plasma_r") {
+        return plasma_r(N);
+    }
+    if (cmap == "viridis_r") {
+        return viridis_r(N);
+    }
+    if (cmap == "White") {
+        return White(N);
+    }
+    if (cmap == "Grey") {
+        return Grey(N);
+    }
+    if (cmap == "Black") {
+        return Black(N);
+    }
+    if (cmap == "Red") {
+        return Red(N);
+    }
+    if (cmap == "Blue") {
+        return Blue(N);
+    }
+    if (cmap == "tuewarmred") {
+        return tuewarmred(N);
+    }
+    if (cmap == "tuedarkblue") {
+        return tuedarkblue(N);
+    }
+    if (cmap == "tueblue") {
+        return tueblue(N);
+    }
+    if (cmap == "tuelightblue") {
+        return tuelightblue(N);
+    }
+    if (cmap == "Apricot") {
+        return Apricot(N);
+    }
+    if (cmap == "Aquamarine") {
+        return Aquamarine(N);
+    }
+    if (cmap == "Bittersweet") {
+        return Bittersweet(N);
+    }
+    if (cmap == "BlueGreen") {
+        return BlueGreen(N);
+    }
+    if (cmap == "BlueViolet") {
+        return BlueViolet(N);
+    }
+    if (cmap == "BrickRed") {
+        return BrickRed(N);
+    }
+    if (cmap == "Brown") {
+        return Brown(N);
+    }
+    if (cmap == "BurntOrange") {
+        return BurntOrange(N);
+    }
+    if (cmap == "CadetBlue") {
+        return CadetBlue(N);
+    }
+    if (cmap == "CarnationPink") {
+        return CarnationPink(N);
+    }
+    if (cmap == "Cerulean") {
+        return Cerulean(N);
+    }
+    if (cmap == "CornflowerBlue") {
+        return CornflowerBlue(N);
+    }
+    if (cmap == "Cyan") {
+        return Cyan(N);
+    }
+    if (cmap == "Dandelion") {
+        return Dandelion(N);
+    }
+    if (cmap == "DarkOrchid") {
+        return DarkOrchid(N);
+    }
+    if (cmap == "Emerald") {
+        return Emerald(N);
+    }
+    if (cmap == "ForestGreen") {
+        return ForestGreen(N);
+    }
+    if (cmap == "Fuchsia") {
+        return Fuchsia(N);
+    }
+    if (cmap == "Goldenrod") {
+        return Goldenrod(N);
+    }
+    if (cmap == "Gray") {
+        return Gray(N);
+    }
+    if (cmap == "Green") {
+        return Green(N);
+    }
+    if (cmap == "GreenYellow") {
+        return GreenYellow(N);
+    }
+    if (cmap == "JungleGreen") {
+        return JungleGreen(N);
+    }
+    if (cmap == "Lavender") {
+        return Lavender(N);
+    }
+    if (cmap == "LimeGreen") {
+        return LimeGreen(N);
+    }
+    if (cmap == "Magenta") {
+        return Magenta(N);
+    }
+    if (cmap == "Mahogany") {
+        return Mahogany(N);
+    }
+    if (cmap == "Maroon") {
+        return Maroon(N);
+    }
+    if (cmap == "Melon") {
+        return Melon(N);
+    }
+    if (cmap == "MidnightBlue") {
+        return MidnightBlue(N);
+    }
+    if (cmap == "Mulberry") {
+        return Mulberry(N);
+    }
+    if (cmap == "NavyBlue") {
+        return NavyBlue(N);
+    }
+    if (cmap == "OliveGreen") {
+        return OliveGreen(N);
+    }
+    if (cmap == "Orange") {
+        return Orange(N);
+    }
+    if (cmap == "OrangeRed") {
+        return OrangeRed(N);
+    }
+    if (cmap == "Orchid") {
+        return Orchid(N);
+    }
+    if (cmap == "Peach") {
+        return Peach(N);
+    }
+    if (cmap == "Periwinkle") {
+        return Periwinkle(N);
+    }
+    if (cmap == "PineGreen") {
+        return PineGreen(N);
+    }
+    if (cmap == "Plum") {
+        return Plum(N);
+    }
+    if (cmap == "ProcessBlue") {
+        return ProcessBlue(N);
+    }
+    if (cmap == "Purple") {
+        return Purple(N);
+    }
+    if (cmap == "RawSienna") {
+        return RawSienna(N);
+    }
+    if (cmap == "RedOrange") {
+        return RedOrange(N);
+    }
+    if (cmap == "RedViolet") {
+        return RedViolet(N);
+    }
+    if (cmap == "Rhodamine") {
+        return Rhodamine(N);
+    }
+    if (cmap == "RoyalBlue") {
+        return RoyalBlue(N);
+    }
+    if (cmap == "RoyalPurple") {
+        return RoyalPurple(N);
+    }
+    if (cmap == "RubineRed") {
+        return RubineRed(N);
+    }
+    if (cmap == "Salmon") {
+        return Salmon(N);
+    }
+    if (cmap == "SeaGreen") {
+        return SeaGreen(N);
+    }
+    if (cmap == "Sepia") {
+        return Sepia(N);
+    }
+    if (cmap == "SkyBlue") {
+        return SkyBlue(N);
+    }
+    if (cmap == "SpringGreen") {
+        return SpringGreen(N);
+    }
+    if (cmap == "Tan") {
+        return Tan(N);
+    }
+    if (cmap == "TealBlue") {
+        return TealBlue(N);
+    }
+    if (cmap == "Thistle") {
+        return Thistle(N);
+    }
+    if (cmap == "Turquoise") {
+        return Turquoise(N);
+    }
+    if (cmap == "Violet") {
+        return Violet(N);
+    }
+    if (cmap == "VioletRed") {
+        return VioletRed(N);
+    }
+    if (cmap == "WildStrawberry") {
+        return WildStrawberry(N);
+    }
+    if (cmap == "Yellow") {
+        return Yellow(N);
+    }
+    if (cmap == "YellowGreen") {
+        return YellowGreen(N);
+    }
+    if (cmap == "YellowOrange") {
+        return YellowOrange(N);
+    }
 
     throw std::runtime_error("Colormap not recognized");
 }
@@ -4495,248 +5011,248 @@ xterm color-cyle.
 inline xt::xtensor<double, 2> xterm()
 {
     xt::xtensor<double, 2> data = {
-        {  0,   0,   0}, // 0  , Black (SYSTEM) ,  #000000, hsl(0,0%,0%)
-        {128,   0,   0}, // 1  , Maroon (SYSTEM),  #800000, hsl(0,100%,25%)
-        {  0, 128,   0}, // 2  , Green (SYSTEM) ,  #008000, hsl(120,100%,25%)
-        {128, 128,   0}, // 3  , Olive (SYSTEM) ,  #808000, hsl(60,100%,25%)
-        {  0,   0, 128}, // 4  , Navy (SYSTEM)  ,  #000080, hsl(240,100%,25%)
-        {128,   0, 128}, // 5  , Purple (SYSTEM),  #800080, hsl(300,100%,25%)
-        {  0, 128, 128}, // 6  , Teal (SYSTEM)  ,  #008080, hsl(180,100%,25%)
+        {0, 0, 0}, // 0  , Black (SYSTEM) ,  #000000, hsl(0,0%,0%)
+        {128, 0, 0}, // 1  , Maroon (SYSTEM),  #800000, hsl(0,100%,25%)
+        {0, 128, 0}, // 2  , Green (SYSTEM) ,  #008000, hsl(120,100%,25%)
+        {128, 128, 0}, // 3  , Olive (SYSTEM) ,  #808000, hsl(60,100%,25%)
+        {0, 0, 128}, // 4  , Navy (SYSTEM)  ,  #000080, hsl(240,100%,25%)
+        {128, 0, 128}, // 5  , Purple (SYSTEM),  #800080, hsl(300,100%,25%)
+        {0, 128, 128}, // 6  , Teal (SYSTEM)  ,  #008080, hsl(180,100%,25%)
         {192, 192, 192}, // 7  , Silver (SYSTEM),  #c0c0c0, hsl(0,0%,75%)
         {128, 128, 128}, // 8  , Grey (SYSTEM)  ,  #808080, hsl(0,0%,50%)
-        {255,   0,   0}, // 9  , Red (SYSTEM)   ,  #ff0000, hsl(0,100%,50%)
-        {  0, 255,   0}, // 10 , Lime (SYSTEM)  ,  #00ff00, hsl(120,100%,50%)
-        {255, 255,   0}, // 11 , Yellow (SYSTEM),  #ffff00, hsl(60,100%,50%)
-        {  0,   0, 255}, // 12 , Blue (SYSTEM)  ,  #0000ff, hsl(240,100%,50%)
-        {255,   0, 255}, // 13 , Fuchsia (SYSTEM,) #ff00ff, hsl(300,100%,50%)
-        {  0, 255, 255}, // 14 , Aqua (SYSTEM)  ,  #00ffff, hsl(180,100%,50%)
+        {255, 0, 0}, // 9  , Red (SYSTEM)   ,  #ff0000, hsl(0,100%,50%)
+        {0, 255, 0}, // 10 , Lime (SYSTEM)  ,  #00ff00, hsl(120,100%,50%)
+        {255, 255, 0}, // 11 , Yellow (SYSTEM),  #ffff00, hsl(60,100%,50%)
+        {0, 0, 255}, // 12 , Blue (SYSTEM)  ,  #0000ff, hsl(240,100%,50%)
+        {255, 0, 255}, // 13 , Fuchsia (SYSTEM,) #ff00ff, hsl(300,100%,50%)
+        {0, 255, 255}, // 14 , Aqua (SYSTEM)  ,  #00ffff, hsl(180,100%,50%)
         {255, 255, 255}, // 15 , White (SYSTEM) ,  #ffffff, hsl(0,0%,100%)
-        {  0,   0,   0}, // 16 , Grey0          ,  #000000, hsl(0,0%,0%)
-        {  0,   0,  95}, // 17 , NavyBlue       ,  #00005f, hsl(240,100%,18%)
-        {  0,   0, 135}, // 18 , DarkBlue       ,  #000087, hsl(240,100%,26%)
-        {  0,   0, 175}, // 19 , Blue3          ,  #0000af, hsl(240,100%,34%)
-        {  0,   0, 215}, // 20 , Blue3          ,  #0000d7, hsl(240,100%,42%)
-        {  0,   0, 255}, // 21 , Blue1          ,  #0000ff, hsl(240,100%,50%)
-        {  0,  95,   0}, // 22 , DarkGreen      ,  #005f00, hsl(120,100%,18%)
-        {  0,  95,  95}, // 23 , DeepSkyBlue4   ,  #005f5f, hsl(180,100%,18%)
-        {  0,  95, 135}, // 24 , DeepSkyBlue4   ,  #005f87, hsl(97,100%,26%)
-        {  0,  95, 175}, // 25 , DeepSkyBlue4   ,  #005faf, hsl(07,100%,34%)
-        {  0,  95, 215}, // 26 , DodgerBlue3    ,  #005fd7, hsl(13,100%,42%)
-        {  0,  95, 255}, // 27 , DodgerBlue2    ,  #005fff, hsl(17,100%,50%)
-        {  0, 135,   0}, // 28 , Green4         ,  #008700, hsl(120,100%,26%)
-        {  0, 135,  95}, // 29 , SpringGreen4   ,  #00875f, hsl(62,100%,26%)
-        {  0, 135, 135}, // 30 , Turquoise4     ,  #008787, hsl(180,100%,26%)
-        {  0, 135, 175}, // 31 , DeepSkyBlue3   ,  #0087af, hsl(93,100%,34%)
-        {  0, 135, 215}, // 32 , DeepSkyBlue3   ,  #0087d7, hsl(02,100%,42%)
-        {  0, 135, 255}, // 33 , DodgerBlue1    ,  #0087ff, hsl(08,100%,50%)
-        {  0, 175,   0}, // 34 , Green3         ,  #00af00, hsl(120,100%,34%)
-        {  0, 175,  95}, // 35 , SpringGreen3   ,  #00af5f, hsl(52,100%,34%)
-        {  0, 175, 135}, // 36 , DarkCyan       ,  #00af87, hsl(66,100%,34%)
-        {  0, 175, 175}, // 37 , LightSeaGreen  ,  #00afaf, hsl(180,100%,34%)
-        {  0, 175, 215}, // 38 , DeepSkyBlue2   ,  #00afd7, hsl(91,100%,42%)
-        {  0, 175, 255}, // 39 , DeepSkyBlue1   ,  #00afff, hsl(98,100%,50%)
-        {  0, 215,   0}, // 40 , Green3         ,  #00d700, hsl(120,100%,42%)
-        {  0, 215,  95}, // 41 , SpringGreen3   ,  #00d75f, hsl(46,100%,42%)
-        {  0, 215, 135}, // 42 , SpringGreen2   ,  #00d787, hsl(57,100%,42%)
-        {  0, 215, 175}, // 43 , Cyan3          ,  #00d7af, hsl(68,100%,42%)
-        {  0, 215, 215}, // 44 , DarkTurquoise  ,  #00d7d7, hsl(180,100%,42%)
-        {  0, 215, 255}, // 45 , Turquoise2     ,  #00d7ff, hsl(89,100%,50%)
-        {  0, 255,   0}, // 46 , Green1         ,  #00ff00, hsl(120,100%,50%)
-        {  0, 255,  95}, // 47 , SpringGreen2   ,  #00ff5f, hsl(42,100%,50%)
-        {  0, 255, 135}, // 48 , SpringGreen1   ,  #00ff87, hsl(51,100%,50%)
-        {  0, 255, 175}, // 49 , MediumSpringGre,en#00ffaf, hsl(61,100%,50%)
-        {  0, 255, 215}, // 50 , Cyan2          ,  #00ffd7, hsl(70,100%,50%)
-        {  0, 255, 255}, // 51 , Cyan1          ,  #00ffff, hsl(180,100%,50%)
-        { 95,   0,   0}, // 52 , DarkRed        ,  #5f0000, hsl(0,100%,18%)
-        { 95,   0,  95}, // 53 , DeepPink4      ,  #5f005f, hsl(300,100%,18%)
-        { 95,   0, 135}, // 54 , Purple4        ,  #5f0087, hsl(82,100%,26%)
-        { 95,   0, 175}, // 55 , Purple4        ,  #5f00af, hsl(72,100%,34%)
-        { 95,   0, 215}, // 56 , Purple3        ,  #5f00d7, hsl(66,100%,42%)
-        { 95,   0, 255}, // 57 , BlueViolet     ,  #5f00ff, hsl(62,100%,50%)
-        { 95,  95,   0}, // 58 , Orange4        ,  #5f5f00, hsl(60,100%,18%)
-        { 95,  95,  95}, // 59 , Grey37         ,  #5f5f5f, hsl(0,0%,37%)
-        { 95,  95, 135}, // 60 , MediumPurple4  ,  #5f5f87, hsl(240,17%,45%)
-        { 95,  95, 175}, // 61 , SlateBlue3     ,  #5f5faf, hsl(240,33%,52%)
-        { 95,  95, 215}, // 62 , SlateBlue3     ,  #5f5fd7, hsl(240,60%,60%)
-        { 95,  95, 255}, // 63 , RoyalBlue1     ,  #5f5fff, hsl(240,100%,68%)
-        { 95, 135,   0}, // 64 , Chartreuse4    ,  #5f8700, hsl(7,100%,26%)
-        { 95, 135,  95}, // 65 , DarkSeaGreen4  ,  #5f875f, hsl(120,17%,45%)
-        { 95, 135, 135}, // 66 , PaleTurquoise4 ,  #5f8787, hsl(180,17%,45%)
-        { 95, 135, 175}, // 67 , SteelBlue      ,  #5f87af, hsl(210,33%,52%)
-        { 95, 135, 215}, // 68 , SteelBlue3     ,  #5f87d7, hsl(220,60%,60%)
-        { 95, 135, 255}, // 69 , CornflowerBlue ,  #5f87ff, hsl(225,100%,68%)
-        { 95, 175,   0}, // 70 , Chartreuse3    ,  #5faf00, hsl(7,100%,34%)
-        { 95, 175,  95}, // 71 , DarkSeaGreen4  ,  #5faf5f, hsl(120,33%,52%)
-        { 95, 175, 135}, // 72 , CadetBlue      ,  #5faf87, hsl(150,33%,52%)
-        { 95, 175, 175}, // 73 , CadetBlue      ,  #5fafaf, hsl(180,33%,52%)
-        { 95, 175, 215}, // 74 , SkyBlue3       ,  #5fafd7, hsl(200,60%,60%)
-        { 95, 175, 255}, // 75 , SteelBlue1     ,  #5fafff, hsl(210,100%,68%)
-        { 95, 215,   0}, // 76 , Chartreuse3    ,  #5fd700, hsl(3,100%,42%)
-        { 95, 215,  95}, // 77 , PaleGreen3     ,  #5fd75f, hsl(120,60%,60%)
-        { 95, 215, 135}, // 78 , SeaGreen3      ,  #5fd787, hsl(140,60%,60%)
-        { 95, 215, 175}, // 79 , Aquamarine3    ,  #5fd7af, hsl(160,60%,60%)
-        { 95, 215, 215}, // 80 , MediumTurquoise,  #5fd7d7, hsl(180,60%,60%)
-        { 95, 215, 255}, // 81 , SteelBlue1     ,  #5fd7ff, hsl(195,100%,68%)
-        { 95, 255,   0}, // 82 , Chartreuse2    ,  #5fff00, hsl(7,100%,50%)
-        { 95, 255,  95}, // 83 , SeaGreen2      ,  #5fff5f, hsl(120,100%,68%)
-        { 95, 255, 135}, // 84 , SeaGreen1      ,  #5fff87, hsl(135,100%,68%)
-        { 95, 255, 175}, // 85 , SeaGreen1      ,  #5fffaf, hsl(150,100%,68%)
-        { 95, 255, 215}, // 86 , Aquamarine1    ,  #5fffd7, hsl(165,100%,68%)
-        { 95, 255, 255}, // 87 , DarkSlateGray2 ,  #5fffff, hsl(180,100%,68%)
-        {135,   0,   0}, // 88 , DarkRed        ,  #870000, hsl(0,100%,26%)
-        {135,   0,  95}, // 89 , DeepPink4      ,  #87005f, hsl(17,100%,26%)
-        {135,   0, 135}, // 90 , DarkMagenta    ,  #870087, hsl(300,100%,26%)
-        {135,   0, 175}, // 91 , DarkMagenta    ,  #8700af, hsl(86,100%,34%)
-        {135,   0, 215}, // 92 , DarkViolet     ,  #8700d7, hsl(77,100%,42%)
-        {135,   0, 255}, // 93 , Purple         ,  #8700ff, hsl(71,100%,50%)
-        {135,  95,   0}, // 94 , Orange4        ,  #875f00, hsl(2,100%,26%)
-        {135,  95,  95}, // 95 , LightPink4     ,  #875f5f, hsl(0,17%,45%)
-        {135,  95, 135}, // 96 , Plum4          ,  #875f87, hsl(300,17%,45%)
-        {135,  95, 175}, // 97 , MediumPurple3  ,  #875faf, hsl(270,33%,52%)
-        {135,  95, 215}, // 98 , MediumPurple3  ,  #875fd7, hsl(260,60%,60%)
-        {135,  95, 255}, // 99 , SlateBlue1     ,  #875fff, hsl(255,100%,68%)
-        {135, 135,   0}, // 100, Yellow4        ,  #878700, hsl(60,100%,26%)
-        {135, 135,  95}, // 101, Wheat4         ,  #87875f, hsl(60,17%,45%)
+        {0, 0, 0}, // 16 , Grey0          ,  #000000, hsl(0,0%,0%)
+        {0, 0, 95}, // 17 , NavyBlue       ,  #00005f, hsl(240,100%,18%)
+        {0, 0, 135}, // 18 , DarkBlue       ,  #000087, hsl(240,100%,26%)
+        {0, 0, 175}, // 19 , Blue3          ,  #0000af, hsl(240,100%,34%)
+        {0, 0, 215}, // 20 , Blue3          ,  #0000d7, hsl(240,100%,42%)
+        {0, 0, 255}, // 21 , Blue1          ,  #0000ff, hsl(240,100%,50%)
+        {0, 95, 0}, // 22 , DarkGreen      ,  #005f00, hsl(120,100%,18%)
+        {0, 95, 95}, // 23 , DeepSkyBlue4   ,  #005f5f, hsl(180,100%,18%)
+        {0, 95, 135}, // 24 , DeepSkyBlue4   ,  #005f87, hsl(97,100%,26%)
+        {0, 95, 175}, // 25 , DeepSkyBlue4   ,  #005faf, hsl(07,100%,34%)
+        {0, 95, 215}, // 26 , DodgerBlue3    ,  #005fd7, hsl(13,100%,42%)
+        {0, 95, 255}, // 27 , DodgerBlue2    ,  #005fff, hsl(17,100%,50%)
+        {0, 135, 0}, // 28 , Green4         ,  #008700, hsl(120,100%,26%)
+        {0, 135, 95}, // 29 , SpringGreen4   ,  #00875f, hsl(62,100%,26%)
+        {0, 135, 135}, // 30 , Turquoise4     ,  #008787, hsl(180,100%,26%)
+        {0, 135, 175}, // 31 , DeepSkyBlue3   ,  #0087af, hsl(93,100%,34%)
+        {0, 135, 215}, // 32 , DeepSkyBlue3   ,  #0087d7, hsl(02,100%,42%)
+        {0, 135, 255}, // 33 , DodgerBlue1    ,  #0087ff, hsl(08,100%,50%)
+        {0, 175, 0}, // 34 , Green3         ,  #00af00, hsl(120,100%,34%)
+        {0, 175, 95}, // 35 , SpringGreen3   ,  #00af5f, hsl(52,100%,34%)
+        {0, 175, 135}, // 36 , DarkCyan       ,  #00af87, hsl(66,100%,34%)
+        {0, 175, 175}, // 37 , LightSeaGreen  ,  #00afaf, hsl(180,100%,34%)
+        {0, 175, 215}, // 38 , DeepSkyBlue2   ,  #00afd7, hsl(91,100%,42%)
+        {0, 175, 255}, // 39 , DeepSkyBlue1   ,  #00afff, hsl(98,100%,50%)
+        {0, 215, 0}, // 40 , Green3         ,  #00d700, hsl(120,100%,42%)
+        {0, 215, 95}, // 41 , SpringGreen3   ,  #00d75f, hsl(46,100%,42%)
+        {0, 215, 135}, // 42 , SpringGreen2   ,  #00d787, hsl(57,100%,42%)
+        {0, 215, 175}, // 43 , Cyan3          ,  #00d7af, hsl(68,100%,42%)
+        {0, 215, 215}, // 44 , DarkTurquoise  ,  #00d7d7, hsl(180,100%,42%)
+        {0, 215, 255}, // 45 , Turquoise2     ,  #00d7ff, hsl(89,100%,50%)
+        {0, 255, 0}, // 46 , Green1         ,  #00ff00, hsl(120,100%,50%)
+        {0, 255, 95}, // 47 , SpringGreen2   ,  #00ff5f, hsl(42,100%,50%)
+        {0, 255, 135}, // 48 , SpringGreen1   ,  #00ff87, hsl(51,100%,50%)
+        {0, 255, 175}, // 49 , MediumSpringGre,en#00ffaf, hsl(61,100%,50%)
+        {0, 255, 215}, // 50 , Cyan2          ,  #00ffd7, hsl(70,100%,50%)
+        {0, 255, 255}, // 51 , Cyan1          ,  #00ffff, hsl(180,100%,50%)
+        {95, 0, 0}, // 52 , DarkRed        ,  #5f0000, hsl(0,100%,18%)
+        {95, 0, 95}, // 53 , DeepPink4      ,  #5f005f, hsl(300,100%,18%)
+        {95, 0, 135}, // 54 , Purple4        ,  #5f0087, hsl(82,100%,26%)
+        {95, 0, 175}, // 55 , Purple4        ,  #5f00af, hsl(72,100%,34%)
+        {95, 0, 215}, // 56 , Purple3        ,  #5f00d7, hsl(66,100%,42%)
+        {95, 0, 255}, // 57 , BlueViolet     ,  #5f00ff, hsl(62,100%,50%)
+        {95, 95, 0}, // 58 , Orange4        ,  #5f5f00, hsl(60,100%,18%)
+        {95, 95, 95}, // 59 , Grey37         ,  #5f5f5f, hsl(0,0%,37%)
+        {95, 95, 135}, // 60 , MediumPurple4  ,  #5f5f87, hsl(240,17%,45%)
+        {95, 95, 175}, // 61 , SlateBlue3     ,  #5f5faf, hsl(240,33%,52%)
+        {95, 95, 215}, // 62 , SlateBlue3     ,  #5f5fd7, hsl(240,60%,60%)
+        {95, 95, 255}, // 63 , RoyalBlue1     ,  #5f5fff, hsl(240,100%,68%)
+        {95, 135, 0}, // 64 , Chartreuse4    ,  #5f8700, hsl(7,100%,26%)
+        {95, 135, 95}, // 65 , DarkSeaGreen4  ,  #5f875f, hsl(120,17%,45%)
+        {95, 135, 135}, // 66 , PaleTurquoise4 ,  #5f8787, hsl(180,17%,45%)
+        {95, 135, 175}, // 67 , SteelBlue      ,  #5f87af, hsl(210,33%,52%)
+        {95, 135, 215}, // 68 , SteelBlue3     ,  #5f87d7, hsl(220,60%,60%)
+        {95, 135, 255}, // 69 , CornflowerBlue ,  #5f87ff, hsl(225,100%,68%)
+        {95, 175, 0}, // 70 , Chartreuse3    ,  #5faf00, hsl(7,100%,34%)
+        {95, 175, 95}, // 71 , DarkSeaGreen4  ,  #5faf5f, hsl(120,33%,52%)
+        {95, 175, 135}, // 72 , CadetBlue      ,  #5faf87, hsl(150,33%,52%)
+        {95, 175, 175}, // 73 , CadetBlue      ,  #5fafaf, hsl(180,33%,52%)
+        {95, 175, 215}, // 74 , SkyBlue3       ,  #5fafd7, hsl(200,60%,60%)
+        {95, 175, 255}, // 75 , SteelBlue1     ,  #5fafff, hsl(210,100%,68%)
+        {95, 215, 0}, // 76 , Chartreuse3    ,  #5fd700, hsl(3,100%,42%)
+        {95, 215, 95}, // 77 , PaleGreen3     ,  #5fd75f, hsl(120,60%,60%)
+        {95, 215, 135}, // 78 , SeaGreen3      ,  #5fd787, hsl(140,60%,60%)
+        {95, 215, 175}, // 79 , Aquamarine3    ,  #5fd7af, hsl(160,60%,60%)
+        {95, 215, 215}, // 80 , MediumTurquoise,  #5fd7d7, hsl(180,60%,60%)
+        {95, 215, 255}, // 81 , SteelBlue1     ,  #5fd7ff, hsl(195,100%,68%)
+        {95, 255, 0}, // 82 , Chartreuse2    ,  #5fff00, hsl(7,100%,50%)
+        {95, 255, 95}, // 83 , SeaGreen2      ,  #5fff5f, hsl(120,100%,68%)
+        {95, 255, 135}, // 84 , SeaGreen1      ,  #5fff87, hsl(135,100%,68%)
+        {95, 255, 175}, // 85 , SeaGreen1      ,  #5fffaf, hsl(150,100%,68%)
+        {95, 255, 215}, // 86 , Aquamarine1    ,  #5fffd7, hsl(165,100%,68%)
+        {95, 255, 255}, // 87 , DarkSlateGray2 ,  #5fffff, hsl(180,100%,68%)
+        {135, 0, 0}, // 88 , DarkRed        ,  #870000, hsl(0,100%,26%)
+        {135, 0, 95}, // 89 , DeepPink4      ,  #87005f, hsl(17,100%,26%)
+        {135, 0, 135}, // 90 , DarkMagenta    ,  #870087, hsl(300,100%,26%)
+        {135, 0, 175}, // 91 , DarkMagenta    ,  #8700af, hsl(86,100%,34%)
+        {135, 0, 215}, // 92 , DarkViolet     ,  #8700d7, hsl(77,100%,42%)
+        {135, 0, 255}, // 93 , Purple         ,  #8700ff, hsl(71,100%,50%)
+        {135, 95, 0}, // 94 , Orange4        ,  #875f00, hsl(2,100%,26%)
+        {135, 95, 95}, // 95 , LightPink4     ,  #875f5f, hsl(0,17%,45%)
+        {135, 95, 135}, // 96 , Plum4          ,  #875f87, hsl(300,17%,45%)
+        {135, 95, 175}, // 97 , MediumPurple3  ,  #875faf, hsl(270,33%,52%)
+        {135, 95, 215}, // 98 , MediumPurple3  ,  #875fd7, hsl(260,60%,60%)
+        {135, 95, 255}, // 99 , SlateBlue1     ,  #875fff, hsl(255,100%,68%)
+        {135, 135, 0}, // 100, Yellow4        ,  #878700, hsl(60,100%,26%)
+        {135, 135, 95}, // 101, Wheat4         ,  #87875f, hsl(60,17%,45%)
         {135, 135, 135}, // 102, Grey53         ,  #878787, hsl(0,0%,52%)
         {135, 135, 175}, // 103, LightSlateGrey ,  #8787af, hsl(240,20%,60%)
         {135, 135, 215}, // 104, MediumPurple   ,  #8787d7, hsl(240,50%,68%)
         {135, 135, 255}, // 105, LightSlateBlue ,  #8787ff, hsl(240,100%,76%)
-        {135, 175,   0}, // 106, Yellow4        ,  #87af00, hsl(3,100%,34%)
-        {135, 175,  95}, // 107, DarkOliveGreen3,  #87af5f, hsl(90,33%,52%)
+        {135, 175, 0}, // 106, Yellow4        ,  #87af00, hsl(3,100%,34%)
+        {135, 175, 95}, // 107, DarkOliveGreen3,  #87af5f, hsl(90,33%,52%)
         {135, 175, 135}, // 108, DarkSeaGreen   ,  #87af87, hsl(120,20%,60%)
         {135, 175, 175}, // 109, LightSkyBlue3  ,  #87afaf, hsl(180,20%,60%)
         {135, 175, 215}, // 110, LightSkyBlue3  ,  #87afd7, hsl(210,50%,68%)
         {135, 175, 255}, // 111, SkyBlue2       ,  #87afff, hsl(220,100%,76%)
-        {135, 215,   0}, // 112, Chartreuse2    ,  #87d700, hsl(2,100%,42%)
-        {135, 215,  95}, // 113, DarkOliveGreen3,  #87d75f, hsl(100,60%,60%)
+        {135, 215, 0}, // 112, Chartreuse2    ,  #87d700, hsl(2,100%,42%)
+        {135, 215, 95}, // 113, DarkOliveGreen3,  #87d75f, hsl(100,60%,60%)
         {135, 215, 135}, // 114, PaleGreen3     ,  #87d787, hsl(120,50%,68%)
         {135, 215, 175}, // 115, DarkSeaGreen3  ,  #87d7af, hsl(150,50%,68%)
         {135, 215, 215}, // 116, DarkSlateGray3 ,  #87d7d7, hsl(180,50%,68%)
         {135, 215, 255}, // 117, SkyBlue1       ,  #87d7ff, hsl(200,100%,76%)
-        {135, 255,   0}, // 118, Chartreuse1    ,  #87ff00, hsl(8,100%,50%)
-        {135, 255,  95}, // 119, LightGreen     ,  #87ff5f, hsl(105,100%,68%)
+        {135, 255, 0}, // 118, Chartreuse1    ,  #87ff00, hsl(8,100%,50%)
+        {135, 255, 95}, // 119, LightGreen     ,  #87ff5f, hsl(105,100%,68%)
         {135, 255, 135}, // 120, LightGreen     ,  #87ff87, hsl(120,100%,76%)
         {135, 255, 175}, // 121, PaleGreen1     ,  #87ffaf, hsl(140,100%,76%)
         {135, 255, 215}, // 122, Aquamarine1    ,  #87ffd7, hsl(160,100%,76%)
         {135, 255, 255}, // 123, DarkSlateGray1 ,  #87ffff, hsl(180,100%,76%)
-        {175,   0,   0}, // 124, Red3           ,  #af0000, hsl(0,100%,34%)
-        {175,   0,  95}, // 125, DeepPink4      ,  #af005f, hsl(27,100%,34%)
-        {175,   0, 135}, // 126, MediumVioletRed,  #af0087, hsl(13,100%,34%)
-        {175,   0, 175}, // 127, Magenta3       ,  #af00af, hsl(300,100%,34%)
-        {175,   0, 215}, // 128, DarkViolet     ,  #af00d7, hsl(88,100%,42%)
-        {175,   0, 255}, // 129, Purple         ,  #af00ff, hsl(81,100%,50%)
-        {175,  95,   0}, // 130, DarkOrange3    ,  #af5f00, hsl(2,100%,34%)
-        {175,  95,  95}, // 131, IndianRed      ,  #af5f5f, hsl(0,33%,52%)
-        {175,  95, 135}, // 132, HotPink3       ,  #af5f87, hsl(330,33%,52%)
-        {175,  95, 175}, // 133, MediumOrchid3  ,  #af5faf, hsl(300,33%,52%)
-        {175,  95, 215}, // 134, MediumOrchid   ,  #af5fd7, hsl(280,60%,60%)
-        {175,  95, 255}, // 135, MediumPurple2  ,  #af5fff, hsl(270,100%,68%)
-        {175, 135,   0}, // 136, DarkGoldenrod  ,  #af8700, hsl(6,100%,34%)
-        {175, 135,  95}, // 137, LightSalmon3   ,  #af875f, hsl(30,33%,52%)
+        {175, 0, 0}, // 124, Red3           ,  #af0000, hsl(0,100%,34%)
+        {175, 0, 95}, // 125, DeepPink4      ,  #af005f, hsl(27,100%,34%)
+        {175, 0, 135}, // 126, MediumVioletRed,  #af0087, hsl(13,100%,34%)
+        {175, 0, 175}, // 127, Magenta3       ,  #af00af, hsl(300,100%,34%)
+        {175, 0, 215}, // 128, DarkViolet     ,  #af00d7, hsl(88,100%,42%)
+        {175, 0, 255}, // 129, Purple         ,  #af00ff, hsl(81,100%,50%)
+        {175, 95, 0}, // 130, DarkOrange3    ,  #af5f00, hsl(2,100%,34%)
+        {175, 95, 95}, // 131, IndianRed      ,  #af5f5f, hsl(0,33%,52%)
+        {175, 95, 135}, // 132, HotPink3       ,  #af5f87, hsl(330,33%,52%)
+        {175, 95, 175}, // 133, MediumOrchid3  ,  #af5faf, hsl(300,33%,52%)
+        {175, 95, 215}, // 134, MediumOrchid   ,  #af5fd7, hsl(280,60%,60%)
+        {175, 95, 255}, // 135, MediumPurple2  ,  #af5fff, hsl(270,100%,68%)
+        {175, 135, 0}, // 136, DarkGoldenrod  ,  #af8700, hsl(6,100%,34%)
+        {175, 135, 95}, // 137, LightSalmon3   ,  #af875f, hsl(30,33%,52%)
         {175, 135, 135}, // 138, RosyBrown      ,  #af8787, hsl(0,20%,60%)
         {175, 135, 175}, // 139, Grey63         ,  #af87af, hsl(300,20%,60%)
         {175, 135, 215}, // 140, MediumPurple2  ,  #af87d7, hsl(270,50%,68%)
         {175, 135, 255}, // 141, MediumPurple1  ,  #af87ff, hsl(260,100%,76%)
-        {175, 175,   0}, // 142, Gold3          ,  #afaf00, hsl(60,100%,34%)
-        {175, 175,  95}, // 143, DarkKhaki      ,  #afaf5f, hsl(60,33%,52%)
+        {175, 175, 0}, // 142, Gold3          ,  #afaf00, hsl(60,100%,34%)
+        {175, 175, 95}, // 143, DarkKhaki      ,  #afaf5f, hsl(60,33%,52%)
         {175, 175, 135}, // 144, NavajoWhite3   ,  #afaf87, hsl(60,20%,60%)
         {175, 175, 175}, // 145, Grey69         ,  #afafaf, hsl(0,0%,68%)
         {175, 175, 215}, // 146, LightSteelBlue3,  #afafd7, hsl(240,33%,76%)
         {175, 175, 255}, // 147, LightSteelBlue ,  #afafff, hsl(240,100%,84%)
-        {175, 215,   0}, // 148, Yellow3        ,  #afd700, hsl(1,100%,42%)
-        {175, 215,  95}, // 149, DarkOliveGreen3,  #afd75f, hsl(80,60%,60%)
+        {175, 215, 0}, // 148, Yellow3        ,  #afd700, hsl(1,100%,42%)
+        {175, 215, 95}, // 149, DarkOliveGreen3,  #afd75f, hsl(80,60%,60%)
         {175, 215, 135}, // 150, DarkSeaGreen3  ,  #afd787, hsl(90,50%,68%)
         {175, 215, 175}, // 151, DarkSeaGreen2  ,  #afd7af, hsl(120,33%,76%)
         {175, 215, 215}, // 152, LightCyan3     ,  #afd7d7, hsl(180,33%,76%)
         {175, 215, 255}, // 153, LightSkyBlue1  ,  #afd7ff, hsl(210,100%,84%)
-        {175, 255,   0}, // 154, GreenYellow    ,  #afff00, hsl(8,100%,50%)
-        {175, 255,  95}, // 155, DarkOliveGreen2,  #afff5f, hsl(90,100%,68%)
+        {175, 255, 0}, // 154, GreenYellow    ,  #afff00, hsl(8,100%,50%)
+        {175, 255, 95}, // 155, DarkOliveGreen2,  #afff5f, hsl(90,100%,68%)
         {175, 255, 135}, // 156, PaleGreen1     ,  #afff87, hsl(100,100%,76%)
         {175, 255, 175}, // 157, DarkSeaGreen2  ,  #afffaf, hsl(120,100%,84%)
         {175, 255, 215}, // 158, DarkSeaGreen1  ,  #afffd7, hsl(150,100%,84%)
         {175, 255, 255}, // 159, PaleTurquoise1 ,  #afffff, hsl(180,100%,84%)
-        {215,   0,   0}, // 160, Red3           ,  #d70000, hsl(0,100%,42%)
-        {215,   0,  95}, // 161, DeepPink3      ,  #d7005f, hsl(33,100%,42%)
-        {215,   0, 135}, // 162, DeepPink3      ,  #d70087, hsl(22,100%,42%)
-        {215,   0, 175}, // 163, Magenta3       ,  #d700af, hsl(11,100%,42%)
-        {215,   0, 215}, // 164, Magenta3       ,  #d700d7, hsl(300,100%,42%)
-        {215,   0, 255}, // 165, Magenta2       ,  #d700ff, hsl(90,100%,50%)
-        {215,  95,   0}, // 166, DarkOrange3    ,  #d75f00, hsl(6,100%,42%)
-        {215,  95,  95}, // 167, IndianRed      ,  #d75f5f, hsl(0,60%,60%)
-        {215,  95, 135}, // 168, HotPink3       ,  #d75f87, hsl(340,60%,60%)
-        {215,  95, 175}, // 169, HotPink2       ,  #d75faf, hsl(320,60%,60%)
-        {215,  95, 215}, // 170, Orchid         ,  #d75fd7, hsl(300,60%,60%)
-        {215,  95, 255}, // 171, MediumOrchid1  ,  #d75fff, hsl(285,100%,68%)
-        {215, 135,   0}, // 172, Orange3        ,  #d78700, hsl(7,100%,42%)
-        {215, 135,  95}, // 173, LightSalmon3   ,  #d7875f, hsl(20,60%,60%)
+        {215, 0, 0}, // 160, Red3           ,  #d70000, hsl(0,100%,42%)
+        {215, 0, 95}, // 161, DeepPink3      ,  #d7005f, hsl(33,100%,42%)
+        {215, 0, 135}, // 162, DeepPink3      ,  #d70087, hsl(22,100%,42%)
+        {215, 0, 175}, // 163, Magenta3       ,  #d700af, hsl(11,100%,42%)
+        {215, 0, 215}, // 164, Magenta3       ,  #d700d7, hsl(300,100%,42%)
+        {215, 0, 255}, // 165, Magenta2       ,  #d700ff, hsl(90,100%,50%)
+        {215, 95, 0}, // 166, DarkOrange3    ,  #d75f00, hsl(6,100%,42%)
+        {215, 95, 95}, // 167, IndianRed      ,  #d75f5f, hsl(0,60%,60%)
+        {215, 95, 135}, // 168, HotPink3       ,  #d75f87, hsl(340,60%,60%)
+        {215, 95, 175}, // 169, HotPink2       ,  #d75faf, hsl(320,60%,60%)
+        {215, 95, 215}, // 170, Orchid         ,  #d75fd7, hsl(300,60%,60%)
+        {215, 95, 255}, // 171, MediumOrchid1  ,  #d75fff, hsl(285,100%,68%)
+        {215, 135, 0}, // 172, Orange3        ,  #d78700, hsl(7,100%,42%)
+        {215, 135, 95}, // 173, LightSalmon3   ,  #d7875f, hsl(20,60%,60%)
         {215, 135, 135}, // 174, LightPink3     ,  #d78787, hsl(0,50%,68%)
         {215, 135, 175}, // 175, Pink3          ,  #d787af, hsl(330,50%,68%)
         {215, 135, 215}, // 176, Plum3          ,  #d787d7, hsl(300,50%,68%)
         {215, 135, 255}, // 177, Violet         ,  #d787ff, hsl(280,100%,76%)
-        {215, 175,   0}, // 178, Gold3          ,  #d7af00, hsl(8,100%,42%)
-        {215, 175,  95}, // 179, LightGoldenrod3,  #d7af5f, hsl(40,60%,60%)
+        {215, 175, 0}, // 178, Gold3          ,  #d7af00, hsl(8,100%,42%)
+        {215, 175, 95}, // 179, LightGoldenrod3,  #d7af5f, hsl(40,60%,60%)
         {215, 175, 135}, // 180, Tan            ,  #d7af87, hsl(30,50%,68%)
         {215, 175, 175}, // 181, MistyRose3     ,  #d7afaf, hsl(0,33%,76%)
         {215, 175, 215}, // 182, Thistle3       ,  #d7afd7, hsl(300,33%,76%)
         {215, 175, 255}, // 183, Plum2          ,  #d7afff, hsl(270,100%,84%)
-        {215, 215,   0}, // 184, Yellow3        ,  #d7d700, hsl(60,100%,42%)
-        {215, 215,  95}, // 185, Khaki3         ,  #d7d75f, hsl(60,60%,60%)
+        {215, 215, 0}, // 184, Yellow3        ,  #d7d700, hsl(60,100%,42%)
+        {215, 215, 95}, // 185, Khaki3         ,  #d7d75f, hsl(60,60%,60%)
         {215, 215, 135}, // 186, LightGoldenrod2,  #d7d787, hsl(60,50%,68%)
         {215, 215, 175}, // 187, LightYellow3   ,  #d7d7af, hsl(60,33%,76%)
         {215, 215, 215}, // 188, Grey84         ,  #d7d7d7, hsl(0,0%,84%)
         {215, 215, 255}, // 189, LightSteelBlue1,  #d7d7ff, hsl(240,100%,92%)
-        {215, 255,   0}, // 190, Yellow2        ,  #d7ff00, hsl(9,100%,50%)
-        {215, 255,  95}, // 191, DarkOliveGreen1,  #d7ff5f, hsl(75,100%,68%)
+        {215, 255, 0}, // 190, Yellow2        ,  #d7ff00, hsl(9,100%,50%)
+        {215, 255, 95}, // 191, DarkOliveGreen1,  #d7ff5f, hsl(75,100%,68%)
         {215, 255, 135}, // 192, DarkOliveGreen1,  #d7ff87, hsl(80,100%,76%)
         {215, 255, 175}, // 193, DarkSeaGreen1  ,  #d7ffaf, hsl(90,100%,84%)
         {215, 255, 215}, // 194, Honeydew2      ,  #d7ffd7, hsl(120,100%,92%)
         {215, 255, 255}, // 195, LightCyan1     ,  #d7ffff, hsl(180,100%,92%)
-        {255,   0,   0}, // 196, Red1           ,  #ff0000, hsl(0,100%,50%)
-        {255,   0,  95}, // 197, DeepPink2      ,  #ff005f, hsl(37,100%,50%)
-        {255,   0, 135}, // 198, DeepPink1      ,  #ff0087, hsl(28,100%,50%)
-        {255,   0, 175}, // 199, DeepPink1      ,  #ff00af, hsl(18,100%,50%)
-        {255,   0, 215}, // 200, Magenta2       ,  #ff00d7, hsl(09,100%,50%)
-        {255,   0, 255}, // 201, Magenta1       ,  #ff00ff, hsl(300,100%,50%)
-        {255,  95,   0}, // 202, OrangeRed1     ,  #ff5f00, hsl(2,100%,50%)
-        {255,  95,  95}, // 203, IndianRed1     ,  #ff5f5f, hsl(0,100%,68%)
-        {255,  95, 135}, // 204, IndianRed1     ,  #ff5f87, hsl(345,100%,68%)
-        {255,  95, 175}, // 205, HotPink        ,  #ff5faf, hsl(330,100%,68%)
-        {255,  95, 215}, // 206, HotPink        ,  #ff5fd7, hsl(315,100%,68%)
-        {255,  95, 255}, // 207, MediumOrchid1  ,  #ff5fff, hsl(300,100%,68%)
-        {255, 135,   0}, // 208, DarkOrange     ,  #ff8700, hsl(1,100%,50%)
-        {255, 135,  95}, // 209, Salmon1        ,  #ff875f, hsl(15,100%,68%)
+        {255, 0, 0}, // 196, Red1           ,  #ff0000, hsl(0,100%,50%)
+        {255, 0, 95}, // 197, DeepPink2      ,  #ff005f, hsl(37,100%,50%)
+        {255, 0, 135}, // 198, DeepPink1      ,  #ff0087, hsl(28,100%,50%)
+        {255, 0, 175}, // 199, DeepPink1      ,  #ff00af, hsl(18,100%,50%)
+        {255, 0, 215}, // 200, Magenta2       ,  #ff00d7, hsl(09,100%,50%)
+        {255, 0, 255}, // 201, Magenta1       ,  #ff00ff, hsl(300,100%,50%)
+        {255, 95, 0}, // 202, OrangeRed1     ,  #ff5f00, hsl(2,100%,50%)
+        {255, 95, 95}, // 203, IndianRed1     ,  #ff5f5f, hsl(0,100%,68%)
+        {255, 95, 135}, // 204, IndianRed1     ,  #ff5f87, hsl(345,100%,68%)
+        {255, 95, 175}, // 205, HotPink        ,  #ff5faf, hsl(330,100%,68%)
+        {255, 95, 215}, // 206, HotPink        ,  #ff5fd7, hsl(315,100%,68%)
+        {255, 95, 255}, // 207, MediumOrchid1  ,  #ff5fff, hsl(300,100%,68%)
+        {255, 135, 0}, // 208, DarkOrange     ,  #ff8700, hsl(1,100%,50%)
+        {255, 135, 95}, // 209, Salmon1        ,  #ff875f, hsl(15,100%,68%)
         {255, 135, 135}, // 210, LightCoral     ,  #ff8787, hsl(0,100%,76%)
         {255, 135, 175}, // 211, PaleVioletRed1 ,  #ff87af, hsl(340,100%,76%)
         {255, 135, 215}, // 212, Orchid2        ,  #ff87d7, hsl(320,100%,76%)
         {255, 135, 255}, // 213, Orchid1        ,  #ff87ff, hsl(300,100%,76%)
-        {255, 175,   0}, // 214, Orange1        ,  #ffaf00, hsl(1,100%,50%)
-        {255, 175,  95}, // 215, SandyBrown     ,  #ffaf5f, hsl(30,100%,68%)
+        {255, 175, 0}, // 214, Orange1        ,  #ffaf00, hsl(1,100%,50%)
+        {255, 175, 95}, // 215, SandyBrown     ,  #ffaf5f, hsl(30,100%,68%)
         {255, 175, 135}, // 216, LightSalmon1   ,  #ffaf87, hsl(20,100%,76%)
         {255, 175, 175}, // 217, LightPink1     ,  #ffafaf, hsl(0,100%,84%)
         {255, 175, 215}, // 218, Pink1          ,  #ffafd7, hsl(330,100%,84%)
         {255, 175, 255}, // 219, Plum1          ,  #ffafff, hsl(300,100%,84%)
-        {255, 215,   0}, // 220, Gold1          ,  #ffd700, hsl(0,100%,50%)
-        {255, 215,  95}, // 221, LightGoldenrod2,  #ffd75f, hsl(45,100%,68%)
+        {255, 215, 0}, // 220, Gold1          ,  #ffd700, hsl(0,100%,50%)
+        {255, 215, 95}, // 221, LightGoldenrod2,  #ffd75f, hsl(45,100%,68%)
         {255, 215, 135}, // 222, LightGoldenrod2,  #ffd787, hsl(40,100%,76%)
         {255, 215, 175}, // 223, NavajoWhite1   ,  #ffd7af, hsl(30,100%,84%)
         {255, 215, 215}, // 224, MistyRose1     ,  #ffd7d7, hsl(0,100%,92%)
         {255, 215, 255}, // 225, Thistle1       ,  #ffd7ff, hsl(300,100%,92%)
-        {255, 255,   0}, // 226, Yellow1        ,  #ffff00, hsl(60,100%,50%)
-        {255, 255,  95}, // 227, LightGoldenrod1,  #ffff5f, hsl(60,100%,68%)
+        {255, 255, 0}, // 226, Yellow1        ,  #ffff00, hsl(60,100%,50%)
+        {255, 255, 95}, // 227, LightGoldenrod1,  #ffff5f, hsl(60,100%,68%)
         {255, 255, 135}, // 228, Khaki1         ,  #ffff87, hsl(60,100%,76%)
         {255, 255, 175}, // 229, Wheat1         ,  #ffffaf, hsl(60,100%,84%)
         {255, 255, 215}, // 230, Cornsilk1      ,  #ffffd7, hsl(60,100%,92%)
         {255, 255, 255}, // 231, Grey100        ,  #ffffff, hsl(0,0%,100%)
-        {  8,   8,   8}, // 232, Grey3          ,  #080808, hsl(0,0%,3%)
-        { 18,  18,  18}, // 233, Grey7          ,  #121212, hsl(0,0%,7%)
-        { 28,  28,  28}, // 234, Grey11         ,  #1c1c1c, hsl(0,0%,10%)
-        { 38,  38,  38}, // 235, Grey15         ,  #262626, hsl(0,0%,14%)
-        { 48,  48,  48}, // 236, Grey19         ,  #303030, hsl(0,0%,18%)
-        { 58,  58,  58}, // 237, Grey23         ,  #3a3a3a, hsl(0,0%,22%)
-        { 68,  68,  68}, // 238, Grey27         ,  #444444, hsl(0,0%,26%)
-        { 78,  78,  78}, // 239, Grey30         ,  #4e4e4e, hsl(0,0%,30%)
-        { 88,  88,  88}, // 240, Grey35         ,  #585858, hsl(0,0%,34%)
-        { 98,  98,  98}, // 241, Grey39         ,  #626262, hsl(0,0%,37%)
+        {8, 8, 8}, // 232, Grey3          ,  #080808, hsl(0,0%,3%)
+        {18, 18, 18}, // 233, Grey7          ,  #121212, hsl(0,0%,7%)
+        {28, 28, 28}, // 234, Grey11         ,  #1c1c1c, hsl(0,0%,10%)
+        {38, 38, 38}, // 235, Grey15         ,  #262626, hsl(0,0%,14%)
+        {48, 48, 48}, // 236, Grey19         ,  #303030, hsl(0,0%,18%)
+        {58, 58, 58}, // 237, Grey23         ,  #3a3a3a, hsl(0,0%,22%)
+        {68, 68, 68}, // 238, Grey27         ,  #444444, hsl(0,0%,26%)
+        {78, 78, 78}, // 239, Grey30         ,  #4e4e4e, hsl(0,0%,30%)
+        {88, 88, 88}, // 240, Grey35         ,  #585858, hsl(0,0%,34%)
+        {98, 98, 98}, // 241, Grey39         ,  #626262, hsl(0,0%,37%)
         {108, 108, 108}, // 242, Grey42         ,  #6c6c6c, hsl(0,0%,40%)
         {118, 118, 118}, // 243, Grey46         ,  #767676, hsl(0,0%,46%)
         {128, 128, 128}, // 244, Grey50         ,  #808080, hsl(0,0%,50%)
@@ -4764,19 +5280,19 @@ Eindhoven University of Technology color-cyle.
 inline xt::xtensor<double, 2> tue()
 {
     xt::xtensor<double, 2> data = {
-        {247,  49,  49}, //  0: warm red
-        {214,   0,  74}, //  1: red
-        {214,   0, 123}, //  2: pink
-        {173,  32, 173}, //  3: dark pink
-        { 16,  16, 115}, //  4: dark blue
-        {  0, 102, 204}, //  5: blue
-        {  0, 162, 222}, //  6: light blue
-        {255, 154,   0}, //  7: orange
-        {255, 221,   0}, //  8: yellow
-        {206, 223,   0}, //  9: lemon
-        {132, 210,   0}, // 10: lime
-        {  0, 172, 130}, // 11: green
-        {  0, 146, 181}, // 12: cornflower blue
+        {247, 49, 49}, //  0: warm red
+        {214, 0, 74}, //  1: red
+        {214, 0, 123}, //  2: pink
+        {173, 32, 173}, //  3: dark pink
+        {16, 16, 115}, //  4: dark blue
+        {0, 102, 204}, //  5: blue
+        {0, 162, 222}, //  6: light blue
+        {255, 154, 0}, //  7: orange
+        {255, 221, 0}, //  8: yellow
+        {206, 223, 0}, //  9: lemon
+        {132, 210, 0}, // 10: lime
+        {0, 172, 130}, // 11: green
+        {0, 146, 181}, // 12: cornflower blue
     };
 
     return data / 255.0;
@@ -4832,43 +5348,39 @@ inline xt::xtensor<double, 2> colorcycle(const std::string& cmap)
 /**
 Algorithm to use for color matching.
 */
-enum metric
-{
+enum metric {
     euclidean, ///< Euclidean norm
-    fast_perceptual, ///< Fast best perception algorithm. See: https://stackoverflow.com/a/1847112/2646505
+    fast_perceptual, ///< Fast best perception algorithm. See:
+                     ///< https://stackoverflow.com/a/1847112/2646505
     perceptual ///< Best perception algorithm. See: https://en.wikipedia.org/wiki/Color_difference
 };
 
-namespace detail
+namespace detail {
+
+double euclidean_metric(double R1, double G1, double B1, double R2, double G2, double B2)
 {
-
-    double euclidean_metric(double R1, double G1, double B1, double R2, double G2, double B2)
-    {
-        return std::pow(R1 - R2, 2.0) +
-               std::pow(G1 - G2, 2.0) +
-               std::pow(B1 - B2, 2.0);
-    }
-
-    // https://stackoverflow.com/a/1847112/2646505
-    double fast_perceptual_metric(double R1, double G1, double B1, double R2, double G2, double B2)
-    {
-        return 0.3  * std::pow(R1 - R2, 2.0) +
-               0.59 * std::pow(G1 - G2, 2.0) +
-               0.11 * std::pow(B1 - B2, 2.0);
-    }
-
-    // https://en.wikipedia.org/wiki/Color_difference
-    double perceptual_metric(double R1, double G1, double B1, double R2, double G2, double B2)
-    {
-        double r_ = (R1 + R2) / 2.0;
-        double DR = (R1 - R2);
-        double DG = (G1 - G2);
-        double DB = (B1 - B2);
-
-        return 2 * DR * DR + 4 * DG * DG + 3 * DB * DB + ((r_ * (DR * DR - DB * DB)));
-    }
-
+    return std::pow(R1 - R2, 2.0) + std::pow(G1 - G2, 2.0) + std::pow(B1 - B2, 2.0);
 }
+
+// https://stackoverflow.com/a/1847112/2646505
+double fast_perceptual_metric(double R1, double G1, double B1, double R2, double G2, double B2)
+{
+    return 0.3 * std::pow(R1 - R2, 2.0) + 0.59 * std::pow(G1 - G2, 2.0) +
+           0.11 * std::pow(B1 - B2, 2.0);
+}
+
+// https://en.wikipedia.org/wiki/Color_difference
+double perceptual_metric(double R1, double G1, double B1, double R2, double G2, double B2)
+{
+    double r_ = (R1 + R2) / 2.0;
+    double DR = (R1 - R2);
+    double DG = (G1 - G2);
+    double DB = (B1 - B2);
+
+    return 2 * DR * DR + 4 * DG * DG + 3 * DB * DB + ((r_ * (DR * DR - DB * DB)));
+}
+
+} // namespace detail
 
 /**
 Match colors.

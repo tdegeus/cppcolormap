@@ -1,9 +1,9 @@
 channels:
-  - conda-forge
+- conda-forge
 dependencies:
-  - cmake
-  - xtensor
-  - pyxtensor
-  - catch2
-  - numpy
-  - matplotlib
+- cmake
+- xtensor
+- pyxtensor
+- catch2
+- numpy
+- matplotlib

@@ -10,37 +10,37 @@
 
 # cppcolormap
 
-C++ and Python library specifying colormaps. 
+C++ and Python library specifying colormaps.
 
-<p align="center"> 
+<p align="center">
     <img src="./examples/overview/Sequential.png">
 </p>
 
-<p align="center"> 
+<p align="center">
     <img src="./examples/overview/Diverging.png">
 </p>
 
-<p align="center"> 
+<p align="center">
     <img src="./examples/overview/matplotlib.png">
 </p>
 
-<p align="center"> 
+<p align="center">
     <img src="./examples/overview/monocolor.png">
 </p>
 
-<p align="center"> 
+<p align="center">
     <img src="./examples/overview/monocolor_dvips_1.png">
 </p>
 
-<p align="center"> 
+<p align="center">
     <img src="./examples/overview/monocolor_dvips_2.png">
 </p>
 
-<p align="center"> 
+<p align="center">
     <img src="./examples/overview/Qualitative.png">
 </p>
 
-<p align="center"> 
+<p align="center">
     <img src="./examples/overview/Colorcycles.png">
 </p>
 
@@ -231,7 +231,7 @@ conda install -c conda-forge python-cppcolormap
 git checkout https://github.com/tdegeus/cppcolormap.git
 cd cppcolormap
 
-# Compile and install 
+# Compile and install
 python -m pip install .
 ```
 
@@ -278,7 +278,7 @@ import numpy as np
 import cppcolormap as cm
 
 x, y = np.meshgrid(
-    np.linspace(0, 1, 100), 
+    np.linspace(0, 1, 100),
     np.linspace(0, 1, 100))
 
 d = np.sqrt(x ** 2.0 + y ** 2.0)
@@ -335,39 +335,39 @@ plt.show()
 | PRGn     | PRGn_r           |
 
 >   Copyright (c) 2002 Cynthia Brewer, Mark Harrower, and The Pennsylvania State University.
->   
+>
 >   Licensed under the Apache License, Version 2.0
->   
+>
 >   [colorbrewer2.org](http://colorbrewer2.org)
 
 ## matplotlib
 
 | Name          | Inverse colormap |
 |---------------|------------------|
-| spring        | spring_r         |       
-| summer        | summer_r         |       
-| autumn        | autumn_r         |       
-| winter        | winter_r         |       
-| bone          | bone_r           |     
-| cool          | cool_r           |     
-| hot           | hot_r            |    
-| copper        | copper_r         |       
-| hsv           | hsv_r            |    
-| nipy_spectral | nipy_spectral_r  |              
-| terrain       | terrain_r        |        
-| seismic       | seismic_r        |        
-| afmhot        | afmhot_r         |       
-| magma         | magma_r          |      
-| inferno       | inferno_r        |        
-| plasma        | plasma_r         |       
-| viridis       | viridis_r        |        
-| jet           | jet_r            |    
+| spring        | spring_r         |
+| summer        | summer_r         |
+| autumn        | autumn_r         |
+| winter        | winter_r         |
+| bone          | bone_r           |
+| cool          | cool_r           |
+| hot           | hot_r            |
+| copper        | copper_r         |
+| hsv           | hsv_r            |
+| nipy_spectral | nipy_spectral_r  |
+| terrain       | terrain_r        |
+| seismic       | seismic_r        |
+| afmhot        | afmhot_r         |
+| magma         | magma_r          |
+| inferno       | inferno_r        |
+| plasma        | plasma_r         |
+| viridis       | viridis_r        |
+| jet           | jet_r            |
 
->   Copyright (c)  New matplotlib colormaps by Nathaniel J. Smith, Stefan van der Walt, and 
+>   Copyright (c)  New matplotlib colormaps by Nathaniel J. Smith, Stefan van der Walt, and
 >   in the case of viridis) Eric Firing.
->   
+>
 >   Licensed under the CC0 license / public domain dedication.
->   
+>
 >   [GitHub](https://github.com/BIDS/colormap)
 
 ## monocolor
@@ -383,74 +383,74 @@ plt.show()
 | tueblue        | -                | [1]    |
 | tuelightblue   | -                | [1]    |
 | tuewarmred     | -                | [1]    |
-| Apricot        | -                | [2]    |  
-| Aquamarine     | -                | [2]    |  
-| Bittersweet    | -                | [2]    |  
-| Black          | -                | [2]    |  
-| Blue           | -                | [2]    |  
-| BlueGreen      | -                | [2]    |  
-| BlueViolet     | -                | [2]    |  
-| BrickRed       | -                | [2]    |  
-| Brown          | -                | [2]    |  
-| BurntOrange    | -                | [2]    |  
-| CadetBlue      | -                | [2]    |  
-| CarnationPink  | -                | [2]    |  
-| Cerulean       | -                | [2]    |  
-| CornflowerBlue | -                | [2]    |  
-| Cyan           | -                | [2]    |  
-| Dandelion      | -                | [2]    |  
-| DarkOrchid     | -                | [2]    |  
-| Emerald        | -                | [2]    |  
-| ForestGreen    | -                | [2]    |  
-| Fuchsia        | -                | [2]    |  
-| Goldenrod      | -                | [2]    |  
-| Gray           | -                | [2]    |  
-| Green          | -                | [2]    |  
-| GreenYellow    | -                | [2]    |  
-| JungleGreen    | -                | [2]    |  
-| Lavender       | -                | [2]    |  
-| LimeGreen      | -                | [2]    |  
-| Magenta        | -                | [2]    |  
-| Mahogany       | -                | [2]    |  
-| Maroon         | -                | [2]    |  
-| Melon          | -                | [2]    |  
-| MidnightBlue   | -                | [2]    |  
-| Mulberry       | -                | [2]    |  
-| NavyBlue       | -                | [2]    |  
-| OliveGreen     | -                | [2]    |  
-| Orange         | -                | [2]    |  
-| OrangeRed      | -                | [2]    |  
-| Orchid         | -                | [2]    |  
-| Peach          | -                | [2]    |  
-| Periwinkle     | -                | [2]    |  
-| PineGreen      | -                | [2]    |  
-| Plum           | -                | [2]    |  
-| ProcessBlue    | -                | [2]    |  
-| Purple         | -                | [2]    |  
-| RawSienna      | -                | [2]    |  
-| Red            | -                | [2]    |  
-| RedOrange      | -                | [2]    |  
-| RedViolet      | -                | [2]    |  
-| Rhodamine      | -                | [2]    |  
-| RoyalBlue      | -                | [2]    |  
-| RoyalPurple    | -                | [2]    |  
-| RubineRed      | -                | [2]    |  
-| Salmon         | -                | [2]    |  
-| SeaGreen       | -                | [2]    |  
-| Sepia          | -                | [2]    |  
-| SkyBlue        | -                | [2]    |  
-| SpringGreen    | -                | [2]    |  
-| Tan            | -                | [2]    |  
-| TealBlue       | -                | [2]    |  
-| Thistle        | -                | [2]    |  
-| Turquoise      | -                | [2]    |  
-| Violet         | -                | [2]    |  
-| VioletRed      | -                | [2]    |  
-| White          | -                | [2]    |  
-| WildStrawberry | -                | [2]    |  
-| Yellow         | -                | [2]    |  
-| YellowGreen    | -                | [2]    |  
-| YellowOrange   | -                | [2]    |  
+| Apricot        | -                | [2]    |
+| Aquamarine     | -                | [2]    |
+| Bittersweet    | -                | [2]    |
+| Black          | -                | [2]    |
+| Blue           | -                | [2]    |
+| BlueGreen      | -                | [2]    |
+| BlueViolet     | -                | [2]    |
+| BrickRed       | -                | [2]    |
+| Brown          | -                | [2]    |
+| BurntOrange    | -                | [2]    |
+| CadetBlue      | -                | [2]    |
+| CarnationPink  | -                | [2]    |
+| Cerulean       | -                | [2]    |
+| CornflowerBlue | -                | [2]    |
+| Cyan           | -                | [2]    |
+| Dandelion      | -                | [2]    |
+| DarkOrchid     | -                | [2]    |
+| Emerald        | -                | [2]    |
+| ForestGreen    | -                | [2]    |
+| Fuchsia        | -                | [2]    |
+| Goldenrod      | -                | [2]    |
+| Gray           | -                | [2]    |
+| Green          | -                | [2]    |
+| GreenYellow    | -                | [2]    |
+| JungleGreen    | -                | [2]    |
+| Lavender       | -                | [2]    |
+| LimeGreen      | -                | [2]    |
+| Magenta        | -                | [2]    |
+| Mahogany       | -                | [2]    |
+| Maroon         | -                | [2]    |
+| Melon          | -                | [2]    |
+| MidnightBlue   | -                | [2]    |
+| Mulberry       | -                | [2]    |
+| NavyBlue       | -                | [2]    |
+| OliveGreen     | -                | [2]    |
+| Orange         | -                | [2]    |
+| OrangeRed      | -                | [2]    |
+| Orchid         | -                | [2]    |
+| Peach          | -                | [2]    |
+| Periwinkle     | -                | [2]    |
+| PineGreen      | -                | [2]    |
+| Plum           | -                | [2]    |
+| ProcessBlue    | -                | [2]    |
+| Purple         | -                | [2]    |
+| RawSienna      | -                | [2]    |
+| Red            | -                | [2]    |
+| RedOrange      | -                | [2]    |
+| RedViolet      | -                | [2]    |
+| Rhodamine      | -                | [2]    |
+| RoyalBlue      | -                | [2]    |
+| RoyalPurple    | -                | [2]    |
+| RubineRed      | -                | [2]    |
+| Salmon         | -                | [2]    |
+| SeaGreen       | -                | [2]    |
+| Sepia          | -                | [2]    |
+| SkyBlue        | -                | [2]    |
+| SpringGreen    | -                | [2]    |
+| Tan            | -                | [2]    |
+| TealBlue       | -                | [2]    |
+| Thistle        | -                | [2]    |
+| Turquoise      | -                | [2]    |
+| Violet         | -                | [2]    |
+| VioletRed      | -                | [2]    |
+| White          | -                | [2]    |
+| WildStrawberry | -                | [2]    |
+| Yellow         | -                | [2]    |
+| YellowGreen    | -                | [2]    |
+| YellowOrange   | -                | [2]    |
 
 1.  [Eindhoven University of Technology](http://www.tue.nl)
 2.  [LaTeX xcolor (dvipsnames)](https://en.wikibooks.org/wiki/LaTeX/Colors)
@@ -472,5 +472,5 @@ plt.show()
 | tue  | tue_r            |
 
 
->   Based on the corporate color scheme of the 
+>   Based on the corporate color scheme of the
 >   [Eindhoven University of Technology](http://www.tue.nl).

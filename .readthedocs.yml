@@ -7,9 +7,7 @@ version: 2
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
-   configuration: docs/conf.py
-
-version: 2
+  configuration: docs/conf.py
 
 conda:
   environment: .readthedocsenv.yml
