@@ -1,11 +1,21 @@
 
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+#define FORCE_IMPORT_ARRAY
+#include <xtensor-python/pyarray.hpp>
+#include <xtensor-python/pytensor.hpp>
+
 #include <cppcolormap.h>
-#include <pyxtensor/pyxtensor.hpp>
+
+namespace py = pybind11;
 
 // -------------------------------------------------------------------------------------------------
 
-PYBIND11_MODULE(cppcolormap, m)
+PYBIND11_MODULE(_cppcolormap, m)
 {
+
+    xt::import_numpy();
 
     m.doc() = "Library with colormaps";
 

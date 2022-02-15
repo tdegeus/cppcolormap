@@ -1,17 +1,31 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.19..3.21)
 
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    project(cppcolormap-test)
+    project(cppcolormap)
     find_package(cppcolormap REQUIRED CONFIG)
 endif()
 
-set(test_name "unit-tests")
+set(MYPROJECT "${PROJECT_NAME}-tests")
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
 find_package(Catch2 REQUIRED)
 
-add_executable(${test_name} main.cpp)
+add_library(mytarget INTERFACE IMPORTED)
 
-target_link_libraries(${test_name} PRIVATE Catch2::Catch2)
-target_link_libraries(${test_name} PRIVATE cppcolormap)
+target_link_libraries(mytarget INTERFACE
+    ${PROJECT_NAME}
+    ${PROJECT_NAME}::compiler_warnings
+    Catch2::Catch2)
 
-add_test(NAME ${test_name} COMMAND ${test_name})
+file(GLOB APP_SOURCES *.cpp)
+
+foreach(mysource ${APP_SOURCES})
+    string(REPLACE ".cpp" "" myexec ${mysource})
+    get_filename_component(myexec ${myexec} NAME)
+    add_executable(${myexec} ${mysource})
+    target_link_libraries(${myexec} PRIVATE mytarget)
+    add_test(NAME ${myexec} COMMAND ${myexec})
+endforeach()
