@@ -28,6 +28,9 @@ PYBIND11_MODULE(_cppcolormap, m)
 
     m.doc() = "Library with colormaps";
 
+    m.def("version", &cppcolormap::version, DOC("version"));
+    m.def("version_dependencies", &cppcolormap::version_dependencies, DOC("version_dependencies"));
+
     m.def("Accent", &cppcolormap::Accent, DOC("Accent"), py::arg("N") = 8);
     m.def("Dark2", &cppcolormap::Dark2, DOC("Dark2"), py::arg("N") = 8);
     m.def("Paired", &cppcolormap::Paired, DOC("Paired"), py::arg("N") = 12);
