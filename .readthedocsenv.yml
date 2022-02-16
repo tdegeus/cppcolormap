@@ -1,9 +1,16 @@
 channels:
 - conda-forge
 dependencies:
-- doxygen
 - breathe
+- cmake
+- doxygen
+- ninja
+- numpy
+- pybind11
+- python
+- scikit-build
+- setuptools_scm
 - sphinx
 - sphinx_rtd_theme
-- python-cppcolormap
-- pyxtensor
+- xtensor
+- xtensor-python
