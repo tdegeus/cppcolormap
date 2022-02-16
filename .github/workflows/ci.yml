@@ -23,11 +23,11 @@ jobs:
         - runs-on: macos-latest
           config: -DCMAKE_BUILD_TYPE=Release -DBUILD_ALL=1
           conda: environment.yaml
-          prop: tests
+          prop: tests & examples
         - runs-on: windows-latest
-          config: -DCMAKE_BUILD_TYPE=Release -DBUILD_ALL=1 -G Ninja
+          config: -DCMAKE_BUILD_TYPE=Release -DBUILD_ALL=1 -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
           conda: environment.yaml
-          prop: tests
+          prop: tests & examples
 
     defaults:
       run:
@@ -46,6 +46,10 @@ jobs:
       with:
         environment-file: ${{ matrix.conda }}
         environment-name: myenv
+
+    - name: Install clang
+      if: runner.os == 'Windows'
+      run: micromamba install -c conda-forge clang_win-64 ninja
 
     - name: Set dummy version
       run: echo "SETUPTOOLS_SCM_PRETEND_VERSION=0.0" >> $GITHUB_ENV
