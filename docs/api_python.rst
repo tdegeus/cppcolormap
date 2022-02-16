@@ -2,7 +2,7 @@
 Python API
 **********
 
-.. automodule:: cppcolormap
+.. automodule:: cppcolormap._cppcolormap
     :members:
     :special-members:
     :undoc-members:

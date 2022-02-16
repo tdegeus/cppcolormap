@@ -1,5 +1,4 @@
-docs/html
-docs/xml
+docs/_doxygen
 
 # Prerequisites
 *.d
