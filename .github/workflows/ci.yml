@@ -72,11 +72,12 @@ jobs:
       run: python tests/python/main.py
 
     - name: Run Python examples
-      if: runner.os == 'Windows'
+      if: runner.os != 'Windows'
       run: |
         python examples/python/match.py
         python examples/overview/overview.py
 
     - name: Build doxygen-docs (error on warning)
+      if: runner.os != 'Windows'
       working-directory: build
       run: make html
