@@ -140,15 +140,6 @@ PYBIND11_MODULE(_cppcolormap, m)
     m.def("viridis_r", &cppcolormap::viridis_r, DOC("viridis_r"), py::arg("N") = 256);
     m.def("jet_r", &cppcolormap::jet_r, DOC("jet_r"), py::arg("N") = 256);
 
-    m.def("White", &cppcolormap::White, DOC("White"), py::arg("N") = 1);
-    m.def("Grey", &cppcolormap::Grey, DOC("Grey"), py::arg("N") = 1);
-    m.def("Black", &cppcolormap::Black, DOC("Black"), py::arg("N") = 1);
-    m.def("Red", &cppcolormap::Red, DOC("Red"), py::arg("N") = 1);
-    m.def("Blue", &cppcolormap::Blue, DOC("Blue"), py::arg("N") = 1);
-    m.def("tuewarmred", &cppcolormap::tuewarmred, DOC("tuewarmred"), py::arg("N") = 1);
-    m.def("tuedarkblue", &cppcolormap::tuedarkblue, DOC("tuedarkblue"), py::arg("N") = 1);
-    m.def("tueblue", &cppcolormap::tueblue, DOC("tueblue"), py::arg("N") = 1);
-    m.def("tuelightblue", &cppcolormap::tuelightblue, DOC("tuelightblue"), py::arg("N") = 1);
     m.def("Apricot", &cppcolormap::Apricot, DOC("Apricot"), py::arg("N") = 1);
     m.def("Aquamarine", &cppcolormap::Aquamarine, DOC("Aquamarine"), py::arg("N") = 1);
     m.def("Bittersweet", &cppcolormap::Bittersweet, DOC("Bittersweet"), py::arg("N") = 1);
@@ -173,6 +164,7 @@ PYBIND11_MODULE(_cppcolormap, m)
     m.def("Gray", &cppcolormap::Gray, DOC("Gray"), py::arg("N") = 1);
     m.def("Green", &cppcolormap::Green, DOC("Green"), py::arg("N") = 1);
     m.def("GreenYellow", &cppcolormap::GreenYellow, DOC("GreenYellow"), py::arg("N") = 1);
+    m.def("Grey", &cppcolormap::Grey, DOC("Grey"), py::arg("N") = 1);
     m.def("JungleGreen", &cppcolormap::JungleGreen, DOC("JungleGreen"), py::arg("N") = 1);
     m.def("Lavender", &cppcolormap::Lavender, DOC("Lavender"), py::arg("N") = 1);
     m.def("LimeGreen", &cppcolormap::LimeGreen, DOC("LimeGreen"), py::arg("N") = 1);
@@ -209,9 +201,14 @@ PYBIND11_MODULE(_cppcolormap, m)
     m.def("Tan", &cppcolormap::Tan, DOC("Tan"), py::arg("N") = 1);
     m.def("TealBlue", &cppcolormap::TealBlue, DOC("TealBlue"), py::arg("N") = 1);
     m.def("Thistle", &cppcolormap::Thistle, DOC("Thistle"), py::arg("N") = 1);
+    m.def("tueblue", &cppcolormap::tueblue, DOC("tueblue"), py::arg("N") = 1);
+    m.def("tuedarkblue", &cppcolormap::tuedarkblue, DOC("tuedarkblue"), py::arg("N") = 1);
+    m.def("tuelightblue", &cppcolormap::tuelightblue, DOC("tuelightblue"), py::arg("N") = 1);
+    m.def("tuewarmred", &cppcolormap::tuewarmred, DOC("tuewarmred"), py::arg("N") = 1);
     m.def("Turquoise", &cppcolormap::Turquoise, DOC("Turquoise"), py::arg("N") = 1);
     m.def("Violet", &cppcolormap::Violet, DOC("Violet"), py::arg("N") = 1);
     m.def("VioletRed", &cppcolormap::VioletRed, DOC("VioletRed"), py::arg("N") = 1);
+    m.def("White", &cppcolormap::White, DOC("White"), py::arg("N") = 1);
     m.def("WildStrawberry", &cppcolormap::WildStrawberry, DOC("WildStrawberry"), py::arg("N") = 1);
     m.def("Yellow", &cppcolormap::Yellow, DOC("Yellow"), py::arg("N") = 1);
     m.def("YellowGreen", &cppcolormap::YellowGreen, DOC("YellowGreen"), py::arg("N") = 1);

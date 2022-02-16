@@ -1,9 +1,0 @@
-channels:
-- conda-forge
-dependencies:
-- breathe
-- cmake
-- doxygen
-- python-cppcolormap
-- sphinx
-- sphinx_rtd_theme

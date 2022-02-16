@@ -69,8 +69,11 @@ jobs:
       run: python setup.py install --build-type Release -vv
 
     - name: Run Python tests
+      run: python tests/python/main.py
+
+    - name: Run Python examples
+      if: runner.os == 'Windows'
       run: |
-        python tests/python/main.py
         python examples/python/match.py
         python examples/overview/overview.py
 

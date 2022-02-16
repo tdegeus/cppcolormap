@@ -1,11 +1,18 @@
 import os
 import subprocess
+import sys
 
 # Project information
 
 project = "cppcolormap"
 copyright = "2021, Tom de Geus"
 author = "Tom de Geus"
+
+# Build Python module
+
+subprocess.call("cd ..; python setup.py build --build-type Release -vv", shell=True)
+mybuild = os.listdir("../_skbuild")[0]
+sys.path.insert(0, os.path.abspath(f"../_skbuild/{mybuild}/cmake-install/python"))
 
 # Run Doxygen
 

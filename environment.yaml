@@ -1,6 +1,7 @@
 channels:
 - conda-forge
 dependencies:
+- breathe
 - catch2
 - cmake
 - doxygen
