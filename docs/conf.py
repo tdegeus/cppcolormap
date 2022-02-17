@@ -5,7 +5,7 @@ import sys
 # Project information
 
 project = "cppcolormap"
-copyright = "2021, Tom de Geus"
+copyright = "2021-2022, Tom de Geus"
 author = "Tom de Geus"
 
 # Build Python module

@@ -12,17 +12,42 @@
 namespace py = pybind11;
 
 #define DOC(function) \
-    (std::string("See documentation of underlying C++ API: :cpp:func:`cppcolormap::") + \
+    (std::string("See documentation of C++ API: :cpp:func:`cppcolormap::") + \
      std::string(function) + std::string("`")) \
         .c_str()
 
 #define ENUM(function) \
-    (std::string("See documentation of underlying C++ API: :cpp:enum:`cppcolormap::") + \
+    (std::string("See documentation of C++ API: :cpp:enum:`cppcolormap::") + \
      std::string(function) + std::string("`")) \
         .c_str()
 
+/**
+Overrides the `__name__` of a module.
+Classes defined by pybind11 use the `__name__` of the module as of the time they are defined,
+which affects the `__repr__` of the class type objects.
+*/
+class ScopedModuleNameOverride {
+public:
+    explicit ScopedModuleNameOverride(py::module m, std::string name) : module_(std::move(m))
+    {
+        original_name_ = module_.attr("__name__");
+        module_.attr("__name__") = name;
+    }
+    ~ScopedModuleNameOverride()
+    {
+        module_.attr("__name__") = original_name_;
+    }
+
+private:
+    py::module module_;
+    py::object original_name_;
+};
+
 PYBIND11_MODULE(_cppcolormap, m)
 {
+
+    // Ensure members to display as `cppcolormap.X` rather than `cppcolormap._cppcolormap.X`
+    ScopedModuleNameOverride name_override(m, "cppcolormap");
 
     xt::import_numpy();
 
@@ -271,6 +296,6 @@ PYBIND11_MODULE(_cppcolormap, m)
         .value("perceptual", cppcolormap::metric::perceptual)
         .export_values();
 
-    m.def("match", &cppcolormap::match);
+    m.def("match", &cppcolormap::match, DOC("match"));
 
 } // PYBIND11_MODULE
