@@ -1,4 +1,6 @@
 docs/_doxygen
+_skbuild
+_cmake_test_compile
 
 # Prerequisites
 *.d

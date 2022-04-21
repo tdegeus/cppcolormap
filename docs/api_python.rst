@@ -171,7 +171,9 @@ Colors
     cppcolormap.YellowOrange
 
 Reversed color(map)s
----------------------
+--------------------
+
+.. autosummary::
 
     cppcolormap.Accent_r
     cppcolormap.Dark2_r
