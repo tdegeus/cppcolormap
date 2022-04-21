@@ -148,6 +148,7 @@ if(BUILD_PYTHON OR BUILD_ALL)
     pybind11_add_module(${PYPROJECT_NAME} python/main.cpp)
 
     target_compile_definitions(${PYPROJECT_NAME} PUBLIC VERSION_INFO=${PROJECT_VERSION})
+    target_compile_definitions(${PYPROJECT_NAME} PUBLIC CPPCOLORMAP_ENABLE_ASSERT)
     target_link_libraries(${PYPROJECT_NAME} PUBLIC ${PROJECT_NAME} xtensor-python)
 
     if (SKBUILD)

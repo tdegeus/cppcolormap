@@ -1,9 +1,7 @@
 /**
-
-\file cppcolormap.h Colormaps in C++
-
-(c - GPLv3) T.W.J. de Geus (Tom) | tom@geus.me | www.geus.me | github.com/tdegeus/cppcolormap
-
+\file
+\copyright Copyright. Tom de Geus. All rights reserved.
+\license This project is released under the GPLv3 License.
 */
 
 #ifndef CPPCOLORMAP_H
@@ -14,9 +12,39 @@
 */
 #define Q(x) #x
 #define QUOTE(x) Q(x)
+
+#define CPPCOLORMAP_ASSERT_IMPL(expr, file, line) \
+    if (!(expr)) { \
+        throw std::runtime_error( \
+            std::string(file) + ':' + std::to_string(line) + \
+            ": assertion failed (" #expr ") \n\t"); \
+    }
 /**
 \endcond
 */
+
+/**
+All assertions are implementation as:
+
+    GMATTENSOR_ASSERT(...)
+
+They can be enabled by:
+
+    #define GMATTENSOR_ENABLE_ASSERT
+
+(before including GMatTensor).
+The advantage is that:
+
+-   File and line-number are displayed if the assertion fails.
+-   GMatTensor's assertions can be enabled/disabled independently from those of other libraries.
+
+\throw std::runtime_error
+*/
+#ifdef CPPCOLORMAP_ENABLE_ASSERT
+#define CPPCOLORMAP_ASSERT(expr) CPPCOLORMAP_ASSERT_IMPL(expr, __FILE__, __LINE__)
+#else
+#define CPPCOLORMAP_ASSERT(expr)
+#endif
 
 /**
 Current version.
@@ -78,7 +106,7 @@ inline std::string unquote(const std::string& arg)
 } // namespace detail
 
 /**
-Return version string, e.g. `"0.8.0"`
+Return version string. E.g.: `"0.1.0"`.
 \return String.
 */
 inline std::string version()
@@ -88,7 +116,7 @@ inline std::string version()
 
 /**
 Return versions of this library and of all of its dependencies.
-The output is a list of strings, e.g.::
+The output is a list of strings, e.g.
 
     "cppcolormap=1.0.0",
     "xtensor=0.20.1"
@@ -159,49 +187,58 @@ xt::xtensor<size_t, 1> hex2rgb(std::string hex)
 /**
 Convert RGB -> HEX.
 
-\param data RGB data.
+\param arg RGB data (values between 0 and 1).
 \returns Vector of strings.
 */
-std::vector<std::string> rgb2hex(const xt::xtensor<double, 2>& data)
+template <class T, typename std::enable_if_t<xt::get_rank<T>::value != 1, int> = 0>
+std::vector<std::string> rgb2hex(const T& arg)
 {
-    std::vector<std::string> out;
+    CPPCOLORMAP_ASSERT(arg.dimension() == 2);
+    CPPCOLORMAP_ASSERT(arg.shape(1) == 3);
+    CPPCOLORMAP_ASSERT(xt::all(arg >= 0.0 && arg <= 1.0));
 
-    for (size_t i = 0; i < data.shape(0); ++i) {
-        out.push_back(detail::rgb2hex(
-            static_cast<size_t>(data(i, 0) * 255.0),
-            static_cast<size_t>(data(i, 1) * 255.0),
-            static_cast<size_t>(data(i, 2) * 255.0)));
+    std::vector<std::string> ret;
+
+    for (size_t i = 0; i < arg.shape(0); ++i) {
+        ret.push_back(detail::rgb2hex(
+            static_cast<size_t>(arg(i, 0) * 255.0),
+            static_cast<size_t>(arg(i, 1) * 255.0),
+            static_cast<size_t>(arg(i, 2) * 255.0)));
     }
 
-    return out;
+    return ret;
 }
 
 /**
 Convert RGB -> HEX.
 
-\param data RGB data.
+\param arg RGB data (values between 0 and 1).
 \returns String.
 */
-std::string rgb2hex(const xt::xtensor<double, 1>& data)
+template <class T, typename std::enable_if_t<xt::get_rank<T>::value == 1, int> = 0>
+std::string rgb2hex(const T& arg)
 {
+    CPPCOLORMAP_ASSERT(arg.size() == 3);
+    CPPCOLORMAP_ASSERT(xt::all(arg >= 0.0 && arg <= 1.0));
+
     return detail::rgb2hex(
-        static_cast<size_t>(data(0) * 255.0),
-        static_cast<size_t>(data(1) * 255.0),
-        static_cast<size_t>(data(2) * 255.0));
+        static_cast<size_t>(arg(0) * 255.0),
+        static_cast<size_t>(arg(1) * 255.0),
+        static_cast<size_t>(arg(2) * 255.0));
 }
 
 /**
 Convert HEX -> RGB.
 
-\param hex HEX data.
+\param arg HEX data.
 \returns RGB data.
 */
-xt::xtensor<double, 2> hex2rgb(const std::vector<std::string>& hex)
+xt::xtensor<double, 2> hex2rgb(const std::vector<std::string>& arg)
 {
-    xt::xtensor<double, 2> out = xt::empty<double>({hex.size(), size_t(3)});
+    xt::xtensor<double, 2> out = xt::empty<double>({arg.size(), size_t(3)});
 
-    for (size_t i = 0; i < hex.size(); ++i) {
-        xt::view(out, i, xt::all()) = detail::hex2rgb(hex[i]);
+    for (size_t i = 0; i < arg.size(); ++i) {
+        xt::view(out, i, xt::all()) = detail::hex2rgb(arg[i]);
     }
 
     return out / 255.0;
@@ -210,39 +247,45 @@ xt::xtensor<double, 2> hex2rgb(const std::vector<std::string>& hex)
 /**
 Convert HEX -> RGB.
 
-\param hex HEX data.
+\param arg HEX data.
 \returns RGB data.
 */
-xt::xtensor<double, 1> hex2rgb(const std::string& hex)
+xt::xtensor<double, 1> hex2rgb(const std::string& arg)
 {
-    return detail::hex2rgb(hex) / 255.0;
+    return detail::hex2rgb(arg) / 255.0;
 }
 
 /**
 Interpolate the individual colours.
 
-\param data RGB data.
+\param arg RGB data.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> interp(const xt::xtensor<double, 2>& data, size_t N)
+template <class T, class R = xt::xtensor<double, 2>>
+inline R interp(const T& arg, size_t N)
 {
-    if (N == data.shape(0)) {
-        return data;
+    CPPCOLORMAP_ASSERT(arg.dimension() == 2);
+    using size_type = typename T::shape_type::value_type;
+    size_type n = static_cast<size_type>(N);
+    size_type m = static_cast<size_type>(arg.shape(1));
+
+    if (n == arg.shape(0)) {
+        return arg;
     }
 
-    xt::xtensor<double, 2> out = xt::empty<double>({N, data.shape(1)});
+    R ret({n, m});
 
-    xt::xtensor<double, 1> x = xt::linspace(0.0, 1.0, data.shape(0));
-    xt::xtensor<double, 1> xi = xt::linspace(0.0, 1.0, N);
+    xt::xtensor<double, 1> x = xt::linspace(0.0, 1.0, arg.shape(0));
+    xt::xtensor<double, 1> xi = xt::linspace(0.0, 1.0, n);
 
-    for (size_t j = 0; j < data.shape(1); j++) {
-        auto c = xt::view(data, xt::all(), j);
-        auto ci = xt::view(out, xt::all(), j);
+    for (size_t j = 0; j < arg.shape(1); j++) {
+        auto c = xt::view(arg, xt::all(), j);
+        auto ci = xt::view(ret, xt::all(), j);
         ci = xt::interp(xi, x, c);
     }
 
-    return out;
+    return ret;
 }
 
 namespace detail {
@@ -250,8 +293,9 @@ namespace detail {
 template <class D, class C, typename V, class R>
 inline void as_colors_func(const D& data, const C& colors, V vmin, V vmax, R& ret)
 {
-    assert(vmax > vmin);
-    assert(colors.shape(0) > 0);
+    CPPCOLORMAP_ASSERT(vmax > vmin);
+    CPPCOLORMAP_ASSERT(colors.shape(0) > 0);
+    CPPCOLORMAP_ASSERT(colors.dimension() == 2);
 
     auto d = xt::eval((data - vmin) / (vmax - vmin));
     d = xt::where(data < vmin, 0, d);
@@ -260,22 +304,21 @@ inline void as_colors_func(const D& data, const C& colors, V vmin, V vmax, R& re
     size_t stride = colors.shape(1);
 
     for (size_t i = 0; i < data.size(); ++i) {
-        size_t j = index.data()[i];
-        std::copy(
-            &colors.data()[j * stride], &colors.data()[(j + 1) * stride], &ret.data()[i * stride]);
+        size_t j = index.flat(i);
+        std::copy(&colors.flat(j * stride), &colors.flat((j + 1) * stride), &ret.flat(i * stride));
     }
 }
 
 template <class E, typename = void>
 struct as_colors_impl {
-    template <typename T, typename S>
-    static xt::xarray<T> run(const E& data, const xt::xtensor<T, 2> colors, S vmin, S vmax)
+    template <class C, typename S>
+    static xt::xarray<typename C::value_type> run(const E& data, const C& colors, S vmin, S vmax)
     {
         size_t N = data.dimension();
         std::vector<size_t> shape(N + 1);
         std::copy(data.shape().cbegin(), data.shape().cend(), shape.begin());
         shape[N] = colors.shape(1);
-        xt::xarray<T> ret = xt::empty<T>(shape);
+        xt::xarray<typename C::value_type> ret(shape);
         as_colors_func(data, colors, vmin, vmax, ret);
         return ret;
     }
@@ -286,14 +329,15 @@ struct as_colors_impl<E, typename xt::has_fixed_rank_t<E>> {
     using value_type = typename E::value_type;
     constexpr static size_t N = xt::get_rank<E>::value;
 
-    template <typename T, typename S>
-    static xt::xtensor<T, N + 1> run(const E& data, const xt::xtensor<T, 2> colors, S vmin, S vmax)
+    template <class C, typename S>
+    static xt::xtensor<typename C::value_type, N + 1>
+    run(const E& data, const C& colors, S vmin, S vmax)
     {
         std::array<size_t, N + 1> shape;
         std::copy(data.shape().cbegin(), data.shape().cend(), shape.begin());
         shape[N] = colors.shape(1);
-        xt::xtensor<T, N + 1> ret = xt::empty<T>(shape);
-        detail::as_colors_func(data, colors, vmin, vmax, ret);
+        xt::xtensor<typename C::value_type, N + 1> ret(shape);
+        as_colors_func(data, colors, vmin, vmax, ret);
         return ret;
     }
 };
@@ -307,8 +351,8 @@ Convert data to colors using a colormap.
 \param vmin The lower limit of the color-axis.
 \param vmax The upper limit of the color-axis.
 */
-template <class E, typename T, typename S>
-inline auto as_colors(const E& data, const xt::xtensor<T, 2> colors, S vmin, S vmax)
+template <class E, class C, typename S>
+inline auto as_colors(const E& data, const C& colors, S vmin, S vmax)
 {
     return detail::as_colors_impl<E>::run(data, colors, vmin, vmax);
 }
@@ -319,8 +363,8 @@ Convert data to colors using a colormap.
 \param data The data.
 \param colors The colormap, e.g. ``cppcolormap::jet()``.
 */
-template <class E, typename T>
-inline auto as_colors(const E& data, const xt::xtensor<T, 2> colors)
+template <class E, class C>
+inline auto as_colors(const E& data, const C& colors)
 {
     return detail::as_colors_impl<E>::run(data, colors, xt::amin(data)(), xt::amax(data)());
 }

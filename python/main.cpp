@@ -45,16 +45,61 @@ private:
 
 PYBIND11_MODULE(_cppcolormap, m)
 {
-
     // Ensure members to display as `cppcolormap.X` rather than `cppcolormap._cppcolormap.X`
     ScopedModuleNameOverride name_override(m, "cppcolormap");
 
     xt::import_numpy();
 
-    m.doc() = "Library with colormaps";
+    m.doc() = "Library with colormaps.";
 
     m.def("version", &cppcolormap::version, DOC("version"));
     m.def("version_dependencies", &cppcolormap::version_dependencies, DOC("version_dependencies"));
+
+    m.def(
+        "rgb2hex",
+        static_cast<std::string (*)(const xt::pytensor<double, 1>&)>(&cppcolormap::rgb2hex),
+        DOC("rgb2hex"));
+
+    m.def(
+        "rgb2hex",
+        static_cast<std::vector<std::string> (*)(const xt::pytensor<double, 2>&)>(
+            &cppcolormap::rgb2hex),
+        DOC("rgb2hex"));
+
+    m.def(
+        "hex2rgb",
+        py::overload_cast<const std::vector<std::string>&>(&cppcolormap::hex2rgb),
+        DOC("hex2rgb"));
+
+    m.def("hex2rgb", py::overload_cast<const std::string&>(&cppcolormap::hex2rgb), DOC("hex2rgb"));
+
+    m.def(
+        "interp",
+        &cppcolormap::interp<xt::pytensor<double, 2>, xt::pytensor<double, 2>>,
+        DOC("interp"),
+        py::arg("arg"),
+        py::arg("N"));
+
+    m.def(
+        "as_colors",
+        [](const xt::pyarray<double>& data,
+           const xt::pytensor<double, 2>& colors,
+           double vmin,
+           double vmax) { return cppcolormap::as_colors(data, colors, vmin, vmax); },
+        DOC("as_colors"),
+        py::arg("data"),
+        py::arg("colors"),
+        py::arg("vmin"),
+        py::arg("vmax"));
+
+    m.def(
+        "as_colors",
+        [](const xt::pyarray<double>& data, const xt::pytensor<double, 2>& colors) {
+            return cppcolormap::as_colors(data, colors);
+        },
+        DOC("as_colors"),
+        py::arg("data"),
+        py::arg("colors"));
 
     m.def("Accent", &cppcolormap::Accent, DOC("Accent"), py::arg("N") = 8);
     m.def("Dark2", &cppcolormap::Dark2, DOC("Dark2"), py::arg("N") = 8);
@@ -251,44 +296,6 @@ PYBIND11_MODULE(_cppcolormap, m)
     m.def("colormap", &cppcolormap::colormap, DOC("colormap"), py::arg("cmap"), py::arg("N") = 256);
 
     m.def("colorcycle", &cppcolormap::colorcycle, DOC("colorcycle"), py::arg("cmap"));
-
-    m.def(
-        "hex2rgb",
-        py::overload_cast<const std::vector<std::string>&>(&cppcolormap::hex2rgb),
-        DOC("hex2rgb"));
-
-    m.def("hex2rgb", py::overload_cast<const std::string&>(&cppcolormap::hex2rgb), DOC("hex2rgb"));
-
-    m.def(
-        "rgb2hex",
-        py::overload_cast<const xt::xtensor<double, 2>&>(&cppcolormap::rgb2hex),
-        DOC("rgb2hex"));
-
-    m.def(
-        "rgb2hex",
-        py::overload_cast<const xt::xtensor<double, 1>&>(&cppcolormap::rgb2hex),
-        DOC("rgb2hex"));
-
-    m.def(
-        "as_colors",
-        [](const xt::xarray<double>& data,
-           const xt::xtensor<double, 2>& colors,
-           double vmin,
-           double vmax) { return cppcolormap::as_colors(data, colors, vmin, vmax); },
-        DOC("as_colors"),
-        py::arg("data"),
-        py::arg("colors"),
-        py::arg("vmin"),
-        py::arg("vmax"));
-
-    m.def(
-        "as_colors",
-        [](const xt::xarray<double>& data, const xt::xtensor<double, 2>& colors) {
-            return cppcolormap::as_colors(data, colors);
-        },
-        DOC("as_colors"),
-        py::arg("data"),
-        py::arg("colors"));
 
     py::enum_<cppcolormap::metric>(m, "metric", ENUM("metric"))
         .value("euclidean", cppcolormap::metric::euclidean)
