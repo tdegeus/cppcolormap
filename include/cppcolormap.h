@@ -94,6 +94,31 @@ overwrite the automatic version.
 
 namespace cppcolormap {
 
+/**
+Container type.
+*/
+namespace array_type {
+
+#ifdef CPPCOLORMAP_USE_XTENSOR_PYTHON
+
+/**
+Fixed (static) rank array.
+*/
+template <typename T, size_t N>
+using tensor = xt::pytensor<T, N>;
+
+#else
+
+/**
+Fixed (static) rank array.
+*/
+template <typename T, size_t N>
+using tensor = xt::xtensor<T, N>;
+
+#endif
+
+} // namespace array_type
+
 namespace detail {
 
 inline std::string unquote(const std::string& arg)
@@ -161,7 +186,7 @@ See: https://stackoverflow.com/questions/28104559/arduino-strange-behavior-conve
 \param hex Hex string.
 \return RGB data.
 */
-xt::xtensor<size_t, 1> hex2rgb(std::string hex)
+array_type::tensor<size_t, 1> hex2rgb(std::string hex)
 {
     if (hex.at(0) == '#') {
         hex.erase(0, 1);
@@ -171,7 +196,7 @@ xt::xtensor<size_t, 1> hex2rgb(std::string hex)
         hex += "0";
     }
 
-    xt::xtensor<size_t, 1> rgb = xt::empty<size_t>({size_t(3)});
+    array_type::tensor<size_t, 1> rgb = xt::empty<size_t>({size_t(3)});
 
     size_t h = (size_t)std::stol(&hex[0], nullptr, 16);
 
@@ -233,9 +258,9 @@ Convert HEX -> RGB.
 \param arg HEX data.
 \returns RGB data.
 */
-xt::xtensor<double, 2> hex2rgb(const std::vector<std::string>& arg)
+array_type::tensor<double, 2> hex2rgb(const std::vector<std::string>& arg)
 {
-    xt::xtensor<double, 2> out = xt::empty<double>({arg.size(), size_t(3)});
+    array_type::tensor<double, 2> out = xt::empty<double>({arg.size(), size_t(3)});
 
     for (size_t i = 0; i < arg.size(); ++i) {
         xt::view(out, i, xt::all()) = detail::hex2rgb(arg[i]);
@@ -250,7 +275,7 @@ Convert HEX -> RGB.
 \param arg HEX data.
 \returns RGB data.
 */
-xt::xtensor<double, 1> hex2rgb(const std::string& arg)
+array_type::tensor<double, 1> hex2rgb(const std::string& arg)
 {
     return detail::hex2rgb(arg) / 255.0;
 }
@@ -262,7 +287,7 @@ Interpolate the individual colours.
 \param N Number of colors to output.
 \returns RGB data.
 */
-template <class T, class R = xt::xtensor<double, 2>>
+template <class T, class R = array_type::tensor<double, 2>>
 inline R interp(const T& arg, size_t N)
 {
     CPPCOLORMAP_ASSERT(arg.dimension() == 2);
@@ -274,10 +299,10 @@ inline R interp(const T& arg, size_t N)
         return arg;
     }
 
-    R ret({n, m});
+    R ret = xt::empty<typename R::value_type>({n, m});
 
-    xt::xtensor<double, 1> x = xt::linspace(0.0, 1.0, arg.shape(0));
-    xt::xtensor<double, 1> xi = xt::linspace(0.0, 1.0, n);
+    array_type::tensor<double, 1> x = xt::linspace(0.0, 1.0, arg.shape(0));
+    array_type::tensor<double, 1> xi = xt::linspace(0.0, 1.0, n);
 
     for (size_t j = 0; j < arg.shape(1); j++) {
         auto c = xt::view(arg, xt::all(), j);
@@ -330,13 +355,13 @@ struct as_colors_impl<E, typename xt::has_fixed_rank_t<E>> {
     constexpr static size_t N = xt::get_rank<E>::value;
 
     template <class C, typename S>
-    static xt::xtensor<typename C::value_type, N + 1>
+    static array_type::tensor<typename C::value_type, N + 1>
     run(const E& data, const C& colors, S vmin, S vmax)
     {
         std::array<size_t, N + 1> shape;
         std::copy(data.shape().cbegin(), data.shape().cend(), shape.begin());
         shape[N] = colors.shape(1);
-        xt::xtensor<typename C::value_type, N + 1> ret(shape);
+        array_type::tensor<typename C::value_type, N + 1> ret(shape);
         as_colors_func(data, colors, vmin, vmax, ret);
         return ret;
     }
@@ -375,10 +400,10 @@ Qualitative colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Accent(size_t N = 8)
+inline array_type::tensor<double, 2> Accent(size_t N = 8)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {127, 201, 127},
         {190, 174, 212},
         {253, 192, 134},
@@ -399,10 +424,10 @@ Qualitative colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Dark2(size_t N = 8)
+inline array_type::tensor<double, 2> Dark2(size_t N = 8)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         { 27, 158, 119},
         {217,  95,   2},
         {117, 112, 179},
@@ -423,10 +448,10 @@ Qualitative colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Paired(size_t N = 12)
+inline array_type::tensor<double, 2> Paired(size_t N = 12)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {166, 206, 227},
         { 31, 120, 180},
         {178, 223, 138},
@@ -451,10 +476,10 @@ Qualitative colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Spectral(size_t N = 11)
+inline array_type::tensor<double, 2> Spectral(size_t N = 11)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {158,   1,  66},
         {213,  62,  79},
         {244, 109,  67},
@@ -478,10 +503,10 @@ Qualitative colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Pastel1(size_t N = 9)
+inline array_type::tensor<double, 2> Pastel1(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {251, 180, 174},
         {179, 205, 227},
         {204, 235, 197},
@@ -503,10 +528,10 @@ Qualitative colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Pastel2(size_t N = 8)
+inline array_type::tensor<double, 2> Pastel2(size_t N = 8)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {179, 226, 205},
         {253, 205, 172},
         {203, 213, 232},
@@ -527,10 +552,10 @@ Qualitative colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Set1(size_t N = 9)
+inline array_type::tensor<double, 2> Set1(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {228,  26,  28},
         { 55, 126, 184},
         { 77, 175,  74},
@@ -552,10 +577,10 @@ Qualitative colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Set2(size_t N = 8)
+inline array_type::tensor<double, 2> Set2(size_t N = 8)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {102, 194, 165},
         {252, 141,  98},
         {141, 160, 203},
@@ -576,10 +601,10 @@ Qualitative colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Set3(size_t N = 12)
+inline array_type::tensor<double, 2> Set3(size_t N = 12)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {141, 211, 199},
         {255, 255, 179},
         {190, 186, 218},
@@ -604,10 +629,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Blues(size_t N = 9)
+inline array_type::tensor<double, 2> Blues(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {247, 251, 255},
         {222, 235, 247},
         {198, 219, 239},
@@ -629,10 +654,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Greens(size_t N = 9)
+inline array_type::tensor<double, 2> Greens(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {247, 252, 245},
         {229, 245, 224},
         {199, 233, 192},
@@ -654,10 +679,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Greys(size_t N = 2)
+inline array_type::tensor<double, 2> Greys(size_t N = 2)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {255, 255, 255},
         {  0,   0,   0},
     };
@@ -672,10 +697,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Oranges(size_t N = 9)
+inline array_type::tensor<double, 2> Oranges(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {255, 245, 235},
         {254, 230, 206},
         {253, 208, 162},
@@ -697,10 +722,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Purples(size_t N = 9)
+inline array_type::tensor<double, 2> Purples(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {252, 251, 253},
         {239, 237, 245},
         {218, 218, 235},
@@ -722,10 +747,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Reds(size_t N = 9)
+inline array_type::tensor<double, 2> Reds(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {255, 245, 240},
         {254, 224, 210},
         {252, 187, 161},
@@ -747,10 +772,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> BuPu(size_t N = 9)
+inline array_type::tensor<double, 2> BuPu(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {247, 252, 253},
         {224, 236, 244},
         {191, 211, 230},
@@ -772,10 +797,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> GnBu(size_t N = 9)
+inline array_type::tensor<double, 2> GnBu(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {247, 252, 240},
         {224, 243, 219},
         {204, 235, 197},
@@ -797,10 +822,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> PuBu(size_t N = 9)
+inline array_type::tensor<double, 2> PuBu(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {255, 247, 251},
         {236, 231, 242},
         {208, 209, 230},
@@ -822,10 +847,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> PuBuGn(size_t N = 9)
+inline array_type::tensor<double, 2> PuBuGn(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {255, 247, 251},
         {236, 226, 240},
         {208, 209, 230},
@@ -847,10 +872,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> PuRd(size_t N = 9)
+inline array_type::tensor<double, 2> PuRd(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {247, 244, 249},
         {231, 225, 239},
         {212, 185, 218},
@@ -872,10 +897,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RdPu(size_t N = 9)
+inline array_type::tensor<double, 2> RdPu(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {255, 247, 243},
         {253, 224, 221},
         {252, 197, 192},
@@ -897,10 +922,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> OrRd(size_t N = 9)
+inline array_type::tensor<double, 2> OrRd(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {255, 247, 236},
         {254, 232, 200},
         {253, 212, 158},
@@ -922,10 +947,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RdOrYl(size_t N = 9)
+inline array_type::tensor<double, 2> RdOrYl(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {128, 0  , 38 },
         {189, 0  , 38 },
         {227, 26 , 28 },
@@ -947,10 +972,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> YlGn(size_t N = 9)
+inline array_type::tensor<double, 2> YlGn(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {255, 255, 229},
         {247, 252, 185},
         {217, 240, 163},
@@ -972,10 +997,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> YlGnBu(size_t N = 9)
+inline array_type::tensor<double, 2> YlGnBu(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {255, 255, 217},
         {237, 248, 177},
         {199, 233, 180},
@@ -997,10 +1022,10 @@ Sequential colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> YlOrRd(size_t N = 9)
+inline array_type::tensor<double, 2> YlOrRd(size_t N = 9)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {255, 255, 204},
         {255, 237, 160},
         {254, 217, 118},
@@ -1022,10 +1047,10 @@ Diverging colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> BrBG(size_t N = 11)
+inline array_type::tensor<double, 2> BrBG(size_t N = 11)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         { 84,  48,   5},
         {140,  81,  10},
         {191, 129,  45},
@@ -1049,10 +1074,10 @@ Diverging colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> PuOr(size_t N = 11)
+inline array_type::tensor<double, 2> PuOr(size_t N = 11)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {127,  59,   8},
         {179,  88,   6},
         {224, 130,  20},
@@ -1076,10 +1101,10 @@ Diverging colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RdBu(size_t N = 11)
+inline array_type::tensor<double, 2> RdBu(size_t N = 11)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {103,   0,  31},
         {178,  24,  43},
         {214,  96,  77},
@@ -1103,10 +1128,10 @@ Diverging colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RdGy(size_t N = 11)
+inline array_type::tensor<double, 2> RdGy(size_t N = 11)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {103,   0,  31},
         {178,  24,  43},
         {214,  96,  77},
@@ -1130,10 +1155,10 @@ Diverging colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RdYlBu(size_t N = 11)
+inline array_type::tensor<double, 2> RdYlBu(size_t N = 11)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {165,   0,  38},
         {215,  48,  39},
         {244, 109,  67},
@@ -1157,10 +1182,10 @@ Diverging colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RdYlGn(size_t N = 11)
+inline array_type::tensor<double, 2> RdYlGn(size_t N = 11)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {165,   0,  38},
         {215,  48,  39},
         {244, 109,  67},
@@ -1184,10 +1209,10 @@ Diverging colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> PiYG(size_t N = 11)
+inline array_type::tensor<double, 2> PiYG(size_t N = 11)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {142,   1,  82},
         {197,  27, 125},
         {222, 119, 174},
@@ -1211,10 +1236,10 @@ Diverging colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> PRGn(size_t N = 11)
+inline array_type::tensor<double, 2> PRGn(size_t N = 11)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         { 64,   0,  75},
         {118,  42, 131},
         {153, 112, 171},
@@ -1234,14 +1259,15 @@ inline xt::xtensor<double, 2> PRGn(size_t N = 11)
 
 namespace detail {
 
-inline xt::xtensor<double, 1> from_anchor_color(size_t N, const xt::xtensor<double, 2>& x)
+inline array_type::tensor<double, 1>
+from_anchor_color(size_t N, const array_type::tensor<double, 2>& x)
 {
     size_t n = x.shape(0);
-    xt::xtensor<size_t, 1> idx = xt::view(x, xt::all(), 0) * (double)N;
+    array_type::tensor<size_t, 1> idx = xt::view(x, xt::all(), 0) * (double)N;
     idx(0) = 0;
     idx(n - 1) = N;
 
-    xt::xtensor<double, 1> ret = xt::empty<double>({N});
+    array_type::tensor<double, 1> ret = xt::empty<double>({N});
 
     for (size_t i = 0; i < n - 1; ++i) {
         xt::view(ret, xt::range(idx(i), idx(i + 1))) =
@@ -1251,14 +1277,16 @@ inline xt::xtensor<double, 1> from_anchor_color(size_t N, const xt::xtensor<doub
     return ret;
 }
 
-inline xt::xtensor<double, 2> from_anchor(
+inline array_type::tensor<double, 2> from_anchor(
     size_t N,
-    const xt::xtensor<double, 2>& r,
-    const xt::xtensor<double, 2>& g,
-    const xt::xtensor<double, 2>& b)
+    const array_type::tensor<double, 2>& r,
+    const array_type::tensor<double, 2>& g,
+    const array_type::tensor<double, 2>& b)
 {
-    std::array<size_t, 2> shape = {N, 3};
-    xt::xtensor<double, 2> ret(shape);
+    using return_type = array_type::tensor<double, 2>;
+    using shape_type = return_type::shape_type::value_type;
+    std::array<shape_type, 2> shape = {static_cast<shape_type>(N), 3};
+    return_type ret(shape);
     xt::view(ret, xt::all(), 0) = from_anchor_color(N, r);
     xt::view(ret, xt::all(), 1) = from_anchor_color(N, g);
     xt::view(ret, xt::all(), 2) = from_anchor_color(N, b);
@@ -1273,18 +1301,18 @@ matplotlib colormap, from anchor.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> spring(size_t N = 256)
+inline array_type::tensor<double, 2> spring(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> r = {
+    array_type::tensor<double, 2> r = {
         {0.0, 1.0, 1.0},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> g = {
+    array_type::tensor<double, 2> g = {
         {0.0, 0.0, 0.0},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> b = {
+    array_type::tensor<double, 2> b = {
         {0.0, 1.0, 1.0},
         {1.0, 0.0, 0.0}};
     // clang-format on
@@ -1298,18 +1326,18 @@ matplotlib colormap, from anchor.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> summer(size_t N = 256)
+inline array_type::tensor<double, 2> summer(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> r = {
+    array_type::tensor<double, 2> r = {
         {0.0, 0.0, 0.0},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> g = {
+    array_type::tensor<double, 2> g = {
         {0.0, 0.5, 0.5},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> b = {
+    array_type::tensor<double, 2> b = {
         {0.0, 0.4, 0.4},
         {1.0, 0.4, 0.4}};
     // clang-format on
@@ -1323,18 +1351,18 @@ matplotlib colormap, from anchor.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> autumn(size_t N = 256)
+inline array_type::tensor<double, 2> autumn(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> r = {
+    array_type::tensor<double, 2> r = {
         {0.0, 1.0, 1.0},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> g = {
+    array_type::tensor<double, 2> g = {
         {0.0, 0.0, 0.0},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> b = {
+    array_type::tensor<double, 2> b = {
         {0.0, 0.0, 0.0},
         {1.0, 0.0, 0.0}};
     // clang-format on
@@ -1348,18 +1376,18 @@ matplotlib colormap, from anchor.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> winter(size_t N = 256)
+inline array_type::tensor<double, 2> winter(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> r = {
+    array_type::tensor<double, 2> r = {
         {0.0, 0.0, 0.0},
         {1.0, 0.0, 0.0}};
 
-    xt::xtensor<double, 2> g = {
+    array_type::tensor<double, 2> g = {
         {0.0, 0.0, 0.0},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> b = {
+    array_type::tensor<double, 2> b = {
         {0.0, 1.0, 1.0},
         {1.0, 0.5, 0.5}};
     // clang-format on
@@ -1373,21 +1401,21 @@ matplotlib colormap, from anchor.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> bone(size_t N = 256)
+inline array_type::tensor<double, 2> bone(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> r = {
+    array_type::tensor<double, 2> r = {
         {0.0, 0.0, 0.0},
         {0.746032, 0.652778, 0.652778},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> g = {
+    array_type::tensor<double, 2> g = {
         {0.0, 0.0, 0.0},
         {0.365079, 0.319444, 0.319444},
         {0.746032, 0.777778, 0.777778},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> b = {
+    array_type::tensor<double, 2> b = {
         {0.0, 0.0, 0.0},
         {0.365079, 0.444444, 0.444444},
         {1.0, 1.0, 1.0}};
@@ -1402,18 +1430,18 @@ matplotlib colormap, from anchor.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> cool(size_t N = 256)
+inline array_type::tensor<double, 2> cool(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> r = {
+    array_type::tensor<double, 2> r = {
         {0.0, 0.0, 0.0},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> g = {
+    array_type::tensor<double, 2> g = {
         {0.0, 1.0, 1.0},
         {1.0, 0.0, 0.0}};
 
-    xt::xtensor<double, 2> b = {
+    array_type::tensor<double, 2> b = {
         {0.0, 1.0, 1.0},
         {1.0, 1.0, 1.0}};
     // clang-format on
@@ -1427,21 +1455,21 @@ matplotlib colormap, from anchor.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> hot(size_t N = 256)
+inline array_type::tensor<double, 2> hot(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> r = {
+    array_type::tensor<double, 2> r = {
         {0.0, 0.0416, 0.0416},
         {0.365079, 1.000000, 1.000000},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> g = {
+    array_type::tensor<double, 2> g = {
         {0.0, 0.0, 0.0},
         {0.365079, 0.000000, 0.000000},
         {0.746032, 1.000000, 1.000000},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> b = {
+    array_type::tensor<double, 2> b = {
         {0.0, 0.0, 0.0},
         {0.746032, 0.000000, 0.000000},
         {1.0, 1.0, 1.0}};
@@ -1456,19 +1484,19 @@ matplotlib colormap, from anchor.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> copper(size_t N = 256)
+inline array_type::tensor<double, 2> copper(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> r = {
+    array_type::tensor<double, 2> r = {
         {0.0, 0.0, 0.0},
         {0.809524, 1.000000, 1.000000},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> g = {
+    array_type::tensor<double, 2> g = {
         {0.0, 0.0, 0.0},
         {1.0, 0.7812, 0.7812}};
 
-    xt::xtensor<double, 2> b = {
+    array_type::tensor<double, 2> b = {
         {0.0, 0.0, 0.0},
         {1.0, 0.4975, 0.4975}};
     // clang-format on
@@ -1482,10 +1510,10 @@ matplotlib colormap, from anchor.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> hsv(size_t N = 256)
+inline array_type::tensor<double, 2> hsv(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> r = {
+    array_type::tensor<double, 2> r = {
         {0.0, 1.0, 1.0},
         {0.158730, 1.000000, 1.000000},
         {0.174603, 0.968750, 0.968750},
@@ -1497,7 +1525,7 @@ inline xt::xtensor<double, 2> hsv(size_t N = 256)
         {0.857143, 1.000000, 1.000000},
         {1.0, 1.0, 1.0}};
 
-    xt::xtensor<double, 2> g = {
+    array_type::tensor<double, 2> g = {
         {0.0, 0.0, 0.0},
         {0.158730, 0.937500, 0.937500},
         {0.174603, 1.000000, 1.000000},
@@ -1506,7 +1534,7 @@ inline xt::xtensor<double, 2> hsv(size_t N = 256)
         {0.682540, 0.000000, 0.000000},
         {1.0, 0.0, 0.0}};
 
-    xt::xtensor<double, 2> b = {
+    array_type::tensor<double, 2> b = {
         {0.0, 0.0, 0.0},
         {0.333333, 0.000000, 0.000000},
         {0.349206, 0.062500, 0.062500},
@@ -1525,10 +1553,10 @@ matplotlib colormap, from anchor.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> nipy_spectral(size_t N = 256)
+inline array_type::tensor<double, 2> nipy_spectral(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> r = {
+    array_type::tensor<double, 2> r = {
         {0.0, 0.0, 0.0},
         {0.05, 0.4667, 0.4667},
         {0.10, 0.5333, 0.5333},
@@ -1551,7 +1579,7 @@ inline xt::xtensor<double, 2> nipy_spectral(size_t N = 256)
         {0.95, 0.80, 0.80},
         {1.0, 0.80, 0.80}};
 
-    xt::xtensor<double, 2> g = {
+    array_type::tensor<double, 2> g = {
         {0.0, 0.0, 0.0},
         {0.05, 0.0, 0.0},
         {0.10, 0.0, 0.0},
@@ -1574,7 +1602,7 @@ inline xt::xtensor<double, 2> nipy_spectral(size_t N = 256)
         {0.95, 0.0, 0.0},
         {1.0, 0.80, 0.80}};
 
-    xt::xtensor<double, 2> b = {
+    array_type::tensor<double, 2> b = {
         {0.0, 0.0, 0.0},
         {0.05, 0.5333, 0.5333},
         {0.10, 0.6000, 0.6000},
@@ -1607,17 +1635,17 @@ matplotlib colormap, from anchor.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> jet(size_t N = 256)
+inline array_type::tensor<double, 2> jet(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> r = {
+    array_type::tensor<double, 2> r = {
         {0.00, 0.0, 0.0},
         {0.35, 0.0, 0.0},
         {0.66, 1.0, 1.0},
         {0.89, 1.0, 1.0},
         {1.00, 0.5, 0.5}};
 
-    xt::xtensor<double, 2> g = {
+    array_type::tensor<double, 2> g = {
         {0.000, 0.0, 0.0},
         {0.125, 0.0, 0.0},
         {0.375, 1.0, 1.0},
@@ -1625,7 +1653,7 @@ inline xt::xtensor<double, 2> jet(size_t N = 256)
         {0.910, 0.0, 0.0},
         {1.000, 0.0, 0.0}};
 
-    xt::xtensor<double, 2> b = {
+    array_type::tensor<double, 2> b = {
         {0.00, 0.5, 0.5},
         {0.11, 1.0, 1.0},
         {0.34, 1.0, 1.0},
@@ -1638,15 +1666,14 @@ inline xt::xtensor<double, 2> jet(size_t N = 256)
 
 namespace detail {
 
-inline xt::xtensor<double, 2> from_fraction(size_t N, const xt::xtensor<double, 2>& x)
+inline array_type::tensor<double, 2> from_fraction(size_t N, const array_type::tensor<double, 2>& x)
 {
     size_t n = x.shape(0);
-    xt::xtensor<size_t, 1> idx = xt::view(x, xt::all(), 0) * (double)N;
+    array_type::tensor<size_t, 1> idx = xt::view(x, xt::all(), 0) * (double)N;
     idx(0) = 0;
     idx(n - 1) = N;
 
-    std::array<size_t, 2> shape = {N, 3};
-    xt::xtensor<double, 2> ret(shape);
+    array_type::tensor<double, 2> ret = xt::empty<double>({N, (size_t)3});
 
     for (size_t i = 0; i < n - 1; ++i) {
         for (size_t j = 0; j < 3; ++j) {
@@ -1667,9 +1694,9 @@ matplotlib colormap, from fraction.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> terrain(size_t N = 6)
+inline array_type::tensor<double, 2> terrain(size_t N = 6)
 {
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {0.00, 0.2, 0.2, 0.6},
         {0.15, 0.0, 0.6, 1.0},
         {0.25, 0.0, 0.8, 0.4},
@@ -1682,167 +1709,167 @@ inline xt::xtensor<double, 2> terrain(size_t N = 6)
 
 namespace detail {
 // Gnuplot palette functions
-inline xt::xtensor<double, 1> _g0(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g0(const array_type::tensor<double, 1>& x)
 {
     return xt::zeros_like(x);
 }
 
-inline xt::xtensor<double, 1> _g1(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g1(const array_type::tensor<double, 1>& x)
 {
     return 0.5 * xt::ones_like(x);
 }
 
-inline xt::xtensor<double, 1> _g2(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g2(const array_type::tensor<double, 1>& x)
 {
     return xt::ones_like(x);
 }
 
-inline xt::xtensor<double, 1> _g3(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g3(const array_type::tensor<double, 1>& x)
 {
     return x;
 }
 
-inline xt::xtensor<double, 1> _g4(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g4(const array_type::tensor<double, 1>& x)
 {
     return xt::pow(x, 2.0);
 }
 
-inline xt::xtensor<double, 1> _g5(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g5(const array_type::tensor<double, 1>& x)
 {
     return xt::pow(x, 3.0);
 }
 
-inline xt::xtensor<double, 1> _g6(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g6(const array_type::tensor<double, 1>& x)
 {
     return xt::pow(x, 4.0);
 }
 
-inline xt::xtensor<double, 1> _g7(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g7(const array_type::tensor<double, 1>& x)
 {
     return xt::sqrt(x);
 }
 
-inline xt::xtensor<double, 1> _g8(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g8(const array_type::tensor<double, 1>& x)
 {
     return xt::sqrt(xt::sqrt(x));
 }
 
-inline xt::xtensor<double, 1> _g9(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g9(const array_type::tensor<double, 1>& x)
 {
     return xt::sin(x * M_PI * 0.5);
 }
 
-inline xt::xtensor<double, 1> _g10(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g10(const array_type::tensor<double, 1>& x)
 {
     return xt::cos(x * M_PI * 0.5);
 }
 
-inline xt::xtensor<double, 1> _g11(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g11(const array_type::tensor<double, 1>& x)
 {
     return xt::abs(x - 0.5);
 }
 
-inline xt::xtensor<double, 1> _g12(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g12(const array_type::tensor<double, 1>& x)
 {
     return xt::pow(2.0 * x - 1.0, 2.0);
 }
 
-inline xt::xtensor<double, 1> _g13(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g13(const array_type::tensor<double, 1>& x)
 {
     return xt::sin(x * M_PI);
 }
 
-inline xt::xtensor<double, 1> _g14(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g14(const array_type::tensor<double, 1>& x)
 {
     return xt::abs(xt::cos(x * M_PI));
 }
 
-inline xt::xtensor<double, 1> _g15(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g15(const array_type::tensor<double, 1>& x)
 {
     return xt::sin(x * 2.0 * M_PI);
 }
 
-inline xt::xtensor<double, 1> _g16(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g16(const array_type::tensor<double, 1>& x)
 {
     return xt::cos(x * 2.0 * M_PI);
 }
 
-inline xt::xtensor<double, 1> _g17(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g17(const array_type::tensor<double, 1>& x)
 {
     return xt::abs(xt::sin(x * 2.0 * M_PI));
 }
 
-inline xt::xtensor<double, 1> _g18(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g18(const array_type::tensor<double, 1>& x)
 {
     return xt::abs(xt::cos(x * 2.0 * M_PI));
 }
 
-inline xt::xtensor<double, 1> _g19(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g19(const array_type::tensor<double, 1>& x)
 {
     return xt::abs(xt::sin(x * 4.0 * M_PI));
 }
 
-inline xt::xtensor<double, 1> _g20(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g20(const array_type::tensor<double, 1>& x)
 {
     return xt::abs(xt::cos(x * 4.0 * M_PI));
 }
 
-inline xt::xtensor<double, 1> _g21(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g21(const array_type::tensor<double, 1>& x)
 {
     return 3.0 * x;
 }
 
-inline xt::xtensor<double, 1> _g22(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g22(const array_type::tensor<double, 1>& x)
 {
     return 3.0 * x - 1.0;
 }
 
-inline xt::xtensor<double, 1> _g23(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g23(const array_type::tensor<double, 1>& x)
 {
     return 3.0 * x - 2.0;
 }
 
-inline xt::xtensor<double, 1> _g24(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g24(const array_type::tensor<double, 1>& x)
 {
     return xt::abs(3.0 * x - 1.0);
 }
 
-inline xt::xtensor<double, 1> _g25(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g25(const array_type::tensor<double, 1>& x)
 {
     return xt::abs(3.0 * x - 2.0);
 }
 
-inline xt::xtensor<double, 1> _g26(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g26(const array_type::tensor<double, 1>& x)
 {
     return (3.0 * x - 1.0) * 0.5;
 }
 
-inline xt::xtensor<double, 1> _g27(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g27(const array_type::tensor<double, 1>& x)
 {
     return (3.0 * x - 2.0) * 0.5;
 }
 
-inline xt::xtensor<double, 1> _g28(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g28(const array_type::tensor<double, 1>& x)
 {
     return xt::abs((3.0 * x - 1.0) * 0.5);
 }
 
-inline xt::xtensor<double, 1> _g29(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g29(const array_type::tensor<double, 1>& x)
 {
     return xt::abs((3.0 * x - 2.0) * 0.5);
 }
 
-inline xt::xtensor<double, 1> _g30(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g30(const array_type::tensor<double, 1>& x)
 {
     return x / 0.32 - 0.78125;
 }
 
-inline xt::xtensor<double, 1> _g31(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g31(const array_type::tensor<double, 1>& x)
 {
     return 2.0 * x - 0.84;
 }
 
-inline xt::xtensor<double, 1> _g32(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g32(const array_type::tensor<double, 1>& x)
 {
     auto ret = xt::zeros_like(x);
     ret = xt::where(xt::less(x, 0.25), 4.0 * x, ret);
@@ -1851,29 +1878,29 @@ inline xt::xtensor<double, 1> _g32(const xt::xtensor<double, 1>& x)
     return ret;
 }
 
-inline xt::xtensor<double, 1> _g33(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g33(const array_type::tensor<double, 1>& x)
 {
     return xt::abs(2.0 * x - 0.5);
 }
 
-inline xt::xtensor<double, 1> _g34(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g34(const array_type::tensor<double, 1>& x)
 {
     return 2.0 * x;
 }
 
-inline xt::xtensor<double, 1> _g35(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g35(const array_type::tensor<double, 1>& x)
 {
     return 2.0 * x - 0.5;
 }
 
-inline xt::xtensor<double, 1> _g36(const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> _g36(const array_type::tensor<double, 1>& x)
 {
     return 2.0 * x - 1.0;
 }
 
-inline xt::xtensor<double, 1> gnu_palette(size_t i, const xt::xtensor<double, 1>& x)
+inline array_type::tensor<double, 1> gnu_palette(size_t i, const array_type::tensor<double, 1>& x)
 {
-    xt::xtensor<double, 1> ret;
+    array_type::tensor<double, 1> ret;
 
     if (i == 0) {
         ret = _g0(x);
@@ -2004,11 +2031,11 @@ GNU plot colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> afmhot(size_t N = 256)
+inline array_type::tensor<double, 2> afmhot(size_t N = 256)
 {
     std::array<size_t, 2> shape = {N, 3};
-    xt::xtensor<double, 2> data(shape);
-    xt::xtensor<double, 1> x = xt::linspace<double>(0.0, 1.0, N);
+    array_type::tensor<double, 2> data = xt::empty<double>(shape);
+    array_type::tensor<double, 1> x = xt::linspace<double>(0.0, 1.0, N);
     xt::view(data, xt::all(), 0) = detail::gnu_palette(34, x);
     xt::view(data, xt::all(), 1) = detail::gnu_palette(35, x);
     xt::view(data, xt::all(), 2) = detail::gnu_palette(36, x);
@@ -2021,10 +2048,10 @@ matplotlib colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> magma(size_t N = 256)
+inline array_type::tensor<double, 2> magma(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {0.001462, 0.000466, 0.013866},
         {0.002258, 0.001295, 0.018331},
         {0.003279, 0.002305, 0.023708},
@@ -2293,10 +2320,10 @@ matplotlib colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> inferno(size_t N = 256)
+inline array_type::tensor<double, 2> inferno(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {0.001462, 0.000466, 0.013866},
         {0.002267, 0.001270, 0.018570},
         {0.003299, 0.002249, 0.024239},
@@ -2565,10 +2592,10 @@ matplotlib colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> plasma(size_t N = 256)
+inline array_type::tensor<double, 2> plasma(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {0.050383, 0.029803, 0.527975},
         {0.063536, 0.028426, 0.533124},
         {0.075353, 0.027206, 0.538007},
@@ -2837,10 +2864,10 @@ matplotlib colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> viridis(size_t N = 256)
+inline array_type::tensor<double, 2> viridis(size_t N = 256)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {0.267004, 0.004874, 0.329415},
         {0.268510, 0.009605, 0.335427},
         {0.269944, 0.014625, 0.341379},
@@ -3109,10 +3136,10 @@ matplotlib colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> seismic(size_t N = 5)
+inline array_type::tensor<double, 2> seismic(size_t N = 5)
 {
     // clang-format off
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {0.0, 0.0, 0.3},
         {0.0, 0.0, 1.0},
         {1.0, 1.0, 1.0},
@@ -3130,9 +3157,9 @@ Monotone colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> White(size_t N = 1)
+inline array_type::tensor<double, 2> White(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{255, 255, 255}};
+    array_type::tensor<double, 2> data = {{255, 255, 255}};
     return interp(data / 255.0, N);
 }
 
@@ -3142,9 +3169,9 @@ Monotone colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Grey(size_t N = 1)
+inline array_type::tensor<double, 2> Grey(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0.5, 0.5, 0.5}};
+    array_type::tensor<double, 2> data = {{0.5, 0.5, 0.5}};
     return interp(data, N);
 }
 
@@ -3154,9 +3181,9 @@ Monotone colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Black(size_t N = 1)
+inline array_type::tensor<double, 2> Black(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 0, 0}};
+    array_type::tensor<double, 2> data = {{0, 0, 0}};
     return interp(data / 255.0, N);
 }
 
@@ -3166,9 +3193,9 @@ Monotone colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Red(size_t N = 1)
+inline array_type::tensor<double, 2> Red(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{255, 0, 0}};
+    array_type::tensor<double, 2> data = {{255, 0, 0}};
     return interp(data / 255.0, N);
 }
 
@@ -3178,9 +3205,9 @@ Monotone colormap.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Blue(size_t N = 1)
+inline array_type::tensor<double, 2> Blue(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 0, 255}};
+    array_type::tensor<double, 2> data = {{0, 0, 255}};
     return interp(data / 255.0, N);
 }
 
@@ -3190,9 +3217,9 @@ Eindhoven University of Technology.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> tuewarmred(size_t N = 1)
+inline array_type::tensor<double, 2> tuewarmred(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{247, 49, 49}};
+    array_type::tensor<double, 2> data = {{247, 49, 49}};
     return interp(data / 255.0, N);
 }
 
@@ -3202,9 +3229,9 @@ Eindhoven University of Technology.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> tuedarkblue(size_t N = 1)
+inline array_type::tensor<double, 2> tuedarkblue(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{16, 16, 115}};
+    array_type::tensor<double, 2> data = {{16, 16, 115}};
     return interp(data / 255.0, N);
 }
 
@@ -3214,9 +3241,9 @@ Eindhoven University of Technology.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> tueblue(size_t N = 1)
+inline array_type::tensor<double, 2> tueblue(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 102, 204}};
+    array_type::tensor<double, 2> data = {{0, 102, 204}};
     return interp(data / 255.0, N);
 }
 
@@ -3226,9 +3253,9 @@ Eindhoven University of Technology.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> tuelightblue(size_t N = 1)
+inline array_type::tensor<double, 2> tuelightblue(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 162, 222}};
+    array_type::tensor<double, 2> data = {{0, 162, 222}};
     return interp(data / 255.0, N);
 }
 
@@ -3238,9 +3265,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Apricot(size_t N = 1)
+inline array_type::tensor<double, 2> Apricot(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{251, 185, 130}};
+    array_type::tensor<double, 2> data = {{251, 185, 130}};
     return interp(data / 255.0, N);
 }
 
@@ -3250,9 +3277,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Aquamarine(size_t N = 1)
+inline array_type::tensor<double, 2> Aquamarine(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 181, 190}};
+    array_type::tensor<double, 2> data = {{0, 181, 190}};
     return interp(data / 255.0, N);
 }
 
@@ -3262,9 +3289,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Bittersweet(size_t N = 1)
+inline array_type::tensor<double, 2> Bittersweet(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{192, 79, 23}};
+    array_type::tensor<double, 2> data = {{192, 79, 23}};
     return interp(data / 255.0, N);
 }
 
@@ -3274,9 +3301,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> BlueGreen(size_t N = 1)
+inline array_type::tensor<double, 2> BlueGreen(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 179, 184}};
+    array_type::tensor<double, 2> data = {{0, 179, 184}};
     return interp(data / 255.0, N);
 }
 
@@ -3286,9 +3313,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> BlueViolet(size_t N = 1)
+inline array_type::tensor<double, 2> BlueViolet(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{71, 57, 146}};
+    array_type::tensor<double, 2> data = {{71, 57, 146}};
     return interp(data / 255.0, N);
 }
 
@@ -3298,9 +3325,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> BrickRed(size_t N = 1)
+inline array_type::tensor<double, 2> BrickRed(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{182, 50, 28}};
+    array_type::tensor<double, 2> data = {{182, 50, 28}};
     return interp(data / 255.0, N);
 }
 
@@ -3310,9 +3337,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Brown(size_t N = 1)
+inline array_type::tensor<double, 2> Brown(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{121, 37, 0}};
+    array_type::tensor<double, 2> data = {{121, 37, 0}};
     return interp(data / 255.0, N);
 }
 
@@ -3322,9 +3349,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> BurntOrange(size_t N = 1)
+inline array_type::tensor<double, 2> BurntOrange(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{247, 146, 29}};
+    array_type::tensor<double, 2> data = {{247, 146, 29}};
     return interp(data / 255.0, N);
 }
 
@@ -3334,9 +3361,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> CadetBlue(size_t N = 1)
+inline array_type::tensor<double, 2> CadetBlue(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{116, 114, 154}};
+    array_type::tensor<double, 2> data = {{116, 114, 154}};
     return interp(data / 255.0, N);
 }
 
@@ -3346,9 +3373,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> CarnationPink(size_t N = 1)
+inline array_type::tensor<double, 2> CarnationPink(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{242, 130, 180}};
+    array_type::tensor<double, 2> data = {{242, 130, 180}};
     return interp(data / 255.0, N);
 }
 
@@ -3358,9 +3385,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Cerulean(size_t N = 1)
+inline array_type::tensor<double, 2> Cerulean(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 162, 227}};
+    array_type::tensor<double, 2> data = {{0, 162, 227}};
     return interp(data / 255.0, N);
 }
 
@@ -3370,9 +3397,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> CornflowerBlue(size_t N = 1)
+inline array_type::tensor<double, 2> CornflowerBlue(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{65, 176, 228}};
+    array_type::tensor<double, 2> data = {{65, 176, 228}};
     return interp(data / 255.0, N);
 }
 
@@ -3382,9 +3409,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Cyan(size_t N = 1)
+inline array_type::tensor<double, 2> Cyan(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 174, 239}};
+    array_type::tensor<double, 2> data = {{0, 174, 239}};
     return interp(data / 255.0, N);
 }
 
@@ -3394,9 +3421,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Dandelion(size_t N = 1)
+inline array_type::tensor<double, 2> Dandelion(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{253, 188, 66}};
+    array_type::tensor<double, 2> data = {{253, 188, 66}};
     return interp(data / 255.0, N);
 }
 
@@ -3406,9 +3433,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> DarkOrchid(size_t N = 1)
+inline array_type::tensor<double, 2> DarkOrchid(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{164, 83, 138}};
+    array_type::tensor<double, 2> data = {{164, 83, 138}};
     return interp(data / 255.0, N);
 }
 
@@ -3418,9 +3445,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Emerald(size_t N = 1)
+inline array_type::tensor<double, 2> Emerald(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 169, 157}};
+    array_type::tensor<double, 2> data = {{0, 169, 157}};
     return interp(data / 255.0, N);
 }
 
@@ -3430,9 +3457,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> ForestGreen(size_t N = 1)
+inline array_type::tensor<double, 2> ForestGreen(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 155, 85}};
+    array_type::tensor<double, 2> data = {{0, 155, 85}};
     return interp(data / 255.0, N);
 }
 
@@ -3442,9 +3469,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Fuchsia(size_t N = 1)
+inline array_type::tensor<double, 2> Fuchsia(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{140, 54, 140}};
+    array_type::tensor<double, 2> data = {{140, 54, 140}};
     return interp(data / 255.0, N);
 }
 
@@ -3454,9 +3481,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Goldenrod(size_t N = 1)
+inline array_type::tensor<double, 2> Goldenrod(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{255, 223, 66}};
+    array_type::tensor<double, 2> data = {{255, 223, 66}};
     return interp(data / 255.0, N);
 }
 
@@ -3466,9 +3493,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Gray(size_t N = 1)
+inline array_type::tensor<double, 2> Gray(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{148, 150, 152}};
+    array_type::tensor<double, 2> data = {{148, 150, 152}};
     return interp(data / 255.0, N);
 }
 
@@ -3478,9 +3505,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Green(size_t N = 1)
+inline array_type::tensor<double, 2> Green(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 166, 79}};
+    array_type::tensor<double, 2> data = {{0, 166, 79}};
     return interp(data / 255.0, N);
 }
 
@@ -3490,9 +3517,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> GreenYellow(size_t N = 1)
+inline array_type::tensor<double, 2> GreenYellow(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{223, 230, 116}};
+    array_type::tensor<double, 2> data = {{223, 230, 116}};
     return interp(data / 255.0, N);
 }
 
@@ -3502,9 +3529,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> JungleGreen(size_t N = 1)
+inline array_type::tensor<double, 2> JungleGreen(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 169, 154}};
+    array_type::tensor<double, 2> data = {{0, 169, 154}};
     return interp(data / 255.0, N);
 }
 
@@ -3514,9 +3541,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Lavender(size_t N = 1)
+inline array_type::tensor<double, 2> Lavender(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{244, 158, 196}};
+    array_type::tensor<double, 2> data = {{244, 158, 196}};
     return interp(data / 255.0, N);
 }
 
@@ -3526,9 +3553,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> LimeGreen(size_t N = 1)
+inline array_type::tensor<double, 2> LimeGreen(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{141, 199, 62}};
+    array_type::tensor<double, 2> data = {{141, 199, 62}};
     return interp(data / 255.0, N);
 }
 
@@ -3538,9 +3565,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Magenta(size_t N = 1)
+inline array_type::tensor<double, 2> Magenta(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{236, 0, 140}};
+    array_type::tensor<double, 2> data = {{236, 0, 140}};
     return interp(data / 255.0, N);
 }
 
@@ -3550,9 +3577,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Mahogany(size_t N = 1)
+inline array_type::tensor<double, 2> Mahogany(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{169, 52, 31}};
+    array_type::tensor<double, 2> data = {{169, 52, 31}};
     return interp(data / 255.0, N);
 }
 
@@ -3562,9 +3589,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Maroon(size_t N = 1)
+inline array_type::tensor<double, 2> Maroon(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{175, 50, 53}};
+    array_type::tensor<double, 2> data = {{175, 50, 53}};
     return interp(data / 255.0, N);
 }
 
@@ -3574,9 +3601,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Melon(size_t N = 1)
+inline array_type::tensor<double, 2> Melon(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{248, 158, 123}};
+    array_type::tensor<double, 2> data = {{248, 158, 123}};
     return interp(data / 255.0, N);
 }
 
@@ -3586,9 +3613,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> MidnightBlue(size_t N = 1)
+inline array_type::tensor<double, 2> MidnightBlue(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 103, 149}};
+    array_type::tensor<double, 2> data = {{0, 103, 149}};
     return interp(data / 255.0, N);
 }
 
@@ -3598,9 +3625,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Mulberry(size_t N = 1)
+inline array_type::tensor<double, 2> Mulberry(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{169, 60, 147}};
+    array_type::tensor<double, 2> data = {{169, 60, 147}};
     return interp(data / 255.0, N);
 }
 
@@ -3610,9 +3637,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> NavyBlue(size_t N = 1)
+inline array_type::tensor<double, 2> NavyBlue(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 110, 184}};
+    array_type::tensor<double, 2> data = {{0, 110, 184}};
     return interp(data / 255.0, N);
 }
 
@@ -3622,9 +3649,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> OliveGreen(size_t N = 1)
+inline array_type::tensor<double, 2> OliveGreen(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{60, 128, 49}};
+    array_type::tensor<double, 2> data = {{60, 128, 49}};
     return interp(data / 255.0, N);
 }
 
@@ -3634,9 +3661,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Orange(size_t N = 1)
+inline array_type::tensor<double, 2> Orange(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{245, 129, 55}};
+    array_type::tensor<double, 2> data = {{245, 129, 55}};
     return interp(data / 255.0, N);
 }
 
@@ -3646,9 +3673,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> OrangeRed(size_t N = 1)
+inline array_type::tensor<double, 2> OrangeRed(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{237, 19, 90}};
+    array_type::tensor<double, 2> data = {{237, 19, 90}};
     return interp(data / 255.0, N);
 }
 
@@ -3658,9 +3685,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Orchid(size_t N = 1)
+inline array_type::tensor<double, 2> Orchid(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{175, 114, 176}};
+    array_type::tensor<double, 2> data = {{175, 114, 176}};
     return interp(data / 255.0, N);
 }
 
@@ -3670,9 +3697,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Peach(size_t N = 1)
+inline array_type::tensor<double, 2> Peach(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{247, 150, 90}};
+    array_type::tensor<double, 2> data = {{247, 150, 90}};
     return interp(data / 255.0, N);
 }
 
@@ -3682,9 +3709,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Periwinkle(size_t N = 1)
+inline array_type::tensor<double, 2> Periwinkle(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{121, 119, 184}};
+    array_type::tensor<double, 2> data = {{121, 119, 184}};
     return interp(data / 255.0, N);
 }
 
@@ -3694,9 +3721,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> PineGreen(size_t N = 1)
+inline array_type::tensor<double, 2> PineGreen(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 139, 114}};
+    array_type::tensor<double, 2> data = {{0, 139, 114}};
     return interp(data / 255.0, N);
 }
 
@@ -3706,9 +3733,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Plum(size_t N = 1)
+inline array_type::tensor<double, 2> Plum(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{146, 38, 143}};
+    array_type::tensor<double, 2> data = {{146, 38, 143}};
     return interp(data / 255.0, N);
 }
 
@@ -3718,9 +3745,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> ProcessBlue(size_t N = 1)
+inline array_type::tensor<double, 2> ProcessBlue(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 176, 240}};
+    array_type::tensor<double, 2> data = {{0, 176, 240}};
     return interp(data / 255.0, N);
 }
 
@@ -3730,9 +3757,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Purple(size_t N = 1)
+inline array_type::tensor<double, 2> Purple(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{153, 71, 155}};
+    array_type::tensor<double, 2> data = {{153, 71, 155}};
     return interp(data / 255.0, N);
 }
 
@@ -3742,9 +3769,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RawSienna(size_t N = 1)
+inline array_type::tensor<double, 2> RawSienna(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{151, 64, 6}};
+    array_type::tensor<double, 2> data = {{151, 64, 6}};
     return interp(data / 255.0, N);
 }
 
@@ -3754,9 +3781,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RedOrange(size_t N = 1)
+inline array_type::tensor<double, 2> RedOrange(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{242, 96, 53}};
+    array_type::tensor<double, 2> data = {{242, 96, 53}};
     return interp(data / 255.0, N);
 }
 
@@ -3766,9 +3793,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RedViolet(size_t N = 1)
+inline array_type::tensor<double, 2> RedViolet(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{161, 36, 107}};
+    array_type::tensor<double, 2> data = {{161, 36, 107}};
     return interp(data / 255.0, N);
 }
 
@@ -3778,9 +3805,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Rhodamine(size_t N = 1)
+inline array_type::tensor<double, 2> Rhodamine(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{239, 85, 159}};
+    array_type::tensor<double, 2> data = {{239, 85, 159}};
     return interp(data / 255.0, N);
 }
 
@@ -3790,9 +3817,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RoyalBlue(size_t N = 1)
+inline array_type::tensor<double, 2> RoyalBlue(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 113, 188}};
+    array_type::tensor<double, 2> data = {{0, 113, 188}};
     return interp(data / 255.0, N);
 }
 
@@ -3802,9 +3829,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RoyalPurple(size_t N = 1)
+inline array_type::tensor<double, 2> RoyalPurple(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{97, 63, 153}};
+    array_type::tensor<double, 2> data = {{97, 63, 153}};
     return interp(data / 255.0, N);
 }
 
@@ -3814,9 +3841,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RubineRed(size_t N = 1)
+inline array_type::tensor<double, 2> RubineRed(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{237, 1, 125}};
+    array_type::tensor<double, 2> data = {{237, 1, 125}};
     return interp(data / 255.0, N);
 }
 
@@ -3826,9 +3853,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Salmon(size_t N = 1)
+inline array_type::tensor<double, 2> Salmon(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{246, 146, 137}};
+    array_type::tensor<double, 2> data = {{246, 146, 137}};
     return interp(data / 255.0, N);
 }
 
@@ -3838,9 +3865,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> SeaGreen(size_t N = 1)
+inline array_type::tensor<double, 2> SeaGreen(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{63, 188, 157}};
+    array_type::tensor<double, 2> data = {{63, 188, 157}};
     return interp(data / 255.0, N);
 }
 
@@ -3850,9 +3877,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Sepia(size_t N = 1)
+inline array_type::tensor<double, 2> Sepia(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{103, 24, 0}};
+    array_type::tensor<double, 2> data = {{103, 24, 0}};
     return interp(data / 255.0, N);
 }
 
@@ -3862,9 +3889,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> SkyBlue(size_t N = 1)
+inline array_type::tensor<double, 2> SkyBlue(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{70, 197, 221}};
+    array_type::tensor<double, 2> data = {{70, 197, 221}};
     return interp(data / 255.0, N);
 }
 
@@ -3874,9 +3901,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> SpringGreen(size_t N = 1)
+inline array_type::tensor<double, 2> SpringGreen(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{198, 220, 103}};
+    array_type::tensor<double, 2> data = {{198, 220, 103}};
     return interp(data / 255.0, N);
 }
 
@@ -3886,9 +3913,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Tan(size_t N = 1)
+inline array_type::tensor<double, 2> Tan(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{218, 157, 118}};
+    array_type::tensor<double, 2> data = {{218, 157, 118}};
     return interp(data / 255.0, N);
 }
 
@@ -3898,9 +3925,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> TealBlue(size_t N = 1)
+inline array_type::tensor<double, 2> TealBlue(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 174, 179}};
+    array_type::tensor<double, 2> data = {{0, 174, 179}};
     return interp(data / 255.0, N);
 }
 
@@ -3910,9 +3937,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Thistle(size_t N = 1)
+inline array_type::tensor<double, 2> Thistle(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{216, 131, 183}};
+    array_type::tensor<double, 2> data = {{216, 131, 183}};
     return interp(data / 255.0, N);
 }
 
@@ -3922,9 +3949,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Turquoise(size_t N = 1)
+inline array_type::tensor<double, 2> Turquoise(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{0, 180, 206}};
+    array_type::tensor<double, 2> data = {{0, 180, 206}};
     return interp(data / 255.0, N);
 }
 
@@ -3934,9 +3961,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Violet(size_t N = 1)
+inline array_type::tensor<double, 2> Violet(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{88, 66, 155}};
+    array_type::tensor<double, 2> data = {{88, 66, 155}};
     return interp(data / 255.0, N);
 }
 
@@ -3946,9 +3973,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> VioletRed(size_t N = 1)
+inline array_type::tensor<double, 2> VioletRed(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{239, 88, 160}};
+    array_type::tensor<double, 2> data = {{239, 88, 160}};
     return interp(data / 255.0, N);
 }
 
@@ -3958,9 +3985,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> WildStrawberry(size_t N = 1)
+inline array_type::tensor<double, 2> WildStrawberry(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{238, 41, 103}};
+    array_type::tensor<double, 2> data = {{238, 41, 103}};
     return interp(data / 255.0, N);
 }
 
@@ -3970,9 +3997,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Yellow(size_t N = 1)
+inline array_type::tensor<double, 2> Yellow(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{255, 242, 0}};
+    array_type::tensor<double, 2> data = {{255, 242, 0}};
     return interp(data / 255.0, N);
 }
 
@@ -3982,9 +4009,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> YellowGreen(size_t N = 1)
+inline array_type::tensor<double, 2> YellowGreen(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{152, 204, 112}};
+    array_type::tensor<double, 2> data = {{152, 204, 112}};
     return interp(data / 255.0, N);
 }
 
@@ -3994,9 +4021,9 @@ dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> YellowOrange(size_t N = 1)
+inline array_type::tensor<double, 2> YellowOrange(size_t N = 1)
 {
-    xt::xtensor<double, 2> data = {{250, 162, 26}};
+    array_type::tensor<double, 2> data = {{250, 162, 26}};
     return interp(data / 255.0, N);
 }
 
@@ -4006,7 +4033,7 @@ Inverse of cppcolormap::Accent.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Accent_r(size_t N = 8)
+inline array_type::tensor<double, 2> Accent_r(size_t N = 8)
 {
     return xt::flip(Accent(N), 0);
 }
@@ -4017,7 +4044,7 @@ Inverse of cppcolormap::Dark2.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Dark2_r(size_t N = 8)
+inline array_type::tensor<double, 2> Dark2_r(size_t N = 8)
 {
     return xt::flip(Dark2(N), 0);
 }
@@ -4028,7 +4055,7 @@ Inverse of cppcolormap::Paired.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Paired_r(size_t N = 12)
+inline array_type::tensor<double, 2> Paired_r(size_t N = 12)
 {
     return xt::flip(Paired(N), 0);
 }
@@ -4039,7 +4066,7 @@ Inverse of cppcolormap::Spectral.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Spectral_r(size_t N = 11)
+inline array_type::tensor<double, 2> Spectral_r(size_t N = 11)
 {
     return xt::flip(Spectral(N), 0);
 }
@@ -4050,7 +4077,7 @@ Inverse of cppcolormap::Pastel1.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Pastel1_r(size_t N = 9)
+inline array_type::tensor<double, 2> Pastel1_r(size_t N = 9)
 {
     return xt::flip(Pastel1(N), 0);
 }
@@ -4061,7 +4088,7 @@ Inverse of cppcolormap::Pastel2.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Pastel2_r(size_t N = 8)
+inline array_type::tensor<double, 2> Pastel2_r(size_t N = 8)
 {
     return xt::flip(Pastel2(N), 0);
 }
@@ -4072,7 +4099,7 @@ Inverse of cppcolormap::Set1.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Set1_r(size_t N = 9)
+inline array_type::tensor<double, 2> Set1_r(size_t N = 9)
 {
     return xt::flip(Set1(N), 0);
 }
@@ -4083,7 +4110,7 @@ Inverse of cppcolormap::Set2.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Set2_r(size_t N = 8)
+inline array_type::tensor<double, 2> Set2_r(size_t N = 8)
 {
     return xt::flip(Set2(N), 0);
 }
@@ -4094,7 +4121,7 @@ Inverse of cppcolormap::Set3.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Set3_r(size_t N = 12)
+inline array_type::tensor<double, 2> Set3_r(size_t N = 12)
 {
     return xt::flip(Set3(N), 0);
 }
@@ -4105,7 +4132,7 @@ Inverse of cppcolormap::Blues.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Blues_r(size_t N = 9)
+inline array_type::tensor<double, 2> Blues_r(size_t N = 9)
 {
     return xt::flip(Blues(N), 0);
 }
@@ -4116,7 +4143,7 @@ Inverse of cppcolormap::Greens.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Greens_r(size_t N = 9)
+inline array_type::tensor<double, 2> Greens_r(size_t N = 9)
 {
     return xt::flip(Greens(N), 0);
 }
@@ -4127,7 +4154,7 @@ Inverse of cppcolormap::Greys.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Greys_r(size_t N = 2)
+inline array_type::tensor<double, 2> Greys_r(size_t N = 2)
 {
     return xt::flip(Greys(N), 0);
 }
@@ -4138,7 +4165,7 @@ Inverse of cppcolormap::Oranges.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Oranges_r(size_t N = 9)
+inline array_type::tensor<double, 2> Oranges_r(size_t N = 9)
 {
     return xt::flip(Oranges(N), 0);
 }
@@ -4149,7 +4176,7 @@ Inverse of cppcolormap::Purples.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Purples_r(size_t N = 9)
+inline array_type::tensor<double, 2> Purples_r(size_t N = 9)
 {
     return xt::flip(Purples(N), 0);
 }
@@ -4160,7 +4187,7 @@ Inverse of cppcolormap::Reds.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> Reds_r(size_t N = 9)
+inline array_type::tensor<double, 2> Reds_r(size_t N = 9)
 {
     return xt::flip(Reds(N), 0);
 }
@@ -4171,7 +4198,7 @@ Inverse of cppcolormap::BuPu.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> BuPu_r(size_t N = 9)
+inline array_type::tensor<double, 2> BuPu_r(size_t N = 9)
 {
     return xt::flip(BuPu(N), 0);
 }
@@ -4182,7 +4209,7 @@ Inverse of cppcolormap::GnBu.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> GnBu_r(size_t N = 9)
+inline array_type::tensor<double, 2> GnBu_r(size_t N = 9)
 {
     return xt::flip(GnBu(N), 0);
 }
@@ -4193,7 +4220,7 @@ Inverse of cppcolormap::PuBu.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> PuBu_r(size_t N = 9)
+inline array_type::tensor<double, 2> PuBu_r(size_t N = 9)
 {
     return xt::flip(PuBu(N), 0);
 }
@@ -4204,7 +4231,7 @@ Inverse of cppcolormap::PuBuGn.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> PuBuGn_r(size_t N = 9)
+inline array_type::tensor<double, 2> PuBuGn_r(size_t N = 9)
 {
     return xt::flip(PuBuGn(N), 0);
 }
@@ -4215,7 +4242,7 @@ Inverse of cppcolormap::PuRd.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> PuRd_r(size_t N = 9)
+inline array_type::tensor<double, 2> PuRd_r(size_t N = 9)
 {
     return xt::flip(PuRd(N), 0);
 }
@@ -4226,7 +4253,7 @@ Inverse of cppcolormap::RdPu.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RdPu_r(size_t N = 9)
+inline array_type::tensor<double, 2> RdPu_r(size_t N = 9)
 {
     return xt::flip(RdPu(N), 0);
 }
@@ -4237,7 +4264,7 @@ Inverse of cppcolormap::OrRd.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> OrRd_r(size_t N = 9)
+inline array_type::tensor<double, 2> OrRd_r(size_t N = 9)
 {
     return xt::flip(OrRd(N), 0);
 }
@@ -4248,7 +4275,7 @@ Inverse of cppcolormap::RdOrYl.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RdOrYl_r(size_t N = 9)
+inline array_type::tensor<double, 2> RdOrYl_r(size_t N = 9)
 {
     return xt::flip(RdOrYl(N), 0);
 }
@@ -4259,7 +4286,7 @@ Inverse of cppcolormap::YlGn.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> YlGn_r(size_t N = 9)
+inline array_type::tensor<double, 2> YlGn_r(size_t N = 9)
 {
     return xt::flip(YlGn(N), 0);
 }
@@ -4270,7 +4297,7 @@ Inverse of cppcolormap::YlGnBu.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> YlGnBu_r(size_t N = 9)
+inline array_type::tensor<double, 2> YlGnBu_r(size_t N = 9)
 {
     return xt::flip(YlGnBu(N), 0);
 }
@@ -4281,7 +4308,7 @@ Inverse of cppcolormap::YlOrRd.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> YlOrRd_r(size_t N = 9)
+inline array_type::tensor<double, 2> YlOrRd_r(size_t N = 9)
 {
     return xt::flip(YlOrRd(N), 0);
 }
@@ -4292,7 +4319,7 @@ Inverse of cppcolormap::BrBG.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> BrBG_r(size_t N = 11)
+inline array_type::tensor<double, 2> BrBG_r(size_t N = 11)
 {
     return xt::flip(BrBG(N), 0);
 }
@@ -4303,7 +4330,7 @@ Inverse of cppcolormap::PuOr.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> PuOr_r(size_t N = 11)
+inline array_type::tensor<double, 2> PuOr_r(size_t N = 11)
 {
     return xt::flip(PuOr(N), 0);
 }
@@ -4314,7 +4341,7 @@ Inverse of cppcolormap::RdBu.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RdBu_r(size_t N = 11)
+inline array_type::tensor<double, 2> RdBu_r(size_t N = 11)
 {
     return xt::flip(RdBu(N), 0);
 }
@@ -4325,7 +4352,7 @@ Inverse of cppcolormap::RdGy.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RdGy_r(size_t N = 11)
+inline array_type::tensor<double, 2> RdGy_r(size_t N = 11)
 {
     return xt::flip(RdGy(N), 0);
 }
@@ -4336,7 +4363,7 @@ Inverse of cppcolormap::RdYlBu.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RdYlBu_r(size_t N = 11)
+inline array_type::tensor<double, 2> RdYlBu_r(size_t N = 11)
 {
     return xt::flip(RdYlBu(N), 0);
 }
@@ -4347,7 +4374,7 @@ Inverse of cppcolormap::RdYlGn.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> RdYlGn_r(size_t N = 11)
+inline array_type::tensor<double, 2> RdYlGn_r(size_t N = 11)
 {
     return xt::flip(RdYlGn(N), 0);
 }
@@ -4358,7 +4385,7 @@ Inverse of cppcolormap::PiYG.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> PiYG_r(size_t N = 11)
+inline array_type::tensor<double, 2> PiYG_r(size_t N = 11)
 {
     return xt::flip(PiYG(N), 0);
 }
@@ -4369,7 +4396,7 @@ Inverse of cppcolormap::PRGn.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> PRGn_r(size_t N = 11)
+inline array_type::tensor<double, 2> PRGn_r(size_t N = 11)
 {
     return xt::flip(PRGn(N), 0);
 }
@@ -4380,7 +4407,7 @@ Inverse of cppcolormap::spring.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> spring_r(size_t N = 256)
+inline array_type::tensor<double, 2> spring_r(size_t N = 256)
 {
     return xt::flip(spring(N), 0);
 }
@@ -4391,7 +4418,7 @@ Inverse of cppcolormap::summer.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> summer_r(size_t N = 256)
+inline array_type::tensor<double, 2> summer_r(size_t N = 256)
 {
     return xt::flip(summer(N), 0);
 }
@@ -4402,7 +4429,7 @@ Inverse of cppcolormap::autumn.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> autumn_r(size_t N = 256)
+inline array_type::tensor<double, 2> autumn_r(size_t N = 256)
 {
     return xt::flip(autumn(N), 0);
 }
@@ -4413,7 +4440,7 @@ Inverse of cppcolormap::winter.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> winter_r(size_t N = 256)
+inline array_type::tensor<double, 2> winter_r(size_t N = 256)
 {
     return xt::flip(winter(N), 0);
 }
@@ -4424,7 +4451,7 @@ Inverse of cppcolormap::bone.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> bone_r(size_t N = 256)
+inline array_type::tensor<double, 2> bone_r(size_t N = 256)
 {
     return xt::flip(bone(N), 0);
 }
@@ -4435,7 +4462,7 @@ Inverse of cppcolormap::cool.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> cool_r(size_t N = 256)
+inline array_type::tensor<double, 2> cool_r(size_t N = 256)
 {
     return xt::flip(cool(N), 0);
 }
@@ -4446,7 +4473,7 @@ Inverse of cppcolormap::hot.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> hot_r(size_t N = 256)
+inline array_type::tensor<double, 2> hot_r(size_t N = 256)
 {
     return xt::flip(hot(N), 0);
 }
@@ -4457,7 +4484,7 @@ Inverse of cppcolormap::copper.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> copper_r(size_t N = 256)
+inline array_type::tensor<double, 2> copper_r(size_t N = 256)
 {
     return xt::flip(copper(N), 0);
 }
@@ -4468,7 +4495,7 @@ Inverse of cppcolormap::hsv.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> hsv_r(size_t N = 256)
+inline array_type::tensor<double, 2> hsv_r(size_t N = 256)
 {
     return xt::flip(hsv(N), 0);
 }
@@ -4479,7 +4506,7 @@ Inverse of cppcolormap::nipy_spectral.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> nipy_spectral_r(size_t N = 256)
+inline array_type::tensor<double, 2> nipy_spectral_r(size_t N = 256)
 {
     return xt::flip(nipy_spectral(N), 0);
 }
@@ -4490,7 +4517,7 @@ Inverse of cppcolormap::jet.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> jet_r(size_t N = 256)
+inline array_type::tensor<double, 2> jet_r(size_t N = 256)
 {
     return xt::flip(jet(N), 0);
 }
@@ -4501,7 +4528,7 @@ Inverse of cppcolormap::terrain.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> terrain_r(size_t N = 5)
+inline array_type::tensor<double, 2> terrain_r(size_t N = 5)
 {
     return xt::flip(terrain(N), 0);
 }
@@ -4512,7 +4539,7 @@ Inverse of cppcolormap::seismic.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> seismic_r(size_t N = 6)
+inline array_type::tensor<double, 2> seismic_r(size_t N = 6)
 {
     return xt::flip(seismic(N), 0);
 }
@@ -4523,7 +4550,7 @@ Inverse of cppcolormap::afmhot.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> afmhot_r(size_t N = 256)
+inline array_type::tensor<double, 2> afmhot_r(size_t N = 256)
 {
     return xt::flip(afmhot(N), 0);
 }
@@ -4534,7 +4561,7 @@ Inverse of cppcolormap::magma.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> magma_r(size_t N = 256)
+inline array_type::tensor<double, 2> magma_r(size_t N = 256)
 {
     return xt::flip(magma(N), 0);
 }
@@ -4545,7 +4572,7 @@ Inverse of cppcolormap::inferno.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> inferno_r(size_t N = 256)
+inline array_type::tensor<double, 2> inferno_r(size_t N = 256)
 {
     return xt::flip(inferno(N), 0);
 }
@@ -4556,7 +4583,7 @@ Inverse of cppcolormap::plasma.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> plasma_r(size_t N = 256)
+inline array_type::tensor<double, 2> plasma_r(size_t N = 256)
 {
     return xt::flip(plasma(N), 0);
 }
@@ -4567,7 +4594,7 @@ Inverse of cppcolormap::viridis.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> viridis_r(size_t N = 256)
+inline array_type::tensor<double, 2> viridis_r(size_t N = 256)
 {
     return xt::flip(viridis(N), 0);
 }
@@ -4579,7 +4606,7 @@ Get colormap specified as string.
 \param N Number of colors to output.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> colormap(const std::string& cmap, size_t N = 256)
+inline array_type::tensor<double, 2> colormap(const std::string& cmap, size_t N = 256)
 {
     if (cmap == "Accent") {
         return Accent(N);
@@ -5121,9 +5148,9 @@ xterm color-cyle.
 
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> xterm()
+inline array_type::tensor<double, 2> xterm()
 {
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {0, 0, 0}, // 0  , Black (SYSTEM) ,  #000000, hsl(0,0%,0%)
         {128, 0, 0}, // 1  , Maroon (SYSTEM),  #800000, hsl(0,100%,25%)
         {0, 128, 0}, // 2  , Green (SYSTEM) ,  #008000, hsl(120,100%,25%)
@@ -5390,9 +5417,9 @@ Eindhoven University of Technology color-cyle.
 
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> tue()
+inline array_type::tensor<double, 2> tue()
 {
-    xt::xtensor<double, 2> data = {
+    array_type::tensor<double, 2> data = {
         {247, 49, 49}, //  0: warm red
         {214, 0, 74}, //  1: red
         {214, 0, 123}, //  2: pink
@@ -5416,7 +5443,7 @@ Inverse of cppcolormap::xterm.
 
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> xterm_r()
+inline array_type::tensor<double, 2> xterm_r()
 {
     return xt::flip(xterm(), 0);
 }
@@ -5426,7 +5453,7 @@ Inverse of cppcolormap::tue.
 
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> tue_r()
+inline array_type::tensor<double, 2> tue_r()
 {
     return xt::flip(tue(), 0);
 }
@@ -5437,7 +5464,7 @@ Get color-cycle specified as string.
 \param cmap Name of the colormap.
 \returns RGB data.
 */
-inline xt::xtensor<double, 2> colorcycle(const std::string& cmap)
+inline array_type::tensor<double, 2> colorcycle(const std::string& cmap)
 {
     if (cmap == "xterm") {
         return xterm();
@@ -5503,13 +5530,13 @@ Match colors.
 \param distance_metric Metric to use in color matching.
 \return For each item in ``A``, the index of the closets corresponding color in ``B``.
 */
-inline xt::xtensor<size_t, 1> match(
-    const xt::xtensor<double, 2>& A,
-    const xt::xtensor<double, 2>& B,
+inline array_type::tensor<size_t, 1> match(
+    const array_type::tensor<double, 2>& A,
+    const array_type::tensor<double, 2>& B,
     metric distance_metric = euclidean)
 {
-    xt::xtensor<size_t, 1> idx = xt::empty<size_t>({A.shape(0)});
-    xt::xtensor<double, 1> d = xt::empty<double>({B.shape(0)});
+    array_type::tensor<size_t, 1> idx = xt::empty<size_t>({A.shape(0)});
+    array_type::tensor<double, 1> d = xt::empty<double>({B.shape(0)});
 
     auto fmetric = detail::euclidean_metric;
 
