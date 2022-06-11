@@ -6,6 +6,7 @@
 #include <xtensor-python/pyarray.hpp>
 #include <xtensor-python/pytensor.hpp>
 
+#define CPPCOLORMAP_USE_XTENSOR_PYTHON
 #include <cppcolormap.h>
 #include <string.h>
 
