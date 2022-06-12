@@ -18,7 +18,7 @@ add_library(mytarget INTERFACE IMPORTED)
 target_link_libraries(mytarget INTERFACE
     ${PROJECT_NAME}
     ${PROJECT_NAME}::compiler_warnings
-    Catch2::Catch2)
+    Catch2::Catch2WithMain)
 
 file(GLOB APP_SOURCES *.cpp)
 
