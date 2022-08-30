@@ -2,7 +2,7 @@ channels:
 - conda-forge
 dependencies:
 - breathe
-- catch2
+- catch2 >=0.3.0
 - cmake
 - doxygen
 - matplotlib
