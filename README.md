@@ -46,29 +46,6 @@ C++ and Python library specifying colormaps.
 
 # Contents
 
-<!-- MarkdownTOC levels="1,2" -->
-
-- [Disclaimer](#disclaimer)
-- [Usage from C++](#usage-from-c)
-    - [Getting cppcolormap](#getting-cppcolormap)
-    - [Usage](#usage)
-    - [Find match](#find-match)
-    - [Compiling](#compiling)
-- [Usage from Python](#usage-from-python)
-    - [Getting cppcolormap](#getting-cppcolormap-1)
-    - [Usage](#usage-1)
-    - [Find match](#find-match-1)
-    - [Example](#example)
-- [Available colormaps](#available-colormaps)
-    - [ColorBrewer](#colorbrewer)
-    - [matplotlib](#matplotlib)
-    - [monocolor](#monocolor)
-- [Available colorcycles](#available-colorcycles)
-    - [Xterm](#xterm)
-    - [Eindhoven University of Technology](#eindhoven-university-of-technology)
-
-<!-- /MarkdownTOC -->
-
 # Disclaimer
 
 This library is free to use under the [GPLv3 license](https://github.com/tdegeus/cppcolormap/blob/master/LICENSE). Any additions are very much appreciated, in terms of suggested functionality, code, documentation, testimonials, word-of-mouth advertisement, etc. Bug reports or feature requests can be filed on [GitHub](https://github.com/tdegeus/cppcolormap). As always, the code comes with no guarantee. None of the developers can be held responsible for possible mistakes.
@@ -119,7 +96,7 @@ int main()
 }
 ```
 
-Lists of [colormaps](#available-colormaps) and [color-cycles](#available-color-cycles) can be found below.
+Lists of colormaps and color-cycles can be found below.
 
 The colormaps are stored as a matrix whereby each row contains the (R,G,B) colors. Each color value has a range `[0..1]`. The number of colors varies from map to map, but can be interpolated by specifying the number of colors you want:
 
@@ -256,7 +233,7 @@ cols = cm.Reds(N)
 cols = cm.tue()
 ```
 
-(see lists of [colormaps](#available-colormaps) and [color-cycles](#available-color-cycles) below).
+(see lists of colormaps and color-cycles below).
 
 ## Find match
 
