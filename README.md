@@ -244,7 +244,7 @@ idx = cm.match(cmap1, cmap2)
 idx = cm.match(cmap1, cmap2, cm.metric.perceptual)
 ```
 
-(See metrics [above](#find-match).)
+(See metrics above.)
 
 ## Example
 
