@@ -1,45 +1,45 @@
 /**
-\file
-\copyright Copyright. Tom de Geus. All rights reserved.
-\license This project is released under the GPLv3 License.
-*/
+ * @file
+ * @copyright Copyright. Tom de Geus. All rights reserved.
+ * \license This project is released under the GPLv3 License.
+ */
 
 #ifndef CPPCOLORMAP_H
 #define CPPCOLORMAP_H
 
 /**
-\cond
-*/
+ * \cond
+ */
 #define Q(x) #x
 #define QUOTE(x) Q(x)
 
 #define CPPCOLORMAP_ASSERT_IMPL(expr, file, line) \
     if (!(expr)) { \
         throw std::runtime_error( \
-            std::string(file) + ':' + std::to_string(line) + \
-            ": assertion failed (" #expr ") \n\t"); \
+            std::string(file) + ':' + std::to_string(line) + ": assertion failed (" #expr ") \n\t" \
+        ); \
     }
 /**
-\endcond
-*/
+ * \endcond
+ */
 
 /**
-All assertions are implementation as:
-
-    GMATTENSOR_ASSERT(...)
-
-They can be enabled by:
-
-    #define GMATTENSOR_ENABLE_ASSERT
-
-(before including GMatTensor).
-The advantage is that:
-
--   File and line-number are displayed if the assertion fails.
--   GMatTensor's assertions can be enabled/disabled independently from those of other libraries.
-
-\throw std::runtime_error
-*/
+ * All assertions are implementation as:
+ *
+ *     GMATTENSOR_ASSERT(...)
+ *
+ * They can be enabled by:
+ *
+ *     #define GMATTENSOR_ENABLE_ASSERT
+ *
+ * (before including GMatTensor).
+ * The advantage is that:
+ *
+ * -   File and line-number are displayed if the assertion fails.
+ * -   GMatTensor's assertions can be enabled/disabled independently from those of other libraries.
+ *
+ * \throw std::runtime_error
+ */
 #ifdef CPPCOLORMAP_ENABLE_ASSERT
 #define CPPCOLORMAP_ASSERT(expr) CPPCOLORMAP_ASSERT_IMPL(expr, __FILE__, __LINE__)
 #else
@@ -47,37 +47,37 @@ The advantage is that:
 #endif
 
 /**
-Current version.
-
-Either:
-
--   Configure using CMake at install time. Internally uses::
-
-        python -c "from setuptools_scm import get_version; print(get_version())"
-
--   Define externally using::
-
-        MYVERSION=`python -c "from setuptools_scm import get_version; print(get_version())"`
-        -DCPPCOLORMAP_VERSION="$MYVERSION"
-
-    From the root of this project. This is what ``setup.py`` does.
-
-Note that both ``CMakeLists.txt`` and ``setup.py`` will construct the version using
-``setuptools_scm``. Tip: use the environment variable ``SETUPTOOLS_SCM_PRETEND_VERSION`` to
-overwrite the automatic version.
-*/
+ * Current version.
+ *
+ * Either:
+ *
+ * -   Configure using CMake at install time. Internally uses::
+ *
+ *         python -c "from setuptools_scm import get_version; print(get_version())"
+ *
+ * -   Define externally using::
+ *
+ *         MYVERSION=`python -c "from setuptools_scm import get_version; print(get_version())"`
+ *         -DCPPCOLORMAP_VERSION="$MYVERSION"
+ *
+ *     From the root of this project. This is what ``setup.py`` does.
+ *
+ * Note that both ``CMakeLists.txt`` and ``setup.py`` will construct the version using
+ * ``setuptools_scm``. Tip: use the environment variable ``SETUPTOOLS_SCM_PRETEND_VERSION`` to
+ * overwrite the automatic version.
+ */
 #ifndef CPPCOLORMAP_VERSION
 #define CPPCOLORMAP_VERSION "@PROJECT_VERSION@"
 #endif
 
 /**
-\cond
-*/
+ * \cond
+ */
 // use "M_PI" from "math.h"
 #define _USE_MATH_DEFINES
 /**
-\endcond
-*/
+ * \endcond
+ */
 
 #include <cfloat>
 #include <iostream>
@@ -95,23 +95,23 @@ overwrite the automatic version.
 namespace cppcolormap {
 
 /**
-Container type.
-*/
+ * Container type.
+ */
 namespace array_type {
 
 #ifdef CPPCOLORMAP_USE_XTENSOR_PYTHON
 
 /**
-Fixed (static) rank array.
-*/
+ * Fixed (static) rank array.
+ */
 template <typename T, size_t N>
 using tensor = xt::pytensor<T, N>;
 
 #else
 
 /**
-Fixed (static) rank array.
-*/
+ * Fixed (static) rank array.
+ */
 template <typename T, size_t N>
 using tensor = xt::xtensor<T, N>;
 
@@ -131,24 +131,24 @@ inline std::string unquote(const std::string& arg)
 } // namespace detail
 
 /**
-Return version string. E.g.: `"0.1.0"`.
-\return String.
-*/
+ * Return version string. E.g.: `"0.1.0"`.
+ * @return String.
+ */
 inline std::string version()
 {
     return detail::unquote(std::string(QUOTE(CPPCOLORMAP_VERSION)));
 }
 
 /**
-Return versions of this library and of all of its dependencies.
-The output is a list of strings, e.g.
-
-    "cppcolormap=1.0.0",
-    "xtensor=0.20.1"
-    ...
-
-\return List of strings.
-*/
+ * Return versions of this library and of all of its dependencies.
+ * The output is a list of strings, e.g.
+ *
+ *     "cppcolormap=1.0.0",
+ *     "xtensor=0.20.1"
+ *     ...
+ *
+ * @return List of strings.
+ */
 inline std::vector<std::string> version_dependencies()
 {
     std::vector<std::string> ret;
@@ -158,7 +158,8 @@ inline std::vector<std::string> version_dependencies()
     ret.push_back(
         "xtensor=" + detail::unquote(std::string(QUOTE(XTENSOR_VERSION_MAJOR))) + "." +
         detail::unquote(std::string(QUOTE(XTENSOR_VERSION_MINOR))) + "." +
-        detail::unquote(std::string(QUOTE(XTENSOR_VERSION_PATCH))));
+        detail::unquote(std::string(QUOTE(XTENSOR_VERSION_PATCH)))
+    );
 
     return ret;
 }
@@ -166,13 +167,13 @@ inline std::vector<std::string> version_dependencies()
 namespace detail {
 
 /**
-See: https://www.codespeedy.com/convert-rgb-to-hex-color-code-in-cpp
-
-\param r Red [0..255].
-\param g Green [0..255].
-\param b Blue [0..255].
-\return Hex string.
-*/
+ * See: https://www.codespeedy.com/convert-rgb-to-hex-color-code-in-cpp
+ *
+ * @param r Red [0..255].
+ * @param g Green [0..255].
+ * @param b Blue [0..255].
+ * @return Hex string.
+ */
 std::string rgb2hex(size_t r, size_t g, size_t b)
 {
     std::stringstream ss;
@@ -181,11 +182,11 @@ std::string rgb2hex(size_t r, size_t g, size_t b)
 }
 
 /**
-See: https://stackoverflow.com/questions/28104559/arduino-strange-behavior-converting-hex-to-rgb
-
-\param hex Hex string.
-\return RGB data.
-*/
+ * See: https://stackoverflow.com/questions/28104559/arduino-strange-behavior-converting-hex-to-rgb
+ *
+ * @param hex Hex string.
+ * @return RGB data.
+ */
 array_type::tensor<size_t, 1> hex2rgb(std::string hex)
 {
     if (hex.at(0) == '#') {
@@ -210,11 +211,11 @@ array_type::tensor<size_t, 1> hex2rgb(std::string hex)
 } // namespace detail
 
 /**
-Convert RGB -> HEX.
-
-\param arg RGB data (values between 0 and 1).
-\returns Vector of strings.
-*/
+ * Convert RGB -> HEX.
+ *
+ * @param arg RGB data (values between 0 and 1).
+ * @returns Vector of strings.
+ */
 template <class T, typename std::enable_if_t<xt::get_rank<T>::value != 1, int> = 0>
 std::vector<std::string> rgb2hex(const T& arg)
 {
@@ -228,18 +229,19 @@ std::vector<std::string> rgb2hex(const T& arg)
         ret.push_back(detail::rgb2hex(
             static_cast<size_t>(arg(i, 0) * 255.0),
             static_cast<size_t>(arg(i, 1) * 255.0),
-            static_cast<size_t>(arg(i, 2) * 255.0)));
+            static_cast<size_t>(arg(i, 2) * 255.0)
+        ));
     }
 
     return ret;
 }
 
 /**
-Convert RGB -> HEX.
-
-\param arg RGB data (values between 0 and 1).
-\returns String.
-*/
+ * Convert RGB -> HEX.
+ *
+ * @param arg RGB data (values between 0 and 1).
+ * @returns String.
+ */
 template <class T, typename std::enable_if_t<xt::get_rank<T>::value == 1, int> = 0>
 std::string rgb2hex(const T& arg)
 {
@@ -249,15 +251,16 @@ std::string rgb2hex(const T& arg)
     return detail::rgb2hex(
         static_cast<size_t>(arg(0) * 255.0),
         static_cast<size_t>(arg(1) * 255.0),
-        static_cast<size_t>(arg(2) * 255.0));
+        static_cast<size_t>(arg(2) * 255.0)
+    );
 }
 
 /**
-Convert HEX -> RGB.
-
-\param arg HEX data.
-\returns RGB data.
-*/
+ * Convert HEX -> RGB.
+ *
+ * @param arg HEX data.
+ * @returns RGB data.
+ */
 array_type::tensor<double, 2> hex2rgb(const std::vector<std::string>& arg)
 {
     array_type::tensor<double, 2> out = xt::empty<double>({arg.size(), size_t(3)});
@@ -270,23 +273,23 @@ array_type::tensor<double, 2> hex2rgb(const std::vector<std::string>& arg)
 }
 
 /**
-Convert HEX -> RGB.
-
-\param arg HEX data.
-\returns RGB data.
-*/
+ * Convert HEX -> RGB.
+ *
+ * @param arg HEX data.
+ * @returns RGB data.
+ */
 array_type::tensor<double, 1> hex2rgb(const std::string& arg)
 {
     return detail::hex2rgb(arg) / 255.0;
 }
 
 /**
-Interpolate the individual colours.
-
-\param arg RGB data.
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Interpolate the individual colours.
+ *
+ * @param arg RGB data.
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 template <class T, class R = array_type::tensor<double, 2>>
 inline R interp(const T& arg, size_t N)
 {
@@ -369,13 +372,13 @@ struct as_colors_impl<E, typename xt::has_fixed_rank_t<E>> {
 } // namespace detail
 
 /**
-Convert data to colors using a colormap.
-
-\param data The data.
-\param colors The colormap, e.g. ``cppcolormap::jet()``.
-\param vmin The lower limit of the color-axis.
-\param vmax The upper limit of the color-axis.
-*/
+ * Convert data to colors using a colormap.
+ *
+ * @param data The data.
+ * @param colors The colormap, e.g. ``cppcolormap::jet()``.
+ * @param vmin The lower limit of the color-axis.
+ * @param vmax The upper limit of the color-axis.
+ */
 template <class E, class C, typename S>
 inline auto as_colors(const E& data, const C& colors, S vmin, S vmax)
 {
@@ -383,11 +386,11 @@ inline auto as_colors(const E& data, const C& colors, S vmin, S vmax)
 }
 
 /**
-Convert data to colors using a colormap.
-
-\param data The data.
-\param colors The colormap, e.g. ``cppcolormap::jet()``.
-*/
+ * Convert data to colors using a colormap.
+ *
+ * @param data The data.
+ * @param colors The colormap, e.g. ``cppcolormap::jet()``.
+ */
 template <class E, class C>
 inline auto as_colors(const E& data, const C& colors)
 {
@@ -395,11 +398,11 @@ inline auto as_colors(const E& data, const C& colors)
 }
 
 /**
-Qualitative colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Qualitative colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Accent(size_t N = 8)
 {
     // clang-format off
@@ -419,11 +422,11 @@ inline array_type::tensor<double, 2> Accent(size_t N = 8)
 }
 
 /**
-Qualitative colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Qualitative colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Dark2(size_t N = 8)
 {
     // clang-format off
@@ -443,11 +446,11 @@ inline array_type::tensor<double, 2> Dark2(size_t N = 8)
 }
 
 /**
-Qualitative colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Qualitative colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Paired(size_t N = 12)
 {
     // clang-format off
@@ -471,11 +474,11 @@ inline array_type::tensor<double, 2> Paired(size_t N = 12)
 }
 
 /**
-Qualitative colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Qualitative colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Spectral(size_t N = 11)
 {
     // clang-format off
@@ -498,11 +501,11 @@ inline array_type::tensor<double, 2> Spectral(size_t N = 11)
 }
 
 /**
-Qualitative colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Qualitative colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Pastel1(size_t N = 9)
 {
     // clang-format off
@@ -523,11 +526,11 @@ inline array_type::tensor<double, 2> Pastel1(size_t N = 9)
 }
 
 /**
-Qualitative colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Qualitative colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Pastel2(size_t N = 8)
 {
     // clang-format off
@@ -547,11 +550,11 @@ inline array_type::tensor<double, 2> Pastel2(size_t N = 8)
 }
 
 /**
-Qualitative colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Qualitative colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Set1(size_t N = 9)
 {
     // clang-format off
@@ -572,11 +575,11 @@ inline array_type::tensor<double, 2> Set1(size_t N = 9)
 }
 
 /**
-Qualitative colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Qualitative colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Set2(size_t N = 8)
 {
     // clang-format off
@@ -596,11 +599,11 @@ inline array_type::tensor<double, 2> Set2(size_t N = 8)
 }
 
 /**
-Qualitative colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Qualitative colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Set3(size_t N = 12)
 {
     // clang-format off
@@ -624,11 +627,11 @@ inline array_type::tensor<double, 2> Set3(size_t N = 12)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Blues(size_t N = 9)
 {
     // clang-format off
@@ -649,11 +652,11 @@ inline array_type::tensor<double, 2> Blues(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Greens(size_t N = 9)
 {
     // clang-format off
@@ -674,11 +677,11 @@ inline array_type::tensor<double, 2> Greens(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Greys(size_t N = 2)
 {
     // clang-format off
@@ -692,11 +695,11 @@ inline array_type::tensor<double, 2> Greys(size_t N = 2)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Oranges(size_t N = 9)
 {
     // clang-format off
@@ -717,11 +720,11 @@ inline array_type::tensor<double, 2> Oranges(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Purples(size_t N = 9)
 {
     // clang-format off
@@ -742,11 +745,11 @@ inline array_type::tensor<double, 2> Purples(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Reds(size_t N = 9)
 {
     // clang-format off
@@ -767,11 +770,11 @@ inline array_type::tensor<double, 2> Reds(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> BuPu(size_t N = 9)
 {
     // clang-format off
@@ -792,11 +795,11 @@ inline array_type::tensor<double, 2> BuPu(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> GnBu(size_t N = 9)
 {
     // clang-format off
@@ -817,11 +820,11 @@ inline array_type::tensor<double, 2> GnBu(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> PuBu(size_t N = 9)
 {
     // clang-format off
@@ -842,11 +845,11 @@ inline array_type::tensor<double, 2> PuBu(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> PuBuGn(size_t N = 9)
 {
     // clang-format off
@@ -867,11 +870,11 @@ inline array_type::tensor<double, 2> PuBuGn(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> PuRd(size_t N = 9)
 {
     // clang-format off
@@ -892,11 +895,11 @@ inline array_type::tensor<double, 2> PuRd(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RdPu(size_t N = 9)
 {
     // clang-format off
@@ -917,11 +920,11 @@ inline array_type::tensor<double, 2> RdPu(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> OrRd(size_t N = 9)
 {
     // clang-format off
@@ -942,11 +945,11 @@ inline array_type::tensor<double, 2> OrRd(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RdOrYl(size_t N = 9)
 {
     // clang-format off
@@ -967,11 +970,11 @@ inline array_type::tensor<double, 2> RdOrYl(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> YlGn(size_t N = 9)
 {
     // clang-format off
@@ -992,11 +995,11 @@ inline array_type::tensor<double, 2> YlGn(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> YlGnBu(size_t N = 9)
 {
     // clang-format off
@@ -1017,11 +1020,11 @@ inline array_type::tensor<double, 2> YlGnBu(size_t N = 9)
 }
 
 /**
-Sequential colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Sequential colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> YlOrRd(size_t N = 9)
 {
     // clang-format off
@@ -1042,11 +1045,11 @@ inline array_type::tensor<double, 2> YlOrRd(size_t N = 9)
 }
 
 /**
-Diverging colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Diverging colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> BrBG(size_t N = 11)
 {
     // clang-format off
@@ -1069,11 +1072,11 @@ inline array_type::tensor<double, 2> BrBG(size_t N = 11)
 }
 
 /**
-Diverging colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Diverging colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> PuOr(size_t N = 11)
 {
     // clang-format off
@@ -1096,11 +1099,11 @@ inline array_type::tensor<double, 2> PuOr(size_t N = 11)
 }
 
 /**
-Diverging colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Diverging colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RdBu(size_t N = 11)
 {
     // clang-format off
@@ -1123,11 +1126,11 @@ inline array_type::tensor<double, 2> RdBu(size_t N = 11)
 }
 
 /**
-Diverging colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Diverging colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RdGy(size_t N = 11)
 {
     // clang-format off
@@ -1150,11 +1153,11 @@ inline array_type::tensor<double, 2> RdGy(size_t N = 11)
 }
 
 /**
-Diverging colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Diverging colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RdYlBu(size_t N = 11)
 {
     // clang-format off
@@ -1177,11 +1180,11 @@ inline array_type::tensor<double, 2> RdYlBu(size_t N = 11)
 }
 
 /**
-Diverging colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Diverging colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RdYlGn(size_t N = 11)
 {
     // clang-format off
@@ -1204,11 +1207,11 @@ inline array_type::tensor<double, 2> RdYlGn(size_t N = 11)
 }
 
 /**
-Diverging colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Diverging colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> PiYG(size_t N = 11)
 {
     // clang-format off
@@ -1231,11 +1234,11 @@ inline array_type::tensor<double, 2> PiYG(size_t N = 11)
 }
 
 /**
-Diverging colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Diverging colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> PRGn(size_t N = 11)
 {
     // clang-format off
@@ -1281,7 +1284,8 @@ inline array_type::tensor<double, 2> from_anchor(
     size_t N,
     const array_type::tensor<double, 2>& r,
     const array_type::tensor<double, 2>& g,
-    const array_type::tensor<double, 2>& b)
+    const array_type::tensor<double, 2>& b
+)
 {
     using return_type = array_type::tensor<double, 2>;
     using shape_type = return_type::shape_type::value_type;
@@ -1296,11 +1300,11 @@ inline array_type::tensor<double, 2> from_anchor(
 } // namespace detail
 
 /**
-matplotlib colormap, from anchor.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap, from anchor.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> spring(size_t N = 256)
 {
     // clang-format off
@@ -1321,11 +1325,11 @@ inline array_type::tensor<double, 2> spring(size_t N = 256)
 }
 
 /**
-matplotlib colormap, from anchor.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap, from anchor.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> summer(size_t N = 256)
 {
     // clang-format off
@@ -1346,11 +1350,11 @@ inline array_type::tensor<double, 2> summer(size_t N = 256)
 }
 
 /**
-matplotlib colormap, from anchor.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap, from anchor.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> autumn(size_t N = 256)
 {
     // clang-format off
@@ -1371,11 +1375,11 @@ inline array_type::tensor<double, 2> autumn(size_t N = 256)
 }
 
 /**
-matplotlib colormap, from anchor.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap, from anchor.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> winter(size_t N = 256)
 {
     // clang-format off
@@ -1396,11 +1400,11 @@ inline array_type::tensor<double, 2> winter(size_t N = 256)
 }
 
 /**
-matplotlib colormap, from anchor.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap, from anchor.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> bone(size_t N = 256)
 {
     // clang-format off
@@ -1425,11 +1429,11 @@ inline array_type::tensor<double, 2> bone(size_t N = 256)
 }
 
 /**
-matplotlib colormap, from anchor.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap, from anchor.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> cool(size_t N = 256)
 {
     // clang-format off
@@ -1450,11 +1454,11 @@ inline array_type::tensor<double, 2> cool(size_t N = 256)
 }
 
 /**
-matplotlib colormap, from anchor.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap, from anchor.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> hot(size_t N = 256)
 {
     // clang-format off
@@ -1479,11 +1483,11 @@ inline array_type::tensor<double, 2> hot(size_t N = 256)
 }
 
 /**
-matplotlib colormap, from anchor.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap, from anchor.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> copper(size_t N = 256)
 {
     // clang-format off
@@ -1505,11 +1509,11 @@ inline array_type::tensor<double, 2> copper(size_t N = 256)
 }
 
 /**
-matplotlib colormap, from anchor.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap, from anchor.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> hsv(size_t N = 256)
 {
     // clang-format off
@@ -1548,11 +1552,11 @@ inline array_type::tensor<double, 2> hsv(size_t N = 256)
 }
 
 /**
-matplotlib colormap, from anchor.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap, from anchor.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> nipy_spectral(size_t N = 256)
 {
     // clang-format off
@@ -1630,11 +1634,11 @@ inline array_type::tensor<double, 2> nipy_spectral(size_t N = 256)
 }
 
 /**
-matplotlib colormap, from anchor.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap, from anchor.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> jet(size_t N = 256)
 {
     // clang-format off
@@ -1689,11 +1693,11 @@ inline array_type::tensor<double, 2> from_fraction(size_t N, const array_type::t
 } // namespace detail
 
 /**
-matplotlib colormap, from fraction.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap, from fraction.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> terrain(size_t N = 6)
 {
     array_type::tensor<double, 2> data = {
@@ -2026,11 +2030,11 @@ inline array_type::tensor<double, 1> gnu_palette(size_t i, const array_type::ten
 } // namespace detail
 
 /**
-GNU plot colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * GNU plot colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> afmhot(size_t N = 256)
 {
     std::array<size_t, 2> shape = {N, 3};
@@ -2043,11 +2047,11 @@ inline array_type::tensor<double, 2> afmhot(size_t N = 256)
 }
 
 /**
-matplotlib colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> magma(size_t N = 256)
 {
     // clang-format off
@@ -2315,11 +2319,11 @@ inline array_type::tensor<double, 2> magma(size_t N = 256)
 }
 
 /**
-matplotlib colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> inferno(size_t N = 256)
 {
     // clang-format off
@@ -2587,11 +2591,11 @@ inline array_type::tensor<double, 2> inferno(size_t N = 256)
 }
 
 /**
-matplotlib colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> plasma(size_t N = 256)
 {
     // clang-format off
@@ -2859,11 +2863,11 @@ inline array_type::tensor<double, 2> plasma(size_t N = 256)
 }
 
 /**
-matplotlib colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> viridis(size_t N = 256)
 {
     // clang-format off
@@ -3131,11 +3135,11 @@ inline array_type::tensor<double, 2> viridis(size_t N = 256)
 }
 
 /**
-matplotlib colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * matplotlib colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> seismic(size_t N = 5)
 {
     // clang-format off
@@ -3152,11 +3156,11 @@ inline array_type::tensor<double, 2> seismic(size_t N = 5)
 }
 
 /**
-Monotone colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Monotone colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> White(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{255, 255, 255}};
@@ -3164,11 +3168,11 @@ inline array_type::tensor<double, 2> White(size_t N = 1)
 }
 
 /**
-Monotone colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Monotone colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Grey(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0.5, 0.5, 0.5}};
@@ -3176,11 +3180,11 @@ inline array_type::tensor<double, 2> Grey(size_t N = 1)
 }
 
 /**
-Monotone colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Monotone colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Black(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 0, 0}};
@@ -3188,11 +3192,11 @@ inline array_type::tensor<double, 2> Black(size_t N = 1)
 }
 
 /**
-Monotone colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Monotone colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Red(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{255, 0, 0}};
@@ -3200,11 +3204,11 @@ inline array_type::tensor<double, 2> Red(size_t N = 1)
 }
 
 /**
-Monotone colormap.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Monotone colormap.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Blue(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 0, 255}};
@@ -3212,11 +3216,11 @@ inline array_type::tensor<double, 2> Blue(size_t N = 1)
 }
 
 /**
-Eindhoven University of Technology.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Eindhoven University of Technology.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> tuewarmred(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{247, 49, 49}};
@@ -3224,11 +3228,11 @@ inline array_type::tensor<double, 2> tuewarmred(size_t N = 1)
 }
 
 /**
-Eindhoven University of Technology.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Eindhoven University of Technology.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> tuedarkblue(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{16, 16, 115}};
@@ -3236,11 +3240,11 @@ inline array_type::tensor<double, 2> tuedarkblue(size_t N = 1)
 }
 
 /**
-Eindhoven University of Technology.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Eindhoven University of Technology.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> tueblue(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 102, 204}};
@@ -3248,11 +3252,11 @@ inline array_type::tensor<double, 2> tueblue(size_t N = 1)
 }
 
 /**
-Eindhoven University of Technology.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Eindhoven University of Technology.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> tuelightblue(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 162, 222}};
@@ -3260,11 +3264,11 @@ inline array_type::tensor<double, 2> tuelightblue(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Apricot(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{251, 185, 130}};
@@ -3272,11 +3276,11 @@ inline array_type::tensor<double, 2> Apricot(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Aquamarine(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 181, 190}};
@@ -3284,11 +3288,11 @@ inline array_type::tensor<double, 2> Aquamarine(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Bittersweet(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{192, 79, 23}};
@@ -3296,11 +3300,11 @@ inline array_type::tensor<double, 2> Bittersweet(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> BlueGreen(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 179, 184}};
@@ -3308,11 +3312,11 @@ inline array_type::tensor<double, 2> BlueGreen(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> BlueViolet(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{71, 57, 146}};
@@ -3320,11 +3324,11 @@ inline array_type::tensor<double, 2> BlueViolet(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> BrickRed(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{182, 50, 28}};
@@ -3332,11 +3336,11 @@ inline array_type::tensor<double, 2> BrickRed(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Brown(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{121, 37, 0}};
@@ -3344,11 +3348,11 @@ inline array_type::tensor<double, 2> Brown(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> BurntOrange(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{247, 146, 29}};
@@ -3356,11 +3360,11 @@ inline array_type::tensor<double, 2> BurntOrange(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> CadetBlue(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{116, 114, 154}};
@@ -3368,11 +3372,11 @@ inline array_type::tensor<double, 2> CadetBlue(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> CarnationPink(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{242, 130, 180}};
@@ -3380,11 +3384,11 @@ inline array_type::tensor<double, 2> CarnationPink(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Cerulean(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 162, 227}};
@@ -3392,11 +3396,11 @@ inline array_type::tensor<double, 2> Cerulean(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> CornflowerBlue(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{65, 176, 228}};
@@ -3404,11 +3408,11 @@ inline array_type::tensor<double, 2> CornflowerBlue(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Cyan(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 174, 239}};
@@ -3416,11 +3420,11 @@ inline array_type::tensor<double, 2> Cyan(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Dandelion(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{253, 188, 66}};
@@ -3428,11 +3432,11 @@ inline array_type::tensor<double, 2> Dandelion(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> DarkOrchid(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{164, 83, 138}};
@@ -3440,11 +3444,11 @@ inline array_type::tensor<double, 2> DarkOrchid(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Emerald(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 169, 157}};
@@ -3452,11 +3456,11 @@ inline array_type::tensor<double, 2> Emerald(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> ForestGreen(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 155, 85}};
@@ -3464,11 +3468,11 @@ inline array_type::tensor<double, 2> ForestGreen(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Fuchsia(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{140, 54, 140}};
@@ -3476,11 +3480,11 @@ inline array_type::tensor<double, 2> Fuchsia(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Goldenrod(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{255, 223, 66}};
@@ -3488,11 +3492,11 @@ inline array_type::tensor<double, 2> Goldenrod(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Gray(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{148, 150, 152}};
@@ -3500,11 +3504,11 @@ inline array_type::tensor<double, 2> Gray(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Green(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 166, 79}};
@@ -3512,11 +3516,11 @@ inline array_type::tensor<double, 2> Green(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> GreenYellow(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{223, 230, 116}};
@@ -3524,11 +3528,11 @@ inline array_type::tensor<double, 2> GreenYellow(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> JungleGreen(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 169, 154}};
@@ -3536,11 +3540,11 @@ inline array_type::tensor<double, 2> JungleGreen(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Lavender(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{244, 158, 196}};
@@ -3548,11 +3552,11 @@ inline array_type::tensor<double, 2> Lavender(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> LimeGreen(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{141, 199, 62}};
@@ -3560,11 +3564,11 @@ inline array_type::tensor<double, 2> LimeGreen(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Magenta(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{236, 0, 140}};
@@ -3572,11 +3576,11 @@ inline array_type::tensor<double, 2> Magenta(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Mahogany(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{169, 52, 31}};
@@ -3584,11 +3588,11 @@ inline array_type::tensor<double, 2> Mahogany(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Maroon(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{175, 50, 53}};
@@ -3596,11 +3600,11 @@ inline array_type::tensor<double, 2> Maroon(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Melon(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{248, 158, 123}};
@@ -3608,11 +3612,11 @@ inline array_type::tensor<double, 2> Melon(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> MidnightBlue(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 103, 149}};
@@ -3620,11 +3624,11 @@ inline array_type::tensor<double, 2> MidnightBlue(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Mulberry(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{169, 60, 147}};
@@ -3632,11 +3636,11 @@ inline array_type::tensor<double, 2> Mulberry(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> NavyBlue(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 110, 184}};
@@ -3644,11 +3648,11 @@ inline array_type::tensor<double, 2> NavyBlue(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> OliveGreen(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{60, 128, 49}};
@@ -3656,11 +3660,11 @@ inline array_type::tensor<double, 2> OliveGreen(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Orange(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{245, 129, 55}};
@@ -3668,11 +3672,11 @@ inline array_type::tensor<double, 2> Orange(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> OrangeRed(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{237, 19, 90}};
@@ -3680,11 +3684,11 @@ inline array_type::tensor<double, 2> OrangeRed(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Orchid(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{175, 114, 176}};
@@ -3692,11 +3696,11 @@ inline array_type::tensor<double, 2> Orchid(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Peach(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{247, 150, 90}};
@@ -3704,11 +3708,11 @@ inline array_type::tensor<double, 2> Peach(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Periwinkle(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{121, 119, 184}};
@@ -3716,11 +3720,11 @@ inline array_type::tensor<double, 2> Periwinkle(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> PineGreen(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 139, 114}};
@@ -3728,11 +3732,11 @@ inline array_type::tensor<double, 2> PineGreen(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Plum(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{146, 38, 143}};
@@ -3740,11 +3744,11 @@ inline array_type::tensor<double, 2> Plum(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> ProcessBlue(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 176, 240}};
@@ -3752,11 +3756,11 @@ inline array_type::tensor<double, 2> ProcessBlue(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Purple(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{153, 71, 155}};
@@ -3764,11 +3768,11 @@ inline array_type::tensor<double, 2> Purple(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RawSienna(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{151, 64, 6}};
@@ -3776,11 +3780,11 @@ inline array_type::tensor<double, 2> RawSienna(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RedOrange(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{242, 96, 53}};
@@ -3788,11 +3792,11 @@ inline array_type::tensor<double, 2> RedOrange(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RedViolet(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{161, 36, 107}};
@@ -3800,11 +3804,11 @@ inline array_type::tensor<double, 2> RedViolet(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Rhodamine(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{239, 85, 159}};
@@ -3812,11 +3816,11 @@ inline array_type::tensor<double, 2> Rhodamine(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RoyalBlue(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 113, 188}};
@@ -3824,11 +3828,11 @@ inline array_type::tensor<double, 2> RoyalBlue(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RoyalPurple(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{97, 63, 153}};
@@ -3836,11 +3840,11 @@ inline array_type::tensor<double, 2> RoyalPurple(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RubineRed(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{237, 1, 125}};
@@ -3848,11 +3852,11 @@ inline array_type::tensor<double, 2> RubineRed(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Salmon(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{246, 146, 137}};
@@ -3860,11 +3864,11 @@ inline array_type::tensor<double, 2> Salmon(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> SeaGreen(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{63, 188, 157}};
@@ -3872,11 +3876,11 @@ inline array_type::tensor<double, 2> SeaGreen(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Sepia(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{103, 24, 0}};
@@ -3884,11 +3888,11 @@ inline array_type::tensor<double, 2> Sepia(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> SkyBlue(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{70, 197, 221}};
@@ -3896,11 +3900,11 @@ inline array_type::tensor<double, 2> SkyBlue(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> SpringGreen(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{198, 220, 103}};
@@ -3908,11 +3912,11 @@ inline array_type::tensor<double, 2> SpringGreen(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Tan(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{218, 157, 118}};
@@ -3920,11 +3924,11 @@ inline array_type::tensor<double, 2> Tan(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> TealBlue(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 174, 179}};
@@ -3932,11 +3936,11 @@ inline array_type::tensor<double, 2> TealBlue(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Thistle(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{216, 131, 183}};
@@ -3944,11 +3948,11 @@ inline array_type::tensor<double, 2> Thistle(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Turquoise(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{0, 180, 206}};
@@ -3956,11 +3960,11 @@ inline array_type::tensor<double, 2> Turquoise(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Violet(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{88, 66, 155}};
@@ -3968,11 +3972,11 @@ inline array_type::tensor<double, 2> Violet(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> VioletRed(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{239, 88, 160}};
@@ -3980,11 +3984,11 @@ inline array_type::tensor<double, 2> VioletRed(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> WildStrawberry(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{238, 41, 103}};
@@ -3992,11 +3996,11 @@ inline array_type::tensor<double, 2> WildStrawberry(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Yellow(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{255, 242, 0}};
@@ -4004,11 +4008,11 @@ inline array_type::tensor<double, 2> Yellow(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> YellowGreen(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{152, 204, 112}};
@@ -4016,11 +4020,11 @@ inline array_type::tensor<double, 2> YellowGreen(size_t N = 1)
 }
 
 /**
-dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * dvips color. See: https://en.wikibooks.org/wiki/LaTeX/Colors
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> YellowOrange(size_t N = 1)
 {
     array_type::tensor<double, 2> data = {{250, 162, 26}};
@@ -4028,584 +4032,584 @@ inline array_type::tensor<double, 2> YellowOrange(size_t N = 1)
 }
 
 /**
-Inverse of cppcolormap::Accent.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Accent.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Accent_r(size_t N = 8)
 {
     return xt::flip(Accent(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Dark2.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Dark2.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Dark2_r(size_t N = 8)
 {
     return xt::flip(Dark2(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Paired.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Paired.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Paired_r(size_t N = 12)
 {
     return xt::flip(Paired(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Spectral.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Spectral.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Spectral_r(size_t N = 11)
 {
     return xt::flip(Spectral(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Pastel1.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Pastel1.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Pastel1_r(size_t N = 9)
 {
     return xt::flip(Pastel1(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Pastel2.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Pastel2.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Pastel2_r(size_t N = 8)
 {
     return xt::flip(Pastel2(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Set1.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Set1.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Set1_r(size_t N = 9)
 {
     return xt::flip(Set1(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Set2.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Set2.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Set2_r(size_t N = 8)
 {
     return xt::flip(Set2(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Set3.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Set3.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Set3_r(size_t N = 12)
 {
     return xt::flip(Set3(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Blues.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Blues.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Blues_r(size_t N = 9)
 {
     return xt::flip(Blues(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Greens.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Greens.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Greens_r(size_t N = 9)
 {
     return xt::flip(Greens(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Greys.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Greys.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Greys_r(size_t N = 2)
 {
     return xt::flip(Greys(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Oranges.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Oranges.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Oranges_r(size_t N = 9)
 {
     return xt::flip(Oranges(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Purples.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Purples.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Purples_r(size_t N = 9)
 {
     return xt::flip(Purples(N), 0);
 }
 
 /**
-Inverse of cppcolormap::Reds.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::Reds.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> Reds_r(size_t N = 9)
 {
     return xt::flip(Reds(N), 0);
 }
 
 /**
-Inverse of cppcolormap::BuPu.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::BuPu.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> BuPu_r(size_t N = 9)
 {
     return xt::flip(BuPu(N), 0);
 }
 
 /**
-Inverse of cppcolormap::GnBu.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::GnBu.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> GnBu_r(size_t N = 9)
 {
     return xt::flip(GnBu(N), 0);
 }
 
 /**
-Inverse of cppcolormap::PuBu.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::PuBu.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> PuBu_r(size_t N = 9)
 {
     return xt::flip(PuBu(N), 0);
 }
 
 /**
-Inverse of cppcolormap::PuBuGn.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::PuBuGn.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> PuBuGn_r(size_t N = 9)
 {
     return xt::flip(PuBuGn(N), 0);
 }
 
 /**
-Inverse of cppcolormap::PuRd.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::PuRd.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> PuRd_r(size_t N = 9)
 {
     return xt::flip(PuRd(N), 0);
 }
 
 /**
-Inverse of cppcolormap::RdPu.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::RdPu.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RdPu_r(size_t N = 9)
 {
     return xt::flip(RdPu(N), 0);
 }
 
 /**
-Inverse of cppcolormap::OrRd.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::OrRd.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> OrRd_r(size_t N = 9)
 {
     return xt::flip(OrRd(N), 0);
 }
 
 /**
-Inverse of cppcolormap::RdOrYl.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::RdOrYl.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RdOrYl_r(size_t N = 9)
 {
     return xt::flip(RdOrYl(N), 0);
 }
 
 /**
-Inverse of cppcolormap::YlGn.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::YlGn.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> YlGn_r(size_t N = 9)
 {
     return xt::flip(YlGn(N), 0);
 }
 
 /**
-Inverse of cppcolormap::YlGnBu.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::YlGnBu.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> YlGnBu_r(size_t N = 9)
 {
     return xt::flip(YlGnBu(N), 0);
 }
 
 /**
-Inverse of cppcolormap::YlOrRd.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::YlOrRd.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> YlOrRd_r(size_t N = 9)
 {
     return xt::flip(YlOrRd(N), 0);
 }
 
 /**
-Inverse of cppcolormap::BrBG.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::BrBG.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> BrBG_r(size_t N = 11)
 {
     return xt::flip(BrBG(N), 0);
 }
 
 /**
-Inverse of cppcolormap::PuOr.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::PuOr.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> PuOr_r(size_t N = 11)
 {
     return xt::flip(PuOr(N), 0);
 }
 
 /**
-Inverse of cppcolormap::RdBu.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::RdBu.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RdBu_r(size_t N = 11)
 {
     return xt::flip(RdBu(N), 0);
 }
 
 /**
-Inverse of cppcolormap::RdGy.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::RdGy.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RdGy_r(size_t N = 11)
 {
     return xt::flip(RdGy(N), 0);
 }
 
 /**
-Inverse of cppcolormap::RdYlBu.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::RdYlBu.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RdYlBu_r(size_t N = 11)
 {
     return xt::flip(RdYlBu(N), 0);
 }
 
 /**
-Inverse of cppcolormap::RdYlGn.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::RdYlGn.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> RdYlGn_r(size_t N = 11)
 {
     return xt::flip(RdYlGn(N), 0);
 }
 
 /**
-Inverse of cppcolormap::PiYG.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::PiYG.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> PiYG_r(size_t N = 11)
 {
     return xt::flip(PiYG(N), 0);
 }
 
 /**
-Inverse of cppcolormap::PRGn.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::PRGn.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> PRGn_r(size_t N = 11)
 {
     return xt::flip(PRGn(N), 0);
 }
 
 /**
-Inverse of cppcolormap::spring.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::spring.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> spring_r(size_t N = 256)
 {
     return xt::flip(spring(N), 0);
 }
 
 /**
-Inverse of cppcolormap::summer.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::summer.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> summer_r(size_t N = 256)
 {
     return xt::flip(summer(N), 0);
 }
 
 /**
-Inverse of cppcolormap::autumn.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::autumn.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> autumn_r(size_t N = 256)
 {
     return xt::flip(autumn(N), 0);
 }
 
 /**
-Inverse of cppcolormap::winter.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::winter.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> winter_r(size_t N = 256)
 {
     return xt::flip(winter(N), 0);
 }
 
 /**
-Inverse of cppcolormap::bone.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::bone.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> bone_r(size_t N = 256)
 {
     return xt::flip(bone(N), 0);
 }
 
 /**
-Inverse of cppcolormap::cool.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::cool.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> cool_r(size_t N = 256)
 {
     return xt::flip(cool(N), 0);
 }
 
 /**
-Inverse of cppcolormap::hot.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::hot.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> hot_r(size_t N = 256)
 {
     return xt::flip(hot(N), 0);
 }
 
 /**
-Inverse of cppcolormap::copper.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::copper.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> copper_r(size_t N = 256)
 {
     return xt::flip(copper(N), 0);
 }
 
 /**
-Inverse of cppcolormap::hsv.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::hsv.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> hsv_r(size_t N = 256)
 {
     return xt::flip(hsv(N), 0);
 }
 
 /**
-Inverse of cppcolormap::nipy_spectral.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::nipy_spectral.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> nipy_spectral_r(size_t N = 256)
 {
     return xt::flip(nipy_spectral(N), 0);
 }
 
 /**
-Inverse of cppcolormap::jet.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::jet.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> jet_r(size_t N = 256)
 {
     return xt::flip(jet(N), 0);
 }
 
 /**
-Inverse of cppcolormap::terrain.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::terrain.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> terrain_r(size_t N = 5)
 {
     return xt::flip(terrain(N), 0);
 }
 
 /**
-Inverse of cppcolormap::seismic.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::seismic.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> seismic_r(size_t N = 6)
 {
     return xt::flip(seismic(N), 0);
 }
 
 /**
-Inverse of cppcolormap::afmhot.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::afmhot.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> afmhot_r(size_t N = 256)
 {
     return xt::flip(afmhot(N), 0);
 }
 
 /**
-Inverse of cppcolormap::magma.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::magma.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> magma_r(size_t N = 256)
 {
     return xt::flip(magma(N), 0);
 }
 
 /**
-Inverse of cppcolormap::inferno.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::inferno.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> inferno_r(size_t N = 256)
 {
     return xt::flip(inferno(N), 0);
 }
 
 /**
-Inverse of cppcolormap::plasma.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::plasma.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> plasma_r(size_t N = 256)
 {
     return xt::flip(plasma(N), 0);
 }
 
 /**
-Inverse of cppcolormap::viridis.
-
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::viridis.
+ *
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> viridis_r(size_t N = 256)
 {
     return xt::flip(viridis(N), 0);
 }
 
 /**
-Get colormap specified as string.
-
-\param cmap Name of the colormap.
-\param N Number of colors to output.
-\returns RGB data.
-*/
+ * Get colormap specified as string.
+ *
+ * @param cmap Name of the colormap.
+ * @param N Number of colors to output.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> colormap(const std::string& cmap, size_t N = 256)
 {
     if (cmap == "Accent") {
@@ -5144,10 +5148,10 @@ inline array_type::tensor<double, 2> colormap(const std::string& cmap, size_t N 
 }
 
 /**
-xterm color-cyle.
-
-\returns RGB data.
-*/
+ * xterm color-cyle.
+ *
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> xterm()
 {
     array_type::tensor<double, 2> data = {
@@ -5413,10 +5417,10 @@ inline array_type::tensor<double, 2> xterm()
 }
 
 /**
-Eindhoven University of Technology color-cyle.
-
-\returns RGB data.
-*/
+ * Eindhoven University of Technology color-cyle.
+ *
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> tue()
 {
     array_type::tensor<double, 2> data = {
@@ -5439,31 +5443,31 @@ inline array_type::tensor<double, 2> tue()
 }
 
 /**
-Inverse of cppcolormap::xterm.
-
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::xterm.
+ *
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> xterm_r()
 {
     return xt::flip(xterm(), 0);
 }
 
 /**
-Inverse of cppcolormap::tue.
-
-\returns RGB data.
-*/
+ * Inverse of cppcolormap::tue.
+ *
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> tue_r()
 {
     return xt::flip(tue(), 0);
 }
 
 /**
-Get color-cycle specified as string.
-
-\param cmap Name of the colormap.
-\returns RGB data.
-*/
+ * Get color-cycle specified as string.
+ *
+ * @param cmap Name of the colormap.
+ * @returns RGB data.
+ */
 inline array_type::tensor<double, 2> colorcycle(const std::string& cmap)
 {
     if (cmap == "xterm") {
@@ -5486,8 +5490,8 @@ inline array_type::tensor<double, 2> colorcycle(const std::string& cmap)
 }
 
 /**
-Algorithm to use for color matching.
-*/
+ * Algorithm to use for color matching.
+ */
 enum metric {
     euclidean, ///< Euclidean norm
     fast_perceptual, ///< Fast best perception algorithm. See:
@@ -5523,17 +5527,18 @@ double perceptual_metric(double R1, double G1, double B1, double R2, double G2, 
 } // namespace detail
 
 /**
-Match colors.
-
-\param A List of colors.
-\param B List of colors.
-\param distance_metric Metric to use in color matching.
-\return For each item in ``A``, the index of the closets corresponding color in ``B``.
-*/
+ * Match colors.
+ *
+ * @param A List of colors.
+ * @param B List of colors.
+ * @param distance_metric Metric to use in color matching.
+ * @return For each item in ``A``, the index of the closets corresponding color in ``B``.
+ */
 inline array_type::tensor<size_t, 1> match(
     const array_type::tensor<double, 2>& A,
     const array_type::tensor<double, 2>& B,
-    metric distance_metric = euclidean)
+    metric distance_metric = euclidean
+)
 {
     array_type::tensor<size_t, 1> idx = xt::empty<size_t>({A.shape(0)});
     array_type::tensor<double, 1> d = xt::empty<double>({B.shape(0)});

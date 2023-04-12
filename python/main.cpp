@@ -23,10 +23,10 @@ namespace py = pybind11;
         .c_str()
 
 /**
-Overrides the `__name__` of a module.
-Classes defined by pybind11 use the `__name__` of the module as of the time they are defined,
-which affects the `__repr__` of the class type objects.
-*/
+ * Overrides the `__name__` of a module.
+ * Classes defined by pybind11 use the `__name__` of the module as of the time they are defined,
+ * which affects the `__repr__` of the class type objects.
+ */
 class ScopedModuleNameOverride {
 public:
     explicit ScopedModuleNameOverride(py::module m, std::string name) : module_(std::move(m))
@@ -59,18 +59,22 @@ PYBIND11_MODULE(_cppcolormap, m)
     m.def(
         "rgb2hex",
         static_cast<std::string (*)(const xt::pytensor<double, 1>&)>(&cppcolormap::rgb2hex),
-        DOC("rgb2hex"));
+        DOC("rgb2hex")
+    );
 
     m.def(
         "rgb2hex",
         static_cast<std::vector<std::string> (*)(const xt::pytensor<double, 2>&)>(
-            &cppcolormap::rgb2hex),
-        DOC("rgb2hex"));
+            &cppcolormap::rgb2hex
+        ),
+        DOC("rgb2hex")
+    );
 
     m.def(
         "hex2rgb",
         py::overload_cast<const std::vector<std::string>&>(&cppcolormap::hex2rgb),
-        DOC("hex2rgb"));
+        DOC("hex2rgb")
+    );
 
     m.def("hex2rgb", py::overload_cast<const std::string&>(&cppcolormap::hex2rgb), DOC("hex2rgb"));
 
@@ -79,7 +83,8 @@ PYBIND11_MODULE(_cppcolormap, m)
         &cppcolormap::interp<xt::pytensor<double, 2>, xt::pytensor<double, 2>>,
         DOC("interp"),
         py::arg("arg"),
-        py::arg("N"));
+        py::arg("N")
+    );
 
     m.def(
         "as_colors",
@@ -91,7 +96,8 @@ PYBIND11_MODULE(_cppcolormap, m)
         py::arg("data"),
         py::arg("colors"),
         py::arg("vmin"),
-        py::arg("vmax"));
+        py::arg("vmax")
+    );
 
     m.def(
         "as_colors",
@@ -100,7 +106,8 @@ PYBIND11_MODULE(_cppcolormap, m)
         },
         DOC("as_colors"),
         py::arg("data"),
-        py::arg("colors"));
+        py::arg("colors")
+    );
 
     m.def("Accent", &cppcolormap::Accent, DOC("Accent"), py::arg("N") = 8);
     m.def("Dark2", &cppcolormap::Dark2, DOC("Dark2"), py::arg("N") = 8);
@@ -201,10 +208,8 @@ PYBIND11_MODULE(_cppcolormap, m)
     m.def("copper_r", &cppcolormap::copper_r, DOC("copper_r"), py::arg("N") = 256);
     m.def("hsv_r", &cppcolormap::hsv_r, DOC("hsv_r"), py::arg("N") = 256);
     m.def(
-        "nipy_spectral_r",
-        &cppcolormap::nipy_spectral_r,
-        DOC("nipy_spectral_r"),
-        py::arg("N") = 256);
+        "nipy_spectral_r", &cppcolormap::nipy_spectral_r, DOC("nipy_spectral_r"), py::arg("N") = 256
+    );
     m.def("terrain_r", &cppcolormap::terrain_r, DOC("terrain_r"), py::arg("N") = 6);
     m.def("seismic_r", &cppcolormap::seismic_r, DOC("seismic_r"), py::arg("N") = 5);
     m.def("afmhot_r", &cppcolormap::afmhot_r, DOC("afmhot_r"), py::arg("N") = 256);
