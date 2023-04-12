@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 project = "cppcolormap"
-copyright = "2021-2022, Tom de Geus"
+copyright = "2021-2023, Tom de Geus"
 author = "Tom de Geus"
 
 subprocess.call("cd ..; python setup.py build --build-type Release -vv", shell=True)
@@ -26,7 +26,7 @@ extensions = [
 
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 
 breathe_projects = {
     project: f"{doxydir:s}/xml/",
