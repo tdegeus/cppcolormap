@@ -1,7 +1,12 @@
+from pathlib import Path
+
 from setuptools_scm import get_version
 from skbuild import setup
 
 project_name = "cppcolormap"
+
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
 
 setup(
     name=project_name,
@@ -16,5 +21,5 @@ setup(
     packages=[f"{project_name}"],
     package_dir={"": "python"},
     cmake_install_dir=f"python/{project_name}",
-    cmake_minimum_required_version="3.13...3.21",
+    cmake_minimum_required_version="3.13",
 )
