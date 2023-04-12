@@ -8,7 +8,6 @@
 
 #define CPPCOLORMAP_USE_XTENSOR_PYTHON
 #include <cppcolormap.h>
-#include <string.h>
 
 namespace py = pybind11;
 
