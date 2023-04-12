@@ -3,5 +3,5 @@ includedir=${prefix}/include
 
 Name: @PROJECT_NAME@
 Description: Colormaps for C++.
-Version: @CPPCOLORMAP_VERSION@
+Version: @PROJECT_VERSION@
 Cflags: -I${includedir}
