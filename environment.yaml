@@ -2,10 +2,10 @@ channels:
 - conda-forge
 dependencies:
 - breathe
-- catch2 >=0.3.0
+- catch2 >=3.0.0
 - cmake
 - doxygen
-- matplotlib
+- furo
 - ninja
 - numpy
 - pybind11
@@ -13,6 +13,5 @@ dependencies:
 - scikit-build
 - setuptools_scm
 - sphinx
-- sphinx_rtd_theme
 - xtensor
 - xtensor-python

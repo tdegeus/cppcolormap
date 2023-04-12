@@ -46,6 +46,8 @@ jobs:
       with:
         environment-file: ${{ matrix.conda }}
         environment-name: myenv
+        extra-specs: |
+          matplotlib
 
     - name: Install clang
       if: runner.os == 'Windows'

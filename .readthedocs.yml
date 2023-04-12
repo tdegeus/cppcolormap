@@ -4,4 +4,4 @@ sphinx:
   configuration: docs/conf.py
 
 conda:
-  environment: .readthedocsenv.yml
+  environment: environment.yaml
