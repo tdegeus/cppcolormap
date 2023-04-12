@@ -14,4 +14,4 @@ dependencies:
 - setuptools_scm
 - sphinx
 - xtensor
-- xtensor-python
+- xtensor-python >=0.25.2
