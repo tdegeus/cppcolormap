@@ -12,13 +12,13 @@
 namespace py = pybind11;
 
 #define DOC(function) \
-    (std::string("See documentation of C++ API: :cpp:func:`cppcolormap::") + \
-     std::string(function) + std::string("`")) \
+    (std::string("See C++ API: :cpp:func:`cppcolormap::") + std::string(function) + \
+     std::string("`")) \
         .c_str()
 
 #define ENUM(function) \
-    (std::string("See documentation of C++ API: :cpp:enum:`cppcolormap::") + \
-     std::string(function) + std::string("`")) \
+    (std::string("See C++ API: :cpp:enum:`cppcolormap::") + std::string(function) + \
+     std::string("`")) \
         .c_str()
 
 /**
