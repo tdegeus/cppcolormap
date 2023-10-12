@@ -38,7 +38,7 @@ jobs:
         init-shell: bash
         cache-downloads: true
         post-cleanup: all
-        extra-specs: |
+        create-args: |
           matplotlib
 
     - name: Export version of this library
