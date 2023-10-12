@@ -181,7 +181,8 @@ TEST_CASE("cppcolormap::colormap", "cppcolormap.h")
         "WildStrawberry",
         "Yellow",
         "YellowGreen",
-        "YellowOrange"};
+        "YellowOrange"
+    };
 
     for (auto& cmap : cmaps) {
         auto c = cppcolormap::colormap(cmap);
