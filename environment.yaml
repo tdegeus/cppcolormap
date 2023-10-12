@@ -13,5 +13,6 @@ dependencies:
 - scikit-build
 - setuptools_scm
 - sphinx
+- sphinx-mdinclude
 - xtensor
 - xtensor-python >=0.25.2

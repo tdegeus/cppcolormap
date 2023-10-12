@@ -4,9 +4,9 @@
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/cppcolormap.svg)](https://anaconda.org/conda-forge/cppcolormap)
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/python-cppcolormap.svg)](https://anaconda.org/conda-forge/python-cppcolormap)
 
-**Documentation: [cppcolormap.readthedocs.org](https://cppcolormap.readthedocs.org)**
+Documentation: [cppcolormap.readthedocs.org](https://cppcolormap.readthedocs.org)
 
-**Doxygen documentation: [tdegeus.github.io/cppcolormap](https://tdegeus.github.io/cppcolormap)**
+Doxygen documentation: [tdegeus.github.io/cppcolormap](https://tdegeus.github.io/cppcolormap)
 
 # cppcolormap
 
@@ -345,7 +345,7 @@ plt.show()
 >
 >   Licensed under the CC0 license / public domain dedication.
 >
->   [GitHub](https://github.com/BIDS/colormap)
+>   [GitHub/BIDS](https://github.com/BIDS/colormap)
 
 ## monocolor
 
