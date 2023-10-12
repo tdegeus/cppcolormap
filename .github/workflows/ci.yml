@@ -41,7 +41,7 @@ jobs:
         condarc: |
           channels:
             - conda-forge
-        create-args: |
+        create-args: >-
           matplotlib
           ${{ runner.os == 'Windows' && 'clang_win-64' || '' }}
 
