@@ -1706,7 +1706,8 @@ inline array_type::tensor<double, 2> terrain(size_t N = 6)
         {0.25, 0.0, 0.8, 0.4},
         {0.50, 1.0, 1.0, 0.6},
         {0.75, 0.5, 0.36, 0.33},
-        {1.00, 1.0, 1.0, 1.0}};
+        {1.00, 1.0, 1.0, 1.0}
+    };
 
     return detail::from_fraction(N, data);
 }
