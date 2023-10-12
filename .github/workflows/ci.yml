@@ -38,8 +38,12 @@ jobs:
         init-shell: bash
         cache-downloads: true
         post-cleanup: all
+        condarc: |
+          channels:
+            - conda-forge
         create-args: |
           matplotlib
+          ${{ runner.os == 'Windows' && 'clang_win-64' || '' }}
 
     - name: Export version of this library
       run: |
@@ -47,16 +51,15 @@ jobs:
         echo "SETUPTOOLS_SCM_PRETEND_VERSION=$LATEST_TAG" >> $GITHUB_ENV
 
     - name: Configure using CMake
-      if: runner.os != 'Windows'
-      run: cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_ALL=1
+      run: |
+        export MYARGS="${{ runner.os == 'Windows' && '-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++' || '' }}"
+        cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_ALL=1 ${MYARGS}
 
     - name: Build C++
-      if: runner.os != 'Windows'
       working-directory: build
       run: cmake --build .
 
     - name: Run C++
-      if: runner.os != 'Windows'
       working-directory: build
       run: ctest --output-on-failure
 
@@ -72,6 +75,5 @@ jobs:
         python examples/overview/overview.py
 
     - name: Build doxygen-docs (error on warning)
-      if: runner.os != 'Windows'
       working-directory: build
       run: cmake --build . --target html
