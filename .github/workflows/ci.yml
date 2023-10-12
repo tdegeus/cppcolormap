@@ -70,4 +70,4 @@ jobs:
 
     - name: Build doxygen-docs (error on warning)
       working-directory: build
-      run: make html
+      run: cmake --build . --target html
