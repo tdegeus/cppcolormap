@@ -28,7 +28,8 @@ namespace py = pybind11;
  */
 class ScopedModuleNameOverride {
 public:
-    explicit ScopedModuleNameOverride(py::module m, std::string name) : module_(std::move(m))
+    explicit ScopedModuleNameOverride(py::module m, std::string name)
+        : module_(std::move(m))
     {
         original_name_ = module_.attr("__name__");
         module_.attr("__name__") = name;

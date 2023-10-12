@@ -29,6 +29,9 @@ AllowAllParametersOfDeclarationOnNextLine: false
 AlignAfterOpenBracket: BlockIndent
 # AlwaysBreakAfterDefinitionReturnType: All
 
+PackConstructorInitializers: Never
+ObjCBinPackProtocolList: Never
+
 BraceWrapping:
   AfterFunction: true
   AfterClass: false
