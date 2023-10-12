@@ -22,6 +22,7 @@ extensions = [
     "breathe",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx_mdinclude",
 ]
 
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
