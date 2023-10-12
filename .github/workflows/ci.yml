@@ -58,7 +58,7 @@ jobs:
       run: ctest --output-on-failure
 
     - name: Build and install Python module
-      run: python -m pip install . -v --no-build-isolation --build-type Release
+      run: python -m pip install . -v --no-build-isolation
 
     - name: Run Python tests
       run: python tests/python/main.py
