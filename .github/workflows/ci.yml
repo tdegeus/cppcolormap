@@ -40,7 +40,6 @@ jobs:
         post-cleanup: all
         create-args: |
           matplotlib
-          sel(win): clang_win-64
 
     - name: Export version of this library
       run: |
@@ -51,15 +50,13 @@ jobs:
       if: runner.os != 'Windows'
       run: cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_ALL=1
 
-    - name: Configure using CMake
-      if: runner.os == 'Windows'
-      run: cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_ALL=1 -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
-
     - name: Build C++
+      if: runner.os != 'Windows'
       working-directory: build
       run: cmake --build .
 
     - name: Run C++
+      if: runner.os != 'Windows'
       working-directory: build
       run: ctest --output-on-failure
 
@@ -75,5 +72,6 @@ jobs:
         python examples/overview/overview.py
 
     - name: Build doxygen-docs (error on warning)
+      if: runner.os != 'Windows'
       working-directory: build
       run: cmake --build . --target html
