@@ -40,6 +40,7 @@ jobs:
         post-cleanup: all
         create-args: |
           matplotlib
+          sel(win): clang_win-64
 
     - name: Export version of this library
       run: |
@@ -47,7 +48,12 @@ jobs:
         echo "SETUPTOOLS_SCM_PRETEND_VERSION=$LATEST_TAG" >> $GITHUB_ENV
 
     - name: Configure using CMake
+      if: runner.os != 'Windows'
       run: cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_ALL=1
+
+    - name: Configure using CMake
+      if: runner.os == 'Windows'
+      run: cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_ALL=1 -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 
     - name: Build C++
       working-directory: build
