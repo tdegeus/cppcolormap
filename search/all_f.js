@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['rawsienna_0',['RawSienna',['../cppcolormap_8h.html#a80427552ba85d56efbb4788504e4693c',1,'cppcolormap']]],
+  ['rdbu_1',['RdBu',['../cppcolormap_8h.html#a645066f196d42dfe41db789e8a3462fc',1,'cppcolormap']]],
+  ['rdbu_5fr_2',['RdBu_r',['../cppcolormap_8h.html#ac8be3e8fd5b96b45dba1e0b4532c1788',1,'cppcolormap']]],
+  ['rdgy_3',['RdGy',['../cppcolormap_8h.html#a39168da25a90b6883cab4e57edc63996',1,'cppcolormap']]],
+  ['rdgy_5fr_4',['RdGy_r',['../cppcolormap_8h.html#abbedb09eb2de015e986486fba2b478ec',1,'cppcolormap']]],
+  ['rdoryl_5',['RdOrYl',['../cppcolormap_8h.html#a5adcd6d062812a8f2813b46de4bbb9a5',1,'cppcolormap']]],
+  ['rdoryl_5fr_6',['RdOrYl_r',['../cppcolormap_8h.html#a9cc4f50617e189d27446112fed9bc205',1,'cppcolormap']]],
+  ['rdpu_7',['RdPu',['../cppcolormap_8h.html#a110289d1f0da2a54cefe534bdc1f4693',1,'cppcolormap']]],
+  ['rdpu_5fr_8',['RdPu_r',['../cppcolormap_8h.html#aed4e7be0c3b71bc2d7a84a890c4650de',1,'cppcolormap']]],
+  ['rdylbu_9',['RdYlBu',['../cppcolormap_8h.html#a2f77b26fe1871b9b5f658fbb5de6a962',1,'cppcolormap']]],
+  ['rdylbu_5fr_10',['RdYlBu_r',['../cppcolormap_8h.html#ae29fb8dafdb35d50f83a433c03fb4bb3',1,'cppcolormap']]],
+  ['rdylgn_11',['RdYlGn',['../cppcolormap_8h.html#a3f0bc673df0f78e663733c40d7b47439',1,'cppcolormap']]],
+  ['rdylgn_5fr_12',['RdYlGn_r',['../cppcolormap_8h.html#a31783b9ad8cd7233ba126ec32a1ff771',1,'cppcolormap']]],
+  ['red_13',['Red',['../cppcolormap_8h.html#a8d9b304a0be50edcedbb5e7b5c5ccb02',1,'cppcolormap']]],
+  ['redorange_14',['RedOrange',['../cppcolormap_8h.html#a10411e62e339971c9ba544f5886176bb',1,'cppcolormap']]],
+  ['reds_15',['Reds',['../cppcolormap_8h.html#a98c13f9a4f1c1684b00b5306659613b8',1,'cppcolormap']]],
+  ['reds_5fr_16',['Reds_r',['../cppcolormap_8h.html#a67ff8e5f86b37a92b6d0dba9f43ea692',1,'cppcolormap']]],
+  ['redviolet_17',['RedViolet',['../cppcolormap_8h.html#a1878303454cb65ac688bba500db36b89',1,'cppcolormap']]],
+  ['rgb2hex_18',['rgb2hex',['../cppcolormap_8h.html#a71e25366074f00033ebbbd211135845b',1,'cppcolormap::rgb2hex(const T &amp;arg)'],['../cppcolormap_8h.html#a5dc5248c608622939d52b7bdf020bf7f',1,'cppcolormap::rgb2hex(const T &amp;arg)']]],
+  ['rhodamine_19',['Rhodamine',['../cppcolormap_8h.html#ae6d26d6e42332c3d341134eb7e251305',1,'cppcolormap']]],
+  ['royalblue_20',['RoyalBlue',['../cppcolormap_8h.html#a4e08ceee9792aa4dcb1557462eabf4c2',1,'cppcolormap']]],
+  ['royalpurple_21',['RoyalPurple',['../cppcolormap_8h.html#a7a12c932db463fd19cf2f1000151fc7b',1,'cppcolormap']]],
+  ['rubinered_22',['RubineRed',['../cppcolormap_8h.html#a4bea5fa3c0f3386be8bd8b80e66c509b',1,'cppcolormap']]]
+];
